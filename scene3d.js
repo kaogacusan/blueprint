@@ -1,6 +1,6 @@
 /* Blueprint — 3D scenes (three.js, loaded locally from assets/vendor).
    The models do not react to the mouse. Scroll drives them.
-   1. "What is Blueprint": a curled blueprint résumé. It unrolls and turns as you scroll past.
+   1. "What is Blueprint": a curled blueprint resume. It unrolls and turns as you scroll past.
    2. Sessions: 4 blocks rise one by one as you scroll. Point at a session card to lift its block. */
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/RoundedBoxGeometry.js";
@@ -155,7 +155,7 @@ function softShadow(size = 3.2, alpha = 0.28) {
   return mesh;
 }
 
-/* ---------- 1. Curled blueprint résumé ---------- */
+/* ---------- 1. Curled blueprint resume ---------- */
 
 function resumeTexture() {
   const W = 1024, H = 1325, cv = document.createElement("canvas");

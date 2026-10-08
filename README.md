@@ -19,7 +19,7 @@ Use the server. The 3D will not load if you double-click `index.html`.
 |---|---|
 | `index.html` | All the content and copy. Edit text here. |
 | `styles.css` | All the design. Colors and fonts are at the top (`:root`). |
-| `main.js` | Small interactions: scroll reveals, hero cards drift on scroll, sneak peek gallery, flip card, Send button, FAQ, register form. |
+| `main.js` | Small interactions: scroll reveals, hero selection box that hops between "paper." and "person.", hero grid that lights up around the mouse, sneak peek gallery, AAA card that flips by itself, Send button, FAQ, register form. |
 | `scene3d.js` | The 2 scroll-driven 3D pieces (see below). |
 | `assets/` | Logo files, facilitator photo (from the S1 deck), and `vendor/` (three.js, stored locally so 3D works offline). |
 
@@ -27,7 +27,7 @@ Use the server. The 3D will not load if you double-click `index.html`.
 
 The 3D models do not follow the mouse. Scroll moves them. They have no box around them, so they sit right in the section.
 
-1. **What is Blueprint:** a blueprint résumé. It comes in rolled up, opens flat as you scroll to it, and turns away as you scroll past.
+1. **What is Blueprint:** a blueprint resume. It comes in rolled up, opens flat as you scroll to it, and turns away as you scroll past.
 2. **Sessions:** 4 blocks rise one by one as you scroll, and the camera moves around them. Point at a session card and its block lifts and glows.
 
 If a device cannot show 3D, the page shows a flat version instead.
@@ -35,7 +35,7 @@ If a device cannot show 3D, the page shows a flat version instead.
 ## Sneak peek
 
 On a computer, the section stops on screen and the 6 cards slide sideways as you scroll down. On a phone, you swipe the cards.
-Each card plays a short animation when it comes into view. Tap the AAA Card to flip it. Press **Send** on the Outreach Card.
+Each card plays a short animation when it comes into view. The AAA Card flips by itself. Press **Send** on the Outreach Card.
 
 ## Page order
 

@@ -40,7 +40,7 @@
   );
   if (quotes.length) qObs.observe(document.getElementById("quotes"));
 
-  /* Hero: drafting crosshair follows the mouse */
+  /* Hero: the grid lights up around the mouse */
   const hero = document.getElementById("hero");
   if (hero && finePointer && !reduce) {
     hero.addEventListener("pointermove", (e) => {
@@ -50,44 +50,45 @@
     });
   }
 
-  /* Hero: the floating cards drift apart as you scroll (not the mouse) */
-  const stack = document.getElementById("stack");
-  const layers = stack ? [...stack.querySelectorAll("[data-depth]")] : [];
-  if (layers.length && !reduce) {
-    const drift = [[-1, -1], [1, -0.4], [-0.6, 1], [1, -1.2]];
+  /* Hero: the headline fades and lifts a little as you scroll away */
+  if (hero && !reduce) {
     let ticking = false;
     const onScrollHero = () => {
       ticking = false;
-      const y = Math.min(window.scrollY, window.innerHeight);
-      layers.forEach((l, i) => {
-        const d = parseFloat(l.dataset.depth);
-        const [dx, dy] = drift[i] || [0, -1];
-        l.style.setProperty("--tx", `${(dx * y * 0.06 * d).toFixed(1)}px`);
-        l.style.setProperty("--ty", `${(dy * y * 0.08 * d - y * 0.12 * d).toFixed(1)}px`);
-      });
+      hero.style.setProperty("--sp", Math.min(1, window.scrollY / (hero.offsetHeight * 0.9)).toFixed(3));
     };
     window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScrollHero); } }, { passive: true });
-    onScrollHero();
   }
 
-  /* Hero: typewriter inside the "career-brand statement" card */
-  const typed = document.getElementById("typed");
-  const phrases = ["showing, not claiming.", "turning chaos into plans.", "the story behind the work.", "making ideas real."];
-  if (typed) {
-    if (reduce) typed.textContent = phrases[0];
-    else {
-      let p = 0, c = 0, deleting = false;
-      const tick = () => {
-        const word = phrases[p];
-        c += deleting ? -1 : 1;
-        typed.textContent = word.slice(0, c);
-        let wait = deleting ? 28 : 55;
-        if (!deleting && c === word.length) { deleting = true; wait = 1800; }
-        else if (deleting && c === 0) { deleting = false; p = (p + 1) % phrases.length; wait = 350; }
-        setTimeout(tick, wait);
-      };
-      setTimeout(tick, 900);
-    }
+  /* Hero: a design-app selection box hops between "paper." and "person."
+     It shows the word's real size in px, like a design tool does. */
+  const hl = document.getElementById("hl");
+  const sel = document.getElementById("sel");
+  const selSize = document.getElementById("selSize");
+  const words = hl ? [...hl.querySelectorAll("[data-word]")] : [];
+  if (hl && sel && words.length) {
+    let on = 0;
+    const place = (i) => {
+      const box = hl.getBoundingClientRect(), r = words[i].getBoundingClientRect();
+      const pad = Math.round(r.height * 0.02);
+      sel.style.setProperty("--x", `${(r.left - box.left - pad).toFixed(1)}px`);
+      sel.style.setProperty("--y", `${(r.top - box.top + r.height * 0.1).toFixed(1)}px`);
+      sel.style.setProperty("--w", `${(r.width + pad * 2).toFixed(1)}px`);
+      sel.style.setProperty("--h", `${(r.height * 0.8).toFixed(1)}px`);
+      selSize.textContent = `${Math.round(r.width)} × ${Math.round(r.height * 0.8)}`;
+      words.forEach((w, j) => w.classList.toggle("is-on", j === i));
+    };
+    // wait for the headline to land, then show the box on "paper."
+    setTimeout(() => {
+      sel.classList.add("no-anim");
+      place(0);
+      sel.offsetWidth; // apply the start spot before turning motion back on
+      sel.classList.remove("no-anim");
+      sel.classList.add("is-ready");
+      if (!reduce) setInterval(() => { on = (on + 1) % words.length; place(on); }, 2800);
+    }, reduce ? 0 : 1500);
+    document.fonts?.ready.then(() => sel.classList.contains("is-ready") && place(on));
+    window.addEventListener("resize", () => { sel.classList.add("no-anim"); place(on); requestAnimationFrame(() => sel.classList.remove("no-anim")); });
   }
 
   /* ---------- Sneak peek gallery ----------
@@ -96,24 +97,11 @@
   const peek = document.getElementById("materials");
   const track = document.getElementById("peekTrack");
   const rail = peek ? peek.querySelector(".peek__rail") : null;
-  const peekNow = document.getElementById("peekNow");
   const peekBar = document.getElementById("peekBar");
   const pinMQ = window.matchMedia("(min-width: 901px) and (pointer: fine)");
   if (peek && track) {
     const cards = [...track.querySelectorAll(".pk")];
     let travel = 0;
-
-    const setCount = () => {
-      // the card closest to the middle of the screen is "current"
-      const mid = window.innerWidth / 2;
-      let best = 0, bestD = Infinity;
-      cards.forEach((c, i) => {
-        const r = c.getBoundingClientRect();
-        const d = Math.abs(r.left + r.width / 2 - mid);
-        if (d < bestD) { bestD = d; best = i; }
-      });
-      if (peekNow) peekNow.textContent = String(Math.min(best + 1, 6)).padStart(2, "0");
-    };
 
     const layout = () => {
       if (pinMQ.matches) {
@@ -137,7 +125,6 @@
         p = max > 0 ? rail.scrollLeft / max : 0;
       }
       if (peekBar) peekBar.style.setProperty("--p", p.toFixed(3));
-      setCount();
     };
 
     let ticking = false;
@@ -148,19 +135,39 @@
     pinMQ.addEventListener("change", layout);
     layout();
 
-    // each card plays its animation when most of it is on screen, and resets when it leaves
+    // each card plays its animation when most of it is on screen, and resets when it leaves.
+    // A "live" event tells a card's own script (like the AAA flip) to start or stop.
+    const setLive = (el, on) => {
+      if (el.classList.contains("is-live") === on) return;
+      el.classList.toggle("is-live", on);
+      el.dispatchEvent(new CustomEvent("live", { detail: on }));
+    };
     const live = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
-        if (e.intersectionRatio >= 0.7) e.target.classList.add("is-live");
-        else if (e.intersectionRatio < 0.15) e.target.classList.remove("is-live");
+        if (e.intersectionRatio >= 0.7) setLive(e.target, true);
+        else if (e.intersectionRatio < 0.15) setLive(e.target, false);
       });
     }, { threshold: [0, 0.15, 0.7] });
     cards.forEach((c) => live.observe(c));
   }
 
-  /* AAA card flip */
+  /* AAA card: flips by itself while it is on screen. Front → back → front, on a loop. */
   const flip = document.getElementById("flip");
-  if (flip) flip.addEventListener("click", () => flip.classList.toggle("is-flipped"));
+  const aaaCard = flip?.closest(".pk");
+  if (flip && aaaCard && !reduce) {
+    let timer = 0;
+    const turn = () => {
+      const toBack = !flip.classList.contains("is-flipped");
+      flip.classList.toggle("is-flipped", toBack);
+      flip.classList.toggle("is-turning", !toBack);
+      timer = setTimeout(turn, toBack ? 4200 : 3400);
+    };
+    aaaCard.addEventListener("live", (e) => {
+      clearTimeout(timer);
+      if (e.detail) timer = setTimeout(turn, 1800);
+      else flip.classList.remove("is-flipped", "is-turning");
+    });
+  }
 
   /* Outreach card: press Send */
   const outreach = document.getElementById("outreach");

@@ -35,59 +35,36 @@
 
   <main id="top">
 
-    <!-- ───────────── 1. HERO ───────────── -->
+    <!-- ───────────── 1. HERO ─────────────
+         Type-only hero. The headline sits on drafting guide lines that draw in.
+         A design-tool selection box hops between "paper." and "person." (main.js).
+         The grid lights up around the mouse. -->
     <section class="hero" id="hero">
       <div class="hero__grid" aria-hidden="true"></div>
-      <svg class="hero__draft" viewBox="0 0 800 800" aria-hidden="true">
-        <circle cx="400" cy="400" r="300" /><circle cx="400" cy="400" r="190" />
-        <line x1="0" y1="400" x2="800" y2="400" /><line x1="400" y1="0" x2="400" y2="800" />
-      </svg>
-      <div class="hero__glow" aria-hidden="true"></div>
-      <div class="crosshair" aria-hidden="true">
-        <span class="crosshair__x"></span><span class="crosshair__y"></span>
-      </div>
+      <div class="hero__grid hero__grid--lit" aria-hidden="true"></div>
+      <div class="hero__glow hero__glow--a" aria-hidden="true"></div>
+      <div class="hero__glow hero__glow--b" aria-hidden="true"></div>
 
-      <div class="hero__inner wrap">
-        <div class="hero__copy">
-          <h1 class="display hero__title reveal">
-            Stand out on <span class="grad">paper.</span><br />Stand out in <span class="grad">person.</span>
-          </h1>
-          <p class="lede hero__lede reveal">
-            Turn what you’ve done in school, orgs, and internships into words employers understand.
-          </p>
-          <div class="hero__ctas reveal">
-            <button class="btn btn--primary btn--lg" data-register>
-              Register for Blueprint <span class="btn__arrow" aria-hidden="true">→</span>
-            </button>
-            <a href="#journey" class="btn btn--ghost btn--lg">See how it works <span aria-hidden="true">↓</span></a>
-          </div>
-        </div>
+      <div class="hero__inner wrap" id="heroInner">
 
-        <!-- Floating workshop materials (they drift apart as you scroll) -->
-        <div class="hero__stack" id="stack" aria-hidden="true">
-          <div class="sheet sheet--resume" data-depth="0.6">
-            <div class="sheet__head"><span class="sheet__avatar"></span><span class="bar w60"></span></div>
-            <span class="bar w80"></span><span class="bar w70"></span><span class="bar w40"></span>
-            <div class="sheet__row"><span class="sheet__box"></span><div><span class="bar w90"></span><span class="bar w60"></span></div></div>
-            <div class="sheet__row"><span class="sheet__box"></span><div><span class="bar w80"></span><span class="bar w50"></span></div></div>
-            <span class="bar w70"></span><span class="bar w30"></span>
-          </div>
+        <h1 class="hl" id="hl">
+          <span class="hl__line"><span class="hl__in">Stand out on <span class="hl__word" data-word>paper.</span></span></span>
+          <span class="hl__line"><span class="hl__in">Stand out in <span class="hl__word" data-word>person.</span></span></span>
+          <span class="sel" id="sel" aria-hidden="true">
+            <i class="sel__h sel__h--tl"></i><i class="sel__h sel__h--tr"></i><i class="sel__h sel__h--bl"></i><i class="sel__h sel__h--br"></i>
+            <b class="sel__size" id="selSize"></b>
+          </span>
+        </h1>
 
-          <div class="card card--aaa" data-depth="1.1">
-            <div class="aaa">
-              <div class="aaa__cell aaa__cell--1"><b>Attention</b></div>
-              <div class="aaa__cell aaa__cell--2"><b>Approach</b></div>
-              <div class="aaa__cell aaa__cell--3"><b>Arrival</b></div>
-            </div>
-          </div>
-
-          <div class="card card--statement" data-depth="1.6">
-            <p class="statement">I want to be known for<span class="statement__blank"><span class="statement__type" id="typed"></span><span class="caret"></span></span></p>
-          </div>
-
-          <div class="tag tag--s1" data-depth="2">Sino Ka?</div>
+        <p class="hero__lede">Turn what you’ve done in school, orgs, and internships into words employers understand.</p>
+        <div class="hero__ctas">
+          <button class="btn btn--primary btn--lg" data-register>
+            Register for Blueprint <span class="btn__arrow" aria-hidden="true">→</span>
+          </button>
+          <a href="#journey" class="btn btn--ghost btn--lg">See how it works <span aria-hidden="true">↓</span></a>
         </div>
       </div>
+
     </section>
 
     <!-- ───────────── 2. PROBLEM ───────────── -->
@@ -96,7 +73,7 @@
         <h2 class="display h2 reveal">You already have the experience. <span class="muted">You just don’t know how to show it yet.</span></h2>
 
         <div class="quotes" id="quotes">
-          <figure class="quote"><span class="quote__check"></span>“My résumé looks like everyone else’s.”</figure>
+          <figure class="quote"><span class="quote__check"></span>“My resume looks like everyone else’s.”</figure>
           <figure class="quote"><span class="quote__check"></span>“I don’t know what to put on LinkedIn.”</figure>
           <figure class="quote"><span class="quote__check"></span>“I don’t know what makes me different.”</figure>
           <figure class="quote"><span class="quote__check"></span>“I’ve done a lot, but I can’t explain it well.”</figure>
@@ -112,10 +89,10 @@
           <p class="rule__head reveal">Show, don’t claim.</p>
           <div class="rule__cards">
             <article class="rule__card rule__card--claim reveal">
-              <p class="rule__big"><s>“I’m a hard worker.”</s></p>
+              <p class="rule__big"><span class="rule__strike">“I’m a hard worker.”</span></p>
             </article>
             <article class="rule__card rule__card--show reveal">
-              <p class="rule__big">Jeff Bezos didn’t say he was resourceful. <b>He used a door as his desk.</b></p>
+              <p class="rule__big"><span class="rule__lead">Jeff Bezos didn’t say he was resourceful.</span> <b class="rule__proof"><span class="rule__w" style="--i:0">He</span> <span class="rule__w" style="--i:1">used</span> <span class="rule__w" style="--i:2">a</span> <span class="rule__w" style="--i:3">door</span> <span class="rule__w" style="--i:4">as</span> <span class="rule__w" style="--i:5">his</span> <span class="rule__w" style="--i:6">desk.</span></b></p>
             </article>
           </div>
         </div>
@@ -128,14 +105,14 @@
         <div class="what__copy">
           <h2 class="display h2 reveal">So, what is <span class="grad">Blueprint?</span></h2>
           <p class="lede reveal">
-            A hands-on career workshop in 4 sessions. Bring what you’ve already done. Leave with a résumé, LinkedIn, and intro that show it.
+            A hands-on career workshop in 4 sessions. Bring what you’ve already done. Leave with a resume, LinkedIn, and intro that show it.
           </p>
           <blockquote class="pull reveal">
             You don’t just learn about career branding. <span class="grad">You build it.</span>
           </blockquote>
         </div>
 
-        <!-- 3D: a blueprint résumé that unrolls as you scroll. No box around it. -->
+        <!-- 3D: a blueprint resume that unrolls as you scroll. No box around it. -->
         <div class="scene3d paper3d" id="paper3d" aria-hidden="true">
           <div class="paper3d__fallback gl-fallback"></div>
         </div>
@@ -159,7 +136,7 @@
             <ul class="ticks">
               <li>Pick 3 words you want people to know you for</li>
               <li>Find 3 real stories that prove it</li>
-              <li>Turn each story into a résumé bullet</li>
+              <li>Turn each story into a resume bullet</li>
               <li>Practice a 30-second intro</li>
             </ul>
           </article>
@@ -169,7 +146,7 @@
             <h3 class="session__title">“Proof on Paper”</h3>
             <p class="session__idea">Don’t just say what you can do. <em>Show it.</em></p>
             <ul class="ticks">
-              <li>Fix your résumé bullets</li>
+              <li>Fix your resume bullets</li>
               <li>Edit your LinkedIn, live</li>
               <li>Pick your proof projects</li>
               <li>Write one message to a real person</li>
@@ -209,7 +186,7 @@
           <li class="verb reveal"><span class="verb__w">Write</span><span class="verb__o">your career-brand statement.</span></li>
           <li class="verb reveal"><span class="verb__w">Find</span><span class="verb__o">3 stories that prove what you can do.</span></li>
           <li class="verb reveal"><span class="verb__w">Practice</span><span class="verb__o">your 30-second intro, out loud.</span></li>
-          <li class="verb reveal"><span class="verb__w">Rewrite</span><span class="verb__o">your résumé bullets and LinkedIn.</span></li>
+          <li class="verb reveal"><span class="verb__w">Rewrite</span><span class="verb__o">your resume bullets and LinkedIn.</span></li>
           <li class="verb reveal"><span class="verb__w">Pick</span><span class="verb__o">the projects that prove your skills.</span></li>
           <li class="verb reveal"><span class="verb__w">Reach out</span><span class="verb__o">to one real person.</span></li>
         </ul>
@@ -222,8 +199,7 @@
     <section class="peek" id="materials">
       <div class="peek__pin">
         <div class="wrap peek__head">
-          <h2 class="display h2 reveal">Built to be used, <span class="grad">not just read.</span></h2>
-          <p class="peek__count" aria-hidden="true"><b id="peekNow">01</b> / 06</p>
+          <h2 class="display h2 reveal">A sneak peek <span class="grad">at the worksheets.</span></h2>
         </div>
 
         <div class="peek__rail">
@@ -243,8 +219,8 @@
             </article>
 
             <article class="pk pk--aaa" data-peek>
-              <h3 class="pk__title">AAA Card <span class="pk__tap">tap to flip</span></h3>
-              <button class="flip" id="flip" aria-label="Flip the AAA card">
+              <h3 class="pk__title">AAA Card</h3>
+              <div class="flip" id="flip">
                 <span class="flip__inner">
                   <span class="flip__face flip__front">
                     <span class="aaa-row"><b>Attention</b><i>The problem you faced.</i></span>
@@ -252,33 +228,42 @@
                     <span class="aaa-row"><b>Arrival</b><i>What changed.</i></span>
                   </span>
                   <span class="flip__face flip__back">
-                    <span class="flip__big">Write one résumé bullet.<br />Then run the check.</span>
+                    <span class="flip__big">Write one resume bullet.<br />Then run the check.</span>
                     <span class="check"><span>Action</span><span>Context</span><span>Evidence</span></span>
                   </span>
                 </span>
-              </button>
+              </div>
             </article>
 
+            <!-- Own: words fill in and get a check. Refuse: words empty out and drift away. -->
             <article class="pk pk--map" data-peek>
               <h3 class="pk__title">Association Map</h3>
               <div class="pk__stage map">
                 <div class="map__col map__col--own">
                   <b>Own</b>
-                  <span class="w"></span><span class="w"></span><span class="w"></span>
+                  <span class="w"><span class="w__fill"></span><span class="w__mark"></span></span>
+                  <span class="w"><span class="w__fill"></span><span class="w__mark"></span></span>
+                  <span class="w"><span class="w__fill"></span><span class="w__mark"></span></span>
                 </div>
                 <div class="map__col map__col--no">
                   <b>Refuse</b>
-                  <span class="w"></span><span class="w"></span><span class="w"></span>
+                  <span class="w"><span class="w__fill"></span><span class="w__mark"></span></span>
+                  <span class="w"><span class="w__fill"></span><span class="w__mark"></span></span>
+                  <span class="w"><span class="w__fill"></span><span class="w__mark"></span></span>
                 </div>
               </div>
             </article>
 
+            <!-- The old bullet fades back, a scan line runs through it, and the new bullet writes in and passes the check. -->
             <article class="pk pk--bullet" data-peek>
               <h3 class="pk__title">Bullet Rebuilder</h3>
               <div class="pk__stage rebuild">
-                <div class="rebuild__before"><b>Before</b><span class="bar w80"></span><span class="bar w50"></span></div>
-                <span class="rebuild__arrow" aria-hidden="true">↓</span>
-                <div class="rebuild__after"><b>After</b><span class="bar w90"></span><span class="bar w70"></span><span class="bar w40"></span></div>
+                <div class="rebuild__before"><b>Before</b><span class="bar w80"></span><span class="bar w50"></span><span class="rebuild__scan"></span></div>
+                <span class="rebuild__arrow" aria-hidden="true"><span>↓</span></span>
+                <div class="rebuild__after">
+                  <b>After</b><span class="bar w90"></span><span class="bar w70"></span><span class="bar w40"></span>
+                  <span class="check check--mini"><span>Action</span><span>Context</span><span>Evidence</span></span>
+                </div>
               </div>
             </article>
 
@@ -327,7 +312,7 @@
           <li class="reveal">A career-brand statement</li>
           <li class="reveal">A 3-story proof bank</li>
           <li class="reveal">A 30-second intro</li>
-          <li class="reveal">Stronger résumé bullets</li>
+          <li class="reveal">Stronger resume bullets</li>
           <li class="reveal">A better LinkedIn intro</li>
           <li class="reveal">One outreach message</li>
         </ol>
@@ -351,7 +336,7 @@
             <p>College students. Mainly 4th years. Fresh grads and 3rd years getting ready for internships are welcome too.</p>
           </details>
           <details class="qa reveal">
-            <summary>Is it just about résumés?</summary>
+            <summary>Is it just about resumes?</summary>
             <p>No. It also covers personal branding, LinkedIn, content creation, networking, and getting ready for jobs.</p>
           </details>
           <details class="qa reveal">
@@ -360,7 +345,7 @@
           </details>
           <details class="qa reveal">
             <summary>What do I need to bring?</summary>
-            <p>For Session 2, bring your résumé and your LinkedIn link.</p>
+            <p>For Session 2, bring your resume and your LinkedIn link.</p>
           </details>
           <details class="qa reveal">
             <summary>How much does it cost?</summary>
@@ -380,7 +365,7 @@
       <div class="final__ghost" aria-hidden="true">blueprint</div>
       <div class="wrap final__inner">
         <h2 class="display final__title reveal">Ready to build <span class="grad grad--light">yours?</span></h2>
-        <p class="final__copy reveal">4 sessions. A résumé, LinkedIn, and intro you can use.</p>
+        <p class="final__copy reveal">4 sessions. A resume, LinkedIn, and intro you can use.</p>
         <button class="btn btn--light btn--xl reveal" data-register>Register for Blueprint <span class="btn__arrow" aria-hidden="true">→</span></button>
       </div>
     </section>
