@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blueprint — Stand out on paper. Stand out in person.</title>
+  <meta name="description" content="Blueprint is a 4-session career workshop for college students. Turn your school, org, and internship experience into words employers understand." />
+  <link rel="icon" href="assets/blueprint-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Inter = fallback for non-Apple devices (SF Pro is used on Mac/iPhone). JetBrains Mono = blueprint labels. -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- three.js is stored locally, so the 3D works without internet -->
+  <script type="importmap">
+    { "imports": { "three": "./assets/vendor/three.module.js", "three/addons/": "./assets/vendor/addons/" } }
+  </script>
+</head>
+<body>
+
+  <!-- ───────────── NAV ───────────── -->
+  <header class="nav" id="nav">
+    <a href="#top" class="nav__brand" aria-label="Blueprint home">
+      <img src="assets/blueprint-mark.png" alt="" class="nav__mark" />
+      <img src="assets/blueprint-wordmark.png" alt="blueprint" class="nav__word" />
+    </a>
+    <nav class="nav__links" aria-label="Sections">
+      <a href="#what">About</a>
+      <a href="#journey">Sessions</a>
+      <a href="#materials">Sneak peek</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="btn btn--primary btn--sm" data-register>Register</button>
+  </header>
+
+  <main id="top">
+
+    <!-- ───────────── 1. HERO ───────────── -->
+    <section class="hero" id="hero">
+      <div class="hero__grid" aria-hidden="true"></div>
+      <svg class="hero__draft" viewBox="0 0 800 800" aria-hidden="true">
+        <circle cx="400" cy="400" r="300" /><circle cx="400" cy="400" r="190" />
+        <line x1="0" y1="400" x2="800" y2="400" /><line x1="400" y1="0" x2="400" y2="800" />
+      </svg>
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="crosshair" aria-hidden="true">
+        <span class="crosshair__x"></span><span class="crosshair__y"></span>
+      </div>
+
+      <div class="hero__inner wrap">
+        <div class="hero__copy">
+          <h1 class="display hero__title reveal">
+            Stand out on <span class="grad">paper.</span><br />Stand out in <span class="grad">person.</span>
+          </h1>
+          <p class="lede hero__lede reveal">
+            Turn what you’ve done in school, orgs, and internships into words employers understand.
+          </p>
+          <div class="hero__ctas reveal">
+            <button class="btn btn--primary btn--lg" data-register>
+              Register for Blueprint <span class="btn__arrow" aria-hidden="true">→</span>
+            </button>
+            <a href="#journey" class="btn btn--ghost btn--lg">See how it works <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+
+        <!-- Floating workshop materials (they drift apart as you scroll) -->
+        <div class="hero__stack" id="stack" aria-hidden="true">
+          <div class="sheet sheet--resume" data-depth="0.6">
+            <div class="sheet__head"><span class="sheet__avatar"></span><span class="bar w60"></span></div>
+            <span class="bar w80"></span><span class="bar w70"></span><span class="bar w40"></span>
+            <div class="sheet__row"><span class="sheet__box"></span><div><span class="bar w90"></span><span class="bar w60"></span></div></div>
+            <div class="sheet__row"><span class="sheet__box"></span><div><span class="bar w80"></span><span class="bar w50"></span></div></div>
+            <span class="bar w70"></span><span class="bar w30"></span>
+          </div>
+
+          <div class="card card--aaa" data-depth="1.1">
+            <div class="aaa">
+              <div class="aaa__cell aaa__cell--1"><b>Attention</b></div>
+              <div class="aaa__cell aaa__cell--2"><b>Approach</b></div>
+              <div class="aaa__cell aaa__cell--3"><b>Arrival</b></div>
+            </div>
+          </div>
+
+          <div class="card card--statement" data-depth="1.6">
+            <p class="statement">I want to be known for<span class="statement__blank"><span class="statement__type" id="typed"></span><span class="caret"></span></span></p>
+          </div>
+
+          <div class="tag tag--s1" data-depth="2">Sino Ka?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── 2. PROBLEM ───────────── -->
+    <section class="problem section" id="problem">
+      <div class="wrap">
+        <h2 class="display h2 reveal">You already have the experience. <span class="muted">You just don’t know how to show it yet.</span></h2>
+
+        <div class="quotes" id="quotes">
+          <figure class="quote"><span class="quote__check"></span>“My résumé looks like everyone else’s.”</figure>
+          <figure class="quote"><span class="quote__check"></span>“I don’t know what to put on LinkedIn.”</figure>
+          <figure class="quote"><span class="quote__check"></span>“I don’t know what makes me different.”</figure>
+          <figure class="quote"><span class="quote__check"></span>“I’ve done a lot, but I can’t explain it well.”</figure>
+          <figure class="quote"><span class="quote__check"></span>“Networking feels awkward.”</figure>
+          <figure class="quote"><span class="quote__check"></span>“Thesis, orgs, and applications — all at the same time.”</figure>
+        </div>
+
+        <div class="pile reveal">
+          <p class="pile__line">Same school. Same credentials.<br /><span class="grad">Same page in the pile.</span></p>
+        </div>
+
+        <div class="rule">
+          <p class="rule__head reveal">Show, don’t claim.</p>
+          <div class="rule__cards">
+            <article class="rule__card rule__card--claim reveal">
+              <p class="rule__big"><s>“I’m a hard worker.”</s></p>
+            </article>
+            <article class="rule__card rule__card--show reveal">
+              <p class="rule__big">Jeff Bezos didn’t say he was resourceful. <b>He used a door as his desk.</b></p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── 3. WHAT IS BLUEPRINT ───────────── -->
+    <section class="what section" id="what">
+      <div class="wrap what__grid">
+        <div class="what__copy">
+          <h2 class="display h2 reveal">So, what is <span class="grad">Blueprint?</span></h2>
+          <p class="lede reveal">
+            A hands-on career workshop in 4 sessions. Bring what you’ve already done. Leave with a résumé, LinkedIn, and intro that show it.
+          </p>
+          <blockquote class="pull reveal">
+            You don’t just learn about career branding. <span class="grad">You build it.</span>
+          </blockquote>
+        </div>
+
+        <!-- 3D: a blueprint résumé that unrolls as you scroll. No box around it. -->
+        <div class="scene3d paper3d" id="paper3d" aria-hidden="true">
+          <div class="paper3d__fallback gl-fallback"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── 4. JOURNEY ───────────── -->
+    <section class="journey section" id="journey">
+      <div class="wrap">
+        <div class="journey__head">
+          <h2 class="display h2 reveal">4 sessions. <span class="grad">One blueprint.</span></h2>
+          <!-- 3D: 4 blocks that rise as you scroll. Point at a session card to lift its block. -->
+          <div class="scene3d steps3d" id="steps3d" aria-hidden="true"></div>
+        </div>
+
+        <div class="sessions" id="sessions">
+          <article class="session reveal" data-session="0">
+            <span class="session__num">01</span>
+            <h3 class="session__title">“Sino Ka?”</h3>
+            <p class="session__idea">Figure out what you want to be <em>known for</em>.</p>
+            <ul class="ticks">
+              <li>Pick 3 words you want people to know you for</li>
+              <li>Find 3 real stories that prove it</li>
+              <li>Turn each story into a résumé bullet</li>
+              <li>Practice a 30-second intro</li>
+            </ul>
+          </article>
+
+          <article class="session reveal" data-session="1">
+            <span class="session__num">02</span>
+            <h3 class="session__title">“Proof on Paper”</h3>
+            <p class="session__idea">Don’t just say what you can do. <em>Show it.</em></p>
+            <ul class="ticks">
+              <li>Fix your résumé bullets</li>
+              <li>Edit your LinkedIn, live</li>
+              <li>Pick your proof projects</li>
+              <li>Write one message to a real person</li>
+            </ul>
+          </article>
+
+          <article class="session session--draft reveal" data-session="2">
+            <span class="session__num">03</span>
+            <p class="draft__title">Coming soon.</p>
+            <p class="draft__copy">5 simple ways to show up online. <b>None of them need you to be a creator.</b></p>
+          </article>
+
+          <article class="session session--draft reveal" data-session="3">
+            <span class="session__num">04</span>
+            <p class="draft__title">Coming soon.</p>
+          </article>
+        </div>
+
+        <aside class="faci reveal">
+          <img src="assets/facilitator-thomas.jpg" alt="Thomas Santos" class="faci__img" loading="lazy" />
+          <div class="faci__body">
+            <p class="faci__k">Session 1 is led by</p>
+            <p class="faci__name">Thomas Santos</p>
+            <p class="faci__line">Founder of Unseen Media. Storytelling for adidas, Nike, Samsung, and Save the Children Philippines.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ───────────── 5. WHAT YOU'LL DO ───────────── -->
+    <section class="do section" id="do">
+      <div class="wrap">
+        <div class="section__head">
+          <h2 class="display h2 reveal">You won’t just sit <span class="muted">and listen.</span></h2>
+        </div>
+        <ul class="verbs">
+          <li class="verb reveal"><span class="verb__w">Write</span><span class="verb__o">your career-brand statement.</span></li>
+          <li class="verb reveal"><span class="verb__w">Find</span><span class="verb__o">3 stories that prove what you can do.</span></li>
+          <li class="verb reveal"><span class="verb__w">Practice</span><span class="verb__o">your 30-second intro, out loud.</span></li>
+          <li class="verb reveal"><span class="verb__w">Rewrite</span><span class="verb__o">your résumé bullets and LinkedIn.</span></li>
+          <li class="verb reveal"><span class="verb__w">Pick</span><span class="verb__o">the projects that prove your skills.</span></li>
+          <li class="verb reveal"><span class="verb__w">Reach out</span><span class="verb__o">to one real person.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ───────────── 6. SNEAK PEEK (scroll gallery) ─────────────
+         Desktop: the section pins and the cards slide sideways as you scroll down.
+         Phone: swipe the row. Each card plays its own animation when it reaches the middle. -->
+    <section class="peek" id="materials">
+      <div class="peek__pin">
+        <div class="wrap peek__head">
+          <h2 class="display h2 reveal">Built to be used, <span class="grad">not just read.</span></h2>
+          <p class="peek__count" aria-hidden="true"><b id="peekNow">01</b> / 06</p>
+        </div>
+
+        <div class="peek__rail">
+          <div class="peek__track" id="peekTrack">
+
+            <article class="pk pk--canvas" data-peek>
+              <h3 class="pk__title">Brand Story Canvas</h3>
+              <div class="pk__stage">
+                <div class="cv">
+                  <div class="cv__box cv__box--big"><b>Your statement</b><span class="bar w80"></span><span class="bar w60"></span></div>
+                  <div class="cv__box"><b>Catalyst</b><span class="bar w70"></span></div>
+                  <div class="cv__box"><b>Core</b><span class="bar w50"></span></div>
+                  <div class="cv__box"><b>Truth</b><span class="bar w60"></span></div>
+                  <div class="cv__box"><b>Proof</b><span class="bar w80"></span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="pk pk--aaa" data-peek>
+              <h3 class="pk__title">AAA Card <span class="pk__tap">tap to flip</span></h3>
+              <button class="flip" id="flip" aria-label="Flip the AAA card">
+                <span class="flip__inner">
+                  <span class="flip__face flip__front">
+                    <span class="aaa-row"><b>Attention</b><i>The problem you faced.</i></span>
+                    <span class="aaa-row"><b>Approach</b><i>What you did about it.</i></span>
+                    <span class="aaa-row"><b>Arrival</b><i>What changed.</i></span>
+                  </span>
+                  <span class="flip__face flip__back">
+                    <span class="flip__big">Write one résumé bullet.<br />Then run the check.</span>
+                    <span class="check"><span>Action</span><span>Context</span><span>Evidence</span></span>
+                  </span>
+                </span>
+              </button>
+            </article>
+
+            <article class="pk pk--map" data-peek>
+              <h3 class="pk__title">Association Map</h3>
+              <div class="pk__stage map">
+                <div class="map__col map__col--own">
+                  <b>Own</b>
+                  <span class="w"></span><span class="w"></span><span class="w"></span>
+                </div>
+                <div class="map__col map__col--no">
+                  <b>Refuse</b>
+                  <span class="w"></span><span class="w"></span><span class="w"></span>
+                </div>
+              </div>
+            </article>
+
+            <article class="pk pk--bullet" data-peek>
+              <h3 class="pk__title">Bullet Rebuilder</h3>
+              <div class="pk__stage rebuild">
+                <div class="rebuild__before"><b>Before</b><span class="bar w80"></span><span class="bar w50"></span></div>
+                <span class="rebuild__arrow" aria-hidden="true">↓</span>
+                <div class="rebuild__after"><b>After</b><span class="bar w90"></span><span class="bar w70"></span><span class="bar w40"></span></div>
+              </div>
+            </article>
+
+            <article class="pk pk--profile" data-peek>
+              <h3 class="pk__title">Profile Blueprint</h3>
+              <div class="pk__stage profile">
+                <div class="profile__cover"></div>
+                <span class="profile__pic"></span>
+                <div class="profile__body">
+                  <b>Headline</b><span class="bar w80"></span>
+                  <b>About</b><span class="bar w90"></span><span class="bar w70"></span><span class="bar w50"></span>
+                </div>
+              </div>
+            </article>
+
+            <article class="pk pk--outreach" data-peek>
+              <h3 class="pk__title">Outreach Card</h3>
+              <div class="pk__stage outreach" id="outreach">
+                <div class="outreach__to"><b>To</b><span class="bar w50"></span></div>
+                <span class="bar w90"></span><span class="bar w80"></span><span class="bar w60"></span><span class="bar w40"></span>
+                <button class="outreach__send" type="button" id="send">Send <span aria-hidden="true">↗</span></button>
+                <span class="outreach__sent" aria-live="polite">Sent to one real person.</span>
+              </div>
+            </article>
+
+            <article class="pk pk--end">
+              <p class="pk__end">Get the full set <span class="grad grad--light">in the room.</span></p>
+              <button class="btn btn--light btn--lg" data-register>Reserve your spot <span class="btn__arrow" aria-hidden="true">→</span></button>
+            </article>
+
+          </div>
+        </div>
+
+        <div class="peek__bar" aria-hidden="true"><span id="peekBar"></span></div>
+      </div>
+    </section>
+
+    <!-- ───────────── 7. LEAVE WITH ───────────── -->
+    <section class="leave section" id="leave">
+      <div class="wrap">
+        <div class="section__head">
+          <h2 class="display h2 reveal">Walk out with something <span class="grad">to show for it.</span></h2>
+        </div>
+
+        <ol class="outlist">
+          <li class="reveal">A career-brand statement</li>
+          <li class="reveal">A 3-story proof bank</li>
+          <li class="reveal">A 30-second intro</li>
+          <li class="reveal">Stronger résumé bullets</li>
+          <li class="reveal">A better LinkedIn intro</li>
+          <li class="reveal">One outreach message</li>
+        </ol>
+
+        <div class="band reveal">
+          <p class="band__t">Ready? It starts with a short form.</p>
+          <button class="btn btn--primary btn--lg" data-register>Reserve your spot <span class="btn__arrow" aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── 8. FAQ ───────────── -->
+    <section class="faq section" id="faq">
+      <div class="wrap faq__grid">
+        <div>
+          <h2 class="display h2 reveal">Questions, <span class="grad">answered.</span></h2>
+        </div>
+        <div class="faq__list">
+          <details class="qa reveal">
+            <summary>Who is Blueprint for?</summary>
+            <p>College students. Mainly 4th years. Fresh grads and 3rd years getting ready for internships are welcome too.</p>
+          </details>
+          <details class="qa reveal">
+            <summary>Is it just about résumés?</summary>
+            <p>No. It also covers personal branding, LinkedIn, content creation, networking, and getting ready for jobs.</p>
+          </details>
+          <details class="qa reveal">
+            <summary>Is it a lecture?</summary>
+            <p>No. You work on your own stuff the whole time — on your own, in pairs, and in quick speed rounds.</p>
+          </details>
+          <details class="qa reveal">
+            <summary>What do I need to bring?</summary>
+            <p>For Session 2, bring your résumé and your LinkedIn link.</p>
+          </details>
+          <details class="qa reveal">
+            <summary>How much does it cost?</summary>
+            <p>Sign up first. We’ll email you the full details, including the fee.</p>
+          </details>
+          <details class="qa reveal">
+            <summary>How do I sign up?</summary>
+            <p>Click “Register,” fill in the short form, and we’ll email you what’s next.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── 9. FINAL CTA ───────────── -->
+    <section class="final" id="register">
+      <div class="final__grid" aria-hidden="true"></div>
+      <div class="final__ghost" aria-hidden="true">blueprint</div>
+      <div class="wrap final__inner">
+        <h2 class="display final__title reveal">Ready to build <span class="grad grad--light">yours?</span></h2>
+        <p class="final__copy reveal">4 sessions. A résumé, LinkedIn, and intro you can use.</p>
+        <button class="btn btn--light btn--xl reveal" data-register>Register for Blueprint <span class="btn__arrow" aria-hidden="true">→</span></button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ───────────── 10. FOOTER ───────────── -->
+  <footer class="foot">
+    <div class="wrap foot__inner">
+      <img src="assets/blueprint-wordmark.png" alt="blueprint" class="foot__word" />
+      <button class="foot__link" data-register>Register →</button>
+      <p class="foot__copy">© 2026 Blueprint</p>
+    </div>
+  </footer>
+
+  <!-- ───────────── REGISTER MODAL ───────────── -->
+  <dialog class="modal" id="modal" aria-labelledby="modalTitle">
+    <button class="modal__x" data-close aria-label="Close">✕</button>
+
+    <form class="reg" id="regForm" novalidate>
+      <h2 class="reg__title" id="modalTitle">Start your <span class="grad">Blueprint.</span></h2>
+      <p class="reg__sub">It takes a minute. We’ll email you what’s next.</p>
+
+      <div class="field">
+        <label for="f-name">Full name</label>
+        <input id="f-name" name="name" autocomplete="name" required placeholder="Juan Dela Cruz" />
+        <span class="field__err">Please add your name.</span>
+      </div>
+      <div class="field">
+        <label for="f-email">Email</label>
+        <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="you@school.edu.ph" />
+        <span class="field__err">Please use a valid email.</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-course">Course</label>
+          <input id="f-course" name="course" required placeholder="BS Management" />
+          <span class="field__err">Please add your course.</span>
+        </div>
+        <div class="field">
+          <label for="f-year">Year</label>
+          <select id="f-year" name="year" required>
+            <option value="" disabled selected>Select</option>
+            <option>3rd year</option><option>4th year</option><option>Fresh grad</option><option>Other</option>
+          </select>
+          <span class="field__err">Please pick one.</span>
+        </div>
+      </div>
+
+      <button class="btn btn--primary btn--lg btn--block" type="submit">
+        <span class="btn__label">Continue</span><span class="spinner" aria-hidden="true"></span>
+      </button>
+      <p class="reg__fine">No payment now. We’ll email you the full details.</p>
+    </form>
+
+    <div class="done" id="done" hidden>
+      <div class="ticket">
+        <div class="ticket__top">
+          <img src="assets/blueprint-mark.png" alt="" />
+          <span class="mono">Blueprint · Reg <b id="regNo">#0000</b></span>
+        </div>
+        <p class="ticket__name" id="regName">You</p>
+        <p class="ticket__meta mono" id="regMeta">—</p>
+        <div class="ticket__perf" aria-hidden="true"></div>
+        <p class="ticket__foot mono">Status · On the list</p>
+      </div>
+      <h2 class="reg__title">You’re on the list.</h2>
+      <p class="reg__sub">We’ll email you the schedule and the fee details.</p>
+      <button class="btn btn--ghost btn--block" data-close>Back to the page</button>
+    </div>
+  </dialog>
+
+  <script src="main.js"></script>
+  <script type="module" src="scene3d.js"></script>
+</body>
+</html>
