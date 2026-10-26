@@ -184,18 +184,18 @@
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
   /* ---------- Registration modal ----------
-     MOCKUP: the form does not send data anywhere yet.
-     To go live, replace the setTimeout in onSubmit with a real request
-     (Google Form, Tally, Formspree, Supabase, etc.). */
+     Saves to the Supabase "registrations" table (see config.js). The team sees it in /admin. */
   const modal = document.getElementById("modal");
   const form = document.getElementById("regForm");
   const done = document.getElementById("done");
+  const regError = document.getElementById("regError");
 
   const openModal = () => {
     form.hidden = false;
     done.hidden = true;
     form.reset();
     form.querySelectorAll(".is-invalid").forEach((f) => f.classList.remove("is-invalid"));
+    regError.hidden = true;
     modal.showModal();
     setTimeout(() => form.querySelector("input")?.focus(), 60);
   };
@@ -219,23 +219,50 @@
     if (f && f.classList.contains("is-invalid") && e.target.checkValidity()) f.classList.remove("is-invalid");
   });
 
-  form.addEventListener("submit", (e) => {
+  const saveRegistration = async (row) => {
+    const { supabaseUrl, supabaseAnonKey } = window.BLUEPRINT;
+    const res = await fetch(`${supabaseUrl}/rest/v1/registrations`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) throw new Error(`Registration failed (${res.status})`);
+  };
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validate()) { form.querySelector(".is-invalid input, .is-invalid select")?.focus(); return; }
     const data = Object.fromEntries(new FormData(form));
+    const row = {
+      name: data.name.trim(),
+      email: data.email.trim().toLowerCase(),
+      course: data.course.trim(),
+      year: data.year,
+    };
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");
     btn.disabled = true;
+    regError.hidden = true;
 
-    setTimeout(() => {
+    try {
+      await saveRegistration(row);
+    } catch (err) {
+      console.error(err);
+      regError.hidden = false;
+      return;
+    } finally {
       btn.classList.remove("is-loading");
       btn.disabled = false;
-      document.getElementById("regNo").textContent = `#${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}`;
-      document.getElementById("regName").textContent = data.name.trim();
-      document.getElementById("regMeta").textContent = `${data.course} · ${data.year}`;
-      form.hidden = true;
-      done.hidden = false;
-      console.info("[Blueprint mockup] registration captured locally:", data);
-    }, 900);
+    }
+    document.getElementById("regNo").textContent = `#${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}`;
+    document.getElementById("regName").textContent = row.name;
+    document.getElementById("regMeta").textContent = `${row.course} · ${row.year}`;
+    form.hidden = true;
+    done.hidden = false;
   });
 })();

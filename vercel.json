@@ -1,0 +1,12 @@
+{
+  "rewrites": [{ "source": "/present/:slug", "destination": "/present/index.html" }],
+  "headers": [
+    {
+      "source": "/(admin|present)(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
+    }
+  ]
+}

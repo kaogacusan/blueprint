@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Blueprint · Present</title>
+  <link rel="icon" href="/assets/blueprint-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/present.css" />
+</head>
+<body>
+  <div class="viewport" id="vp">
+    <div class="stage" id="stage">
+      <div class="stage__bg" aria-hidden="true"><i class="blob blob--a"></i><i class="blob blob--b"></i><i class="blob blob--c"></i></div>
+      <div class="slides" id="slides"></div>
+      <header class="chrome" aria-hidden="true">
+        <span class="chrome__brand"><img src="/assets/blueprint-mark.png" alt="" /><img src="/assets/blueprint-wordmark.png" alt="" /></span>
+        <span class="chrome__label" id="label"></span>
+      </header>
+      <div class="timer" id="timer" hidden><span class="timer__dot"></span><span id="timerText">0:00</span></div>
+      <div class="progress" aria-hidden="true"><span id="prog"></span></div>
+    </div>
+    <div class="blackout" id="blackout" hidden></div>
+  </div>
+
+  <!-- presenter controls: show when the mouse moves -->
+  <div class="hud" id="hud">
+    <a class="hud__btn hud__back" href="/admin/#presentations" title="Back to admin">← Admin</a>
+    <span class="hud__gap"></span>
+    <button class="hud__btn" id="prev" title="Back (←)">‹</button>
+    <span class="hud__count" id="count">1 / 1</span>
+    <button class="hud__btn" id="next" title="Next (→ or Space)">›</button>
+    <span class="hud__gap"></span>
+    <button class="hud__btn" id="timerBtn" title="Block timer (T)" hidden>⏱</button>
+    <button class="hud__btn" id="helpBtn" title="Shortcuts (?)">?</button>
+    <button class="hud__btn" id="fs" title="Full screen (F)">⤢</button>
+  </div>
+
+  <div class="help" id="help" hidden>
+    <div class="help__card">
+      <p class="help__t">Presenting</p>
+      <dl>
+        <dt>→ Space Enter</dt><dd>Next (or the next build on the slide)</dd>
+        <dt>←</dt><dd>Back</dd>
+        <dt>F</dt><dd>Full screen</dd>
+        <dt>T</dt><dd>Start / pause the block timer</dd>
+        <dt>R</dt><dd>Reset the timer</dd>
+        <dt>B</dt><dd>Black screen</dd>
+        <dt>Home / End</dt><dd>First / last slide</dd>
+      </dl>
+      <p class="help__f">Clickers work too. Press any key to close.</p>
+    </div>
+  </div>
+
+  <div class="loading" id="loading"><span class="loading__spin"></span><span id="loadingText">Loading slides…</span></div>
+
+  <script src="/config.js"></script>
+  <script type="module" src="/admin/present.js"></script>
+</body>
+</html>
