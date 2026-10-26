@@ -57,16 +57,25 @@ Hero → Problem ("Sound familiar?" pills) → What is Blueprint → 4 sessions 
 - Colors: Ateneo Navy `#061A4D`, Core Blue `#0646C8`, Electric Blue `#006DFF`, Bright Cyan `#3DD9F2`, Ice Blue `#B9EEFF`, Soft White `#F8FAFC`, Near Black `#101114`
 - Type: SF Pro Display (headlines) + SF Pro Text (body). Inter is the fallback on non-Apple devices. JetBrains Mono is only used on the register ticket.
 
-## Admin (`/admin`)
+## Workspace (`/admin`)
 
-Team-only. Sign in with email + password. Only emails on the team list can create an account:
-add a teammate under **Team**, then they open `/admin` and press **Create your account**.
+The team's hub. Keira is the **owner** and the only one who can change anything; everyone else on the team can **view** it all.
+Add a teammate under **Team** with their email, then they open `/admin` and press **Create your account**.
 
-- **Inquiries:** everyone who registered on the site. Set a status (New → Emailed → Confirmed), add notes, copy the emails, or export a CSV.
-- **Presentations:** opens a deck full screen at `/present/<deck>`.
-- **Team:** who can get in.
+| Page | What it shows |
+|---|---|
+| Overview | Up next (live countdown), the next 7 days, your tasks, open decisions, team pulse. Copy a GC update, add your dates to your calendar. |
+| Tasks | The project log: who, what, by when, with files. List or board. Owner can import the project log `.xlsx`. |
+| Schedule | The four sessions. Set a date and every venue, print and pre-work deadline fills in. Key dates. |
+| Outreach | Every org, its owner and status. Open one to copy its messages with the brackets filled in. |
+| Budget | The costing sheet's math: print list, printer prices, session costs, break-even. |
+| Playbook | Guides and copy-ready scripts. |
+| Directory | Folders, files and contacts. Also collects every file linked from a task. |
+| Inquiries / Presentations / Team | Sign-ups, session decks, people and roles (roles are labels only). |
 
-Data lives in Supabase (project `blueprint`). The public site can only *add* a registration; reading anything needs a team login.
+**Updating from Thomas's files:** Tasks → Import from Excel takes the project log or the costing sheet (`.xlsx`) and shows every change before saving.
+
+Data lives in Supabase (project `blueprint`); rules are in `supabase/migrations`. Team content is never in this repo.
 
 ## Slide decks
 

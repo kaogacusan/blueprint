@@ -4,125 +4,101 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Blueprint Admin</title>
+  <meta name="theme-color" content="#061a4d" />
+  <title>Blueprint Workspace</title>
   <link rel="icon" href="/assets/blueprint-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/admin.css" />
 </head>
 <body>
 
+  <!-- loading -->
+  <div class="boot" id="boot"><img src="/assets/blueprint-mark.png" alt="" /><span class="boot__bar"><i></i></span></div>
+
   <!-- ───────────── SIGN IN ───────────── -->
   <main class="auth" id="auth" hidden>
-    <form class="auth__card" id="authForm" novalidate>
+    <section class="auth__brand">
+      <div class="auth__grid" aria-hidden="true"></div>
       <img src="/assets/blueprint-wordmark.png" alt="blueprint" class="auth__word" />
-      <h1 class="auth__title" id="authTitle">Team sign in</h1>
-      <p class="auth__sub" id="authSub">For the Blueprint team only.</p>
-
-      <label class="field"><span>Email</span>
-        <input id="authEmail" type="email" autocomplete="email" required placeholder="you@email.com" />
-      </label>
-      <label class="field"><span>Password</span>
-        <input id="authPass" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters" />
-      </label>
-
-      <p class="auth__err" id="authErr" role="alert" hidden></p>
-      <button class="btn btn--primary btn--block" type="submit" id="authBtn">Sign in</button>
-      <p class="auth__switch">
-        <span id="authSwitchText">First time here?</span>
-        <button type="button" class="link" id="authSwitch">Create your account</button>
-      </p>
-    </form>
+      <div>
+        <p class="auth__big">Everything the team needs, <span>in one place.</span></p>
+        <ul class="auth__list">
+          <li>Your tasks and deadlines</li>
+          <li>The right folders and files</li>
+          <li>Scripts, contacts and the playbook</li>
+        </ul>
+      </div>
+      <p class="auth__foot">Blueprint · LAS 50</p>
+    </section>
+    <section class="auth__side">
+      <form class="auth__card" id="authForm" novalidate>
+        <img src="/assets/blueprint-mark.png" alt="" class="auth__mark" />
+        <h1 class="auth__title" id="authTitle">Welcome back</h1>
+        <p class="auth__sub" id="authSub">Sign in to the Blueprint workspace.</p>
+        <label class="fld"><span>Email</span><input id="authEmail" type="email" autocomplete="email" required placeholder="you@email.com" /></label>
+        <label class="fld"><span>Password</span><input id="authPass" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters" /></label>
+        <p class="auth__err" id="authErr" role="alert" hidden></p>
+        <button class="btn btn--primary btn--lg btn--block" type="submit" id="authBtn">Sign in</button>
+        <p class="auth__switch"><span id="authSwitchText">First time here?</span> <button type="button" class="link" id="authSwitch">Create your account</button></p>
+      </form>
+    </section>
   </main>
 
   <!-- ───────────── APP ───────────── -->
   <div class="app" id="app" hidden>
-    <header class="top">
-      <a href="/" class="top__brand" aria-label="Blueprint site">
-        <img src="/assets/blueprint-mark.png" alt="" class="top__mark" />
-        <span class="top__name">Admin</span>
+    <aside class="side">
+      <a href="/" class="side__brand" title="Open the public site">
+        <img src="/assets/blueprint-mark.png" alt="" />
+        <span><b>Blueprint</b><small>Workspace</small></span>
       </a>
-      <nav class="tabs" role="tablist">
-        <button class="tab" role="tab" data-tab="inquiries">Inquiries <b class="tab__n" id="newCount" hidden></b></button>
-        <button class="tab" role="tab" data-tab="presentations">Presentations</button>
-        <button class="tab" role="tab" data-tab="team">Team</button>
-      </nav>
-      <div class="top__me">
-        <span class="top__email" id="meEmail"></span>
-        <button class="btn btn--ghost btn--sm" id="signOut">Sign out</button>
+      <button class="side__search" id="searchBtn">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search</span><kbd>⌘K</kbd>
+      </button>
+      <nav class="nav" id="nav" aria-label="Workspace"></nav>
+      <div class="side__me">
+        <div class="me" id="me"></div>
+        <button class="iconbtn iconbtn--dark" id="signOut" title="Sign out"><svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button>
       </div>
-    </header>
+    </aside>
+    <div class="scrim" id="scrim"></div>
 
-    <!-- Inquiries -->
-    <section class="panel" data-panel="inquiries" hidden>
-      <div class="panel__head">
-        <div>
-          <h2 class="panel__title">Inquiries</h2>
-          <p class="panel__sub">Everyone who filled in the Register form on the site.</p>
-        </div>
-        <button class="btn btn--ghost btn--sm" id="refresh">↻ Refresh</button>
-      </div>
+    <div class="topbar">
+      <button class="iconbtn" id="menuBtn" aria-label="Menu"><svg class="i" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16"/></svg></button>
+      <img src="/assets/blueprint-wordmark.png" alt="blueprint" />
+    </div>
 
-      <div class="stats" id="stats"></div>
+    <main class="main" id="main"></main>
+  </div>
 
-      <div class="toolbar">
-        <input class="search" id="search" type="search" placeholder="Search name, email, course…" />
-        <select class="select" id="statusFilter">
-          <option value="">All statuses</option>
-          <option value="new">New</option>
-          <option value="emailed">Emailed</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="archived">Archived</option>
-        </select>
-        <span class="toolbar__gap"></span>
-        <button class="btn btn--ghost btn--sm" id="copyEmails">Copy emails</button>
-        <a class="btn btn--ghost btn--sm" id="mailAll" href="#">Email these (BCC)</a>
-        <button class="btn btn--ghost btn--sm" id="exportCsv">Export CSV</button>
-      </div>
+  <!-- side panel -->
+  <div class="drawer" id="drawer" hidden>
+    <div class="drawer__bg" data-close-drawer></div>
+    <aside class="dr__panel" id="drawerBody" role="dialog" aria-modal="true"></aside>
+  </div>
 
-      <div class="tablewrap">
-        <table class="table">
-          <thead>
-            <tr><th>Date</th><th>Name</th><th>Email</th><th>Course</th><th>Year</th><th>Status</th><th>Notes</th><th></th></tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
-        <p class="empty" id="empty" hidden>No inquiries yet. When someone registers on the site, they show up here.</p>
-      </div>
-    </section>
+  <!-- quick search -->
+  <div class="palette" id="palette" hidden>
+    <div class="pal">
+      <label class="pal__in"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="palInput" placeholder="Search tasks, orgs, links, scripts, people…" autocomplete="off" /><kbd>esc</kbd></label>
+      <ul class="pal__list" id="palList"></ul>
+      <p class="pal__foot"><kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>↵</kbd> to open</p>
+    </div>
+  </div>
 
-    <!-- Presentations -->
-    <section class="panel" data-panel="presentations" hidden>
-      <div class="panel__head">
-        <div>
-          <h2 class="panel__title">Presentations</h2>
-          <p class="panel__sub">Opens full screen. Use → / Space for next, ← for back, F for full screen, T for the block timer.</p>
-        </div>
-      </div>
-      <div class="decks" id="decks"></div>
-    </section>
-
-    <!-- Team -->
-    <section class="panel" data-panel="team" hidden>
-      <div class="panel__head">
-        <div>
-          <h2 class="panel__title">Team</h2>
-          <p class="panel__sub">Only these emails can make an account and see this page. Add someone, then they go to this page and press “Create your account.”</p>
-        </div>
-      </div>
-      <form class="addteam" id="addTeam">
-        <input class="search" id="teamEmail" type="email" required placeholder="teammate@email.com" />
-        <input class="search" id="teamName" placeholder="Name (optional)" />
-        <button class="btn btn--primary btn--sm" type="submit">Add to team</button>
-      </form>
-      <ul class="team" id="team"></ul>
-    </section>
+  <!-- confirm -->
+  <div class="confirm" id="confirm" hidden>
+    <div class="confirm__card">
+      <p id="confirmText"></p>
+      <div class="confirm__act"><button class="btn btn--ghost" id="confirmCancel">Cancel</button><button class="btn btn--danger" id="confirmOk">Delete</button></div>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="/config.js"></script>
-  <script type="module" src="/admin/admin.js"></script>
+  <script type="module" src="/admin/app.js"></script>
 </body>
 </html>
