@@ -21,7 +21,7 @@ Use the server. The 3D will not load if you double-click `index.html`.
 | `styles.css` | All the design. Colors and fonts are at the top (`:root`). |
 | `main.js` | Small interactions: scroll reveals, hero selection box that hops between "paper." and "person.", hero grid that lights up around the mouse, sneak peek gallery, AAA card that flips by itself, Send button, FAQ, register form. |
 | `scene3d.js` | The 2 scroll-driven 3D pieces (see below). |
-| `assets/` | Logo files, facilitator photo (from the S1 deck), and `vendor/` (three.js, stored locally so 3D works offline). |
+| `assets/` | Logo files and `vendor/` (three.js, stored locally so 3D works offline). |
 
 ## 3D pieces
 
@@ -39,7 +39,7 @@ Each card plays a short animation when it comes into view. The AAA Card flips by
 
 ## Page order
 
-Hero → Problem (+ "Show, don't claim") → What is Blueprint → 4 sessions (+ facilitator) → What you'll do → Sneak peek → Take-home → FAQ → Final CTA → Footer
+Hero → Problem ("Sound familiar?" pills) → What is Blueprint → 4 sessions → What you'll do → Sneak peek → Take-home (with what each one is for) → FAQ → Final CTA → Footer
 
 ## Still placeholder (on purpose)
 
