@@ -38,10 +38,10 @@
         <h1 class="auth__title" id="authTitle">Welcome back</h1>
         <p class="auth__sub" id="authSub">Sign in to the Blueprint workspace.</p>
         <label class="afld"><span>Email</span><input id="authEmail" type="email" autocomplete="email" required placeholder="you@email.com" /></label>
-        <label class="afld"><span>Password</span><input id="authPass" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters" /></label>
+        <label class="afld"><span>Password</span><input id="authPass" type="password" autocomplete="current-password" required minlength="8" placeholder="Your password" /></label>
         <p class="auth__err" id="authErr" role="alert" hidden></p>
         <button class="auth__btn" type="submit" id="authBtn">Sign in</button>
-        <p class="auth__switch"><span id="authSwitchText">First time here?</span> <button type="button" class="auth__link" id="authSwitch">Create your account</button></p>
+        <p class="auth__switch">No login yet, or forgot your password? Ask Keira.</p>
       </form>
     </section>
   </main>
@@ -60,6 +60,8 @@
       <nav class="nav" id="nav" aria-label="Workspace"></nav>
       <div class="side__me">
         <div class="me" id="me"></div>
+        <button class="iconbtn iconbtn--dark" id="tourBtn" title="Show me around (tour)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg></button>
+        <button class="iconbtn iconbtn--dark" id="pwBtn" title="Change password"><svg class="i" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg></button>
         <button class="iconbtn iconbtn--dark" id="signOut" title="Sign out"><svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button>
       </div>
     </aside>

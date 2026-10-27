@@ -1,8 +1,9 @@
 /* Blueprint workspace: sign in, sidebar, pages, quick search. */
 import { supa, isTeam } from "/admin/supa.js";
-import { S, loadAll, live, onChange, tasksFor, isDone } from "/admin/store.js";
-import { $, $$, esc, icon, avatar, closeDrawer, linkKind } from "/admin/lib.js";
+import { S, loadAll, live, onChange, tasksFor, isDone, isGuest, focusOf, focusName } from "/admin/store.js";
+import { $, $$, esc, icon, avatar, closeDrawer, linkKind, openDrawer, toast } from "/admin/lib.js";
 import { openTask, quickToggle } from "/admin/ui.js";
+import { firstRun, startTour } from "/admin/tour.js";
 import overview from "/admin/views/overview.js";
 import tasks from "/admin/views/tasks.js";
 import schedule from "/admin/views/schedule.js";
@@ -20,13 +21,14 @@ const NAV = [
   ["", [team]],
 ];
 const VIEWS = Object.fromEntries(NAV.flatMap(([, vs]) => vs).map((v) => [v.id, v]));
+const allowed = (id) => !(id === "inquiries" && isGuest()); // guests never see sign-ups
 const ALIAS = { directory: ["playbook", { tab: "files" }] }; // old links still land somewhere useful
 let current = "overview";
 
 /* ---------- routing ---------- */
 export function go(id, params = {}, { quiet = false } = {}) {
   if (ALIAS[id]) [id, params] = [ALIAS[id][0], { ...ALIAS[id][1], ...params }];
-  if (!VIEWS[id]) id = "overview";
+  if (!VIEWS[id] || !allowed(id)) id = "overview";
   const changed = id !== current;
   current = id;
   if (location.hash.slice(1) !== id) history.replaceState(null, "", `#${id}`);
@@ -41,10 +43,14 @@ export function go(id, params = {}, { quiet = false } = {}) {
   $("#app").classList.remove("nav-open");
 }
 
+/* "For you" first: the pages that matter most to this person, then everything else */
 function renderNav() {
-  $("#nav").innerHTML = NAV.map(([label, vs]) => `
-    ${label ? `<p class="nav__label">${label}</p>` : `<hr class="nav__hr" />`}
-    ${vs.map((v) => { const b = v.badge?.(); return `<a href="#${v.id}" class="nav__item ${v.id === current ? "is-on" : ""}" data-view="${v.id}">${icon(v.icon)}<span>${v.title}</span>${b ? `<b class="nav__badge">${b}</b>` : ""}</a>`; }).join("")}`).join("");
+  const focus = focusOf(focusName() || S.me?.name).tabs.filter((id) => VIEWS[id] && allowed(id));
+  const groups = [["For you", focus.map((id) => VIEWS[id])], ...NAV.map(([label, vs]) => [label, vs.filter((v) => !focus.includes(v.id) && allowed(v.id))])].filter(([, vs]) => vs.length);
+  const item = (v, star) => { const b = v.badge?.(); return `<a href="#${v.id}" class="nav__item ${star ? "nav__item--focus" : ""} ${v.id === current ? "is-on" : ""}" data-view="${v.id}">${icon(v.icon)}<span>${v.title}</span>${b ? `<b class="nav__badge">${b}</b>` : ""}</a>`; };
+  $("#nav").innerHTML = groups.map(([label, vs], gi) => `
+    ${label ? `<p class="nav__label ${gi === 0 ? "nav__label--focus" : ""}">${label}</p>` : `<hr class="nav__hr" />`}
+    ${vs.map((v) => item(v, gi === 0)).join("")}`).join("");
   // teammates see how many of their own tasks are still open
   if (!S.owner && S.me) {
     const n = tasksFor(S.me.name).filter((t) => !isDone(t)).length;
@@ -88,26 +94,37 @@ function paintPalette() {
   $("#palList .is-on")?.scrollIntoView({ block: "nearest" });
 }
 
-/* ---------- sign in ---------- */
-let creating = false;
-function setMode(create) {
-  creating = create;
-  $("#authTitle").textContent = create ? "Create your account" : "Welcome back";
-  $("#authSub").textContent = create ? "Use the email Keira added to the team, and pick a password." : "Sign in to the Blueprint workspace.";
-  $("#authBtn").textContent = create ? "Create account" : "Sign in";
-  $("#authSwitchText").textContent = create ? "Already have an account?" : "First time here?";
-  $("#authSwitch").textContent = create ? "Sign in" : "Create your account";
-  $("#authPass").autocomplete = create ? "new-password" : "current-password";
-  $("#authErr").hidden = true;
-}
+/* ---------- sign in (Keira makes every account; there's no public sign-up) ---------- */
 const friendly = (e) => {
   const m = e?.message || "";
-  if (/database error saving new user|not_on_team/i.test(m)) return "That email isn’t on the team yet. Ask Keira to add it.";
-  if (/invalid login credentials/i.test(m)) return "Wrong email or password.";
-  if (/already registered/i.test(m)) return "That email already has an account. Sign in instead.";
-  if (/password/i.test(m)) return "Your password needs at least 8 characters.";
+  if (/invalid login credentials/i.test(m)) return "Wrong email or password. Forgot it? Ask Keira for a new one.";
+  if (/rate limit|too many/i.test(m)) return "Too many tries. Wait a few minutes, then try again.";
   return m || "Something went wrong. Try again.";
 };
+
+/* change your own password (the one Keira sent is only for the first sign-in) */
+function changePassword() {
+  openDrawer({
+    eyebrow: "Your account",
+    title: "Change your password",
+    body: `<form class="form" id="pwForm" autocomplete="on">
+      <input type="email" autocomplete="username" value="${esc(S.user.email)}" hidden />
+      <label class="fld fld--full"><span>New password</span><input id="pw1" type="password" autocomplete="new-password" minlength="10" required /><small>At least 10 characters. A short sentence is easy to remember.</small></label>
+      <label class="fld fld--full"><span>Type it again</span><input id="pw2" type="password" autocomplete="new-password" minlength="10" required /></label>
+    </form>`,
+    actions: `<span class="grow"></span><button class="btn btn--primary" data-save>${icon("check")} Save password</button>`,
+    onMount(root) {
+      root.querySelector("[data-save]").addEventListener("click", async () => {
+        const a = root.querySelector("#pw1").value, b = root.querySelector("#pw2").value;
+        if (a.length < 10) return toast("Use at least 10 characters.", "bad");
+        if (a !== b) return toast("The two passwords don’t match.", "bad");
+        const { error } = await supa.auth.updateUser({ password: a });
+        if (error) return toast(/same|different/i.test(error.message) ? "That’s your current password. Pick a new one." : "Couldn’t save. Try again.", "bad");
+        closeDrawer(); toast("Password changed");
+      });
+    },
+  });
+}
 let scene3d = null;
 function showAuth(msg = "") {
   $("#boot").hidden = true;
@@ -135,11 +152,13 @@ async function start() {
   $("#app").hidden = false;
   scene3d?.then((s) => s?.stop?.());
   document.body.classList.toggle("is-owner", S.owner);
-  $("#me").innerHTML = `${avatar(S.me.name, "md")}<span><b>${esc(S.me.name)}</b><small>${S.owner ? `${icon("sparkles")}Owner · can edit` : "View only"}</small></span>`;
+  const access = S.owner ? `${icon("sparkles")}Owner` : isGuest() ? "Guest" : "Team member";
+  $("#me").innerHTML = `${avatar(S.me.name, "md")}<span><b>${esc(S.me.name)}</b><small>${access}</small></span>`;
   live();
   // re-draw the page when data changes, unless someone is typing in it
   onChange(() => { if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) renderNav(); else go(current, {}, { quiet: true }); });
   go(location.hash.slice(1) || "overview");
+  firstRun(); // first sign-in: own password, then the tour
 }
 
 /* ---------- events ---------- */
@@ -151,7 +170,7 @@ $("#authForm").addEventListener("submit", async (e) => {
   btn.disabled = true;
   btn.classList.add("is-loading");
   $("#authErr").hidden = true;
-  const { error } = creating ? await supa.auth.signUp({ email, password }) : await supa.auth.signInWithPassword({ email, password });
+  const { error } = await supa.auth.signInWithPassword({ email, password });
   btn.disabled = false;
   btn.classList.remove("is-loading");
   if (error) { $("#authErr").textContent = friendly(error); $("#authErr").hidden = false; return; }
@@ -159,7 +178,6 @@ $("#authForm").addEventListener("submit", async (e) => {
   $("#boot").hidden = false;
   start();
 });
-$("#authSwitch").addEventListener("click", () => setMode(!creating));
 document.addEventListener("click", (e) => {
   const nav = e.target.closest("[data-view]");
   if (nav && nav.closest("#nav")) { e.preventDefault(); return go(nav.dataset.view); }
@@ -170,6 +188,8 @@ document.addEventListener("click", (e) => {
   if (t && !e.target.closest("a, [data-quick]")) openTask(t.dataset.task);
   if (e.target.closest("[data-close-drawer]")) closeDrawer();
 });
+$("#pwBtn").addEventListener("click", changePassword);
+$("#tourBtn").addEventListener("click", () => startTour());
 $("#signOut").addEventListener("click", async () => { await supa.auth.signOut(); location.replace("/admin/"); });
 $("#menuBtn").addEventListener("click", () => $("#app").classList.add("nav-open"));
 $("#scrim").addEventListener("click", () => $("#app").classList.remove("nav-open"));

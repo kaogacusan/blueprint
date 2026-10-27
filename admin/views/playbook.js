@@ -1,6 +1,7 @@
-/* Playbook: the guides, every message we send (ready to copy), the files, and who to ask. */
+/* Playbook: four doors (guides, messages, files, people). Pick one, then everything is a card:
+   guides open in a reader panel, messages look like the chat bubble you'll send, files are tiles, people are contact cards. */
 import { S, fillScript, focusName } from "/admin/store.js";
-import { esc, icon, md, copy, linkKind } from "/admin/lib.js";
+import { esc, icon, md, copy, linkKind, openDrawer, avatar } from "/admin/lib.js";
 import { editRow, empty, ownerOnly, trackName } from "/admin/ui.js";
 
 const GUIDE_FIELDS = [
@@ -31,108 +32,144 @@ const CONTACT_FIELDS = [
   { key: "phone", label: "Phone / local" },
   { key: "note", label: "What to contact them for", type: "textarea", rows: 3 },
 ];
-const TABS = [["guides", "Guides", "book"], ["scripts", "Scripts", "message"], ["files", "Files", "folder"], ["contacts", "Contacts", "mail"]];
-const pb = { tab: "guides", item: "", q: "" };
-const HELP = {
-  guides: "How we run things, step by step. Pick a guide on the left.",
-  scripts: "Every message we send. Copy one and paste it. Brackets fill in where we know the answer.",
-  files: "Every folder and file the team uses, plus files attached to tasks.",
-  contacts: "Who to ask for what.",
-};
+/* the four doors */
+const DOORS = [
+  ["guides", "Guides", "book", "How we run things", "guides"],
+  ["scripts", "Messages", "message", "Copy, paste, send", "scripts"],
+  ["files", "Files", "folder", "Docs, sheets, folders", "resources"],
+  ["contacts", "People", "users", "Who to ask for what", "contacts"],
+];
+const TABLE = { guides: "guides", scripts: "scripts", files: "resources", contacts: "contacts" };
+const FIELDS = { guides: GUIDE_FIELDS, scripts: SCRIPT_FIELDS, files: RES_FIELDS, contacts: CONTACT_FIELDS };
+const pb = { tab: "guides", q: "" };
 const group = (rows, key = "category") => rows.reduce((m, r) => ((m[r[key]] ||= []).push(r), m), {});
 const pad = (n) => String(n).padStart(2, "0");
 const marked = (s) => esc(s).replace(/\[[^\]]+\]/g, (m) => `<mark>${m}</mark>`);
+const me = () => focusName() || S.me?.name;
+const hue = (s) => [...String(s)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7);
+/* first plain sentence or two of a guide, for its card */
+const preview = (body) => body.split("\n").map((l) => l.trim()).find((l) => l && !/^(#|\||-|\d+\.|>)/.test(l))?.replace(/\*\*|\*|\[([^\]]+)\]\([^)]+\)/g, "$1").slice(0, 170) || "";
+const MATCH = {
+  guides: (g) => [g.title, g.body, g.category],
+  scripts: (s) => [s.title, s.body, s.note, s.category],
+  files: (r) => [r.label, r.note, r.category, r.url],
+  contacts: (c) => [c.name, c.org, c.note, c.email, c.category],
+};
 
 export default {
   id: "playbook", title: "Playbook", icon: "book",
   render(root, params = {}) {
     if (params.tab) pb.tab = params.tab;
-    if (params.item) pb.item = params.item;
     const match = (...xs) => !pb.q || xs.join(" ").toLowerCase().includes(pb.q.toLowerCase());
-    const counts = { guides: (S.data.guides || []).length, scripts: (S.data.scripts || []).length, files: (S.data.resources || []).length, contacts: (S.data.contacts || []).length };
-    const add = { guides: "Guide", scripts: "Script", files: "Link", contacts: "Contact" }[pb.tab];
+    const rows = (tab) => (S.data[TABLE[tab]] || []).filter((r) => match(...MATCH[tab](r)));
+    const door = DOORS.find((d) => d[0] === pb.tab);
 
-    root.innerHTML = `
+    root.innerHTML = `<div class="page">
       <header class="ph">
         <div>
-          <h1 class="ph__title">Playbook</h1>
-          <p class="ph__sub">${esc(HELP[pb.tab])}</p>
+          <p class="kicker">Playbook</p>
+          <h1 class="ph__title">What do you need?</h1>
         </div>
-        <div class="ph__actions">${ownerOnly(`<button class="btn btn--ghost" id="add">${icon("plus")} Add ${add.toLowerCase()}</button>`)}</div>
+        <div class="ph__actions">
+          <label class="search search--lg">${icon("search")}<input id="q" placeholder="Search everything" value="${esc(pb.q)}" /></label>
+          ${ownerOnly(`<button class="btn btn--ghost" id="add">${icon("plus")} Add</button>`)}
+        </div>
       </header>
 
-      <div class="card filters">
-        <div class="seg seg--tabs" id="pbTabs">${TABS.map(([k, l, ic]) => `<button class="${pb.tab === k ? "is-on" : ""}" data-tab="${k}">${icon(ic)}${l}<span>${counts[k]}</span></button>`).join("")}</div>
-        <label class="search">${icon("search")}<input id="q" placeholder="Search ${pb.tab}" value="${esc(pb.q)}" /></label>
-      </div>
+      <nav class="doors" aria-label="Playbook sections">${DOORS.map(([k, l, ic, sub], i) => `
+        <button class="door door--${k} ${pb.tab === k ? "is-on" : ""}" data-tab="${k}" style="--i:${i}">
+          <span class="door__ic">${icon(ic)}</span>
+          <span class="door__t"><b>${l}</b><small>${sub}</small></span>
+          <span class="door__n">${rows(k).length}</span>
+        </button>`).join("")}
+      </nav>
 
-      <div class="results">${({ guides, scripts, files, contacts })[pb.tab](match)}</div>`;
+      <div class="results" data-tab-body="${pb.tab}">${({ guides, scripts, files, contacts })[pb.tab](rows(pb.tab), match)}</div></div>`;
 
     const rerender = () => this.render(root);
-    root.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => { pb.tab = b.dataset.tab; pb.item = ""; rerender(); }));
+    root.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => { pb.tab = b.dataset.tab; rerender(); }));
     const q = root.querySelector("#q");
     q.addEventListener("input", () => { pb.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => { rerender(); const n = root.querySelector("#q"); n.focus(); n.setSelectionRange(pb.q.length, pb.q.length); }, 180); });
-    root.querySelectorAll("[data-item]").forEach((b) => b.addEventListener("click", () => { pb.item = b.dataset.item; rerender(); if (innerWidth < 900) root.querySelector(".reader__doc")?.scrollIntoView({ behavior: "smooth" }); }));
-    root.querySelectorAll("[data-toc]").forEach((b) => b.addEventListener("click", () => root.querySelector(`#${b.dataset.toc}`)?.scrollIntoView({ behavior: "smooth", block: "start" })));
-    root.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", () => copy(fillScript(S.data.scripts.find((s) => s.id === b.dataset.copy).body, { sender: me() }), "Script copied")));
-    root.querySelectorAll("[data-copy-text]").forEach((b) => b.addEventListener("click", () => copy(b.dataset.copyText, "Copied")));
-    const table = { guides: "guides", scripts: "scripts", files: "resources", contacts: "contacts" }[pb.tab];
-    const fields = { guides: GUIDE_FIELDS, scripts: SCRIPT_FIELDS, files: RES_FIELDS, contacts: CONTACT_FIELDS }[pb.tab];
+    root.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", (e) => { if (!e.target.closest("[data-edit]")) readGuide(b.dataset.read); }));
+    root.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", () => copy(fillScript(S.data.scripts.find((s) => s.id === b.dataset.copy).body, { sender: me() }), "Message copied")));
+    root.querySelectorAll("[data-more]").forEach((b) => b.addEventListener("click", () => { const open = b.closest(".msg").classList.toggle("is-open"); b.textContent = open ? "Show less" : "Show all"; }));
+    root.querySelectorAll("[data-copy-text]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); copy(b.dataset.copyText, "Copied"); }));
     root.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
-      const row = S.data[table].find((x) => x.id === b.dataset.edit);
-      editRow({ table, row, fields, title: row.title || row.label || row.name });
+      const row = S.data[TABLE[pb.tab]].find((x) => x.id === b.dataset.edit);
+      editRow({ table: TABLE[pb.tab], row, fields: FIELDS[pb.tab], title: row.title || row.label || row.name });
     }));
     const category = { guides: "Guide", scripts: "Outreach", files: "Start here", contacts: "General" }[pb.tab];
-    root.querySelector("#add")?.addEventListener("click", () => editRow({ table, fields, title: `New ${add.toLowerCase()}`, defaults: { category, sort: (S.data[table] || []).length } }));
-    if (pb.tab === "scripts" && params.item) requestAnimationFrame(() => root.querySelector(`#s-${params.item}`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+    root.querySelector("#add")?.addEventListener("click", () => editRow({ table: TABLE[pb.tab], fields: FIELDS[pb.tab], title: `New in ${door[1]}`, defaults: { category, sort: (S.data[TABLE[pb.tab]] || []).length } }));
+    if (params.item) {
+      if (pb.tab === "guides") readGuide(params.item);
+      else requestAnimationFrame(() => root.querySelector(`#s-${params.item}`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+    }
   },
 };
 
-const me = () => focusName() || S.me?.name;
-
-/* ---------- guides: index on the left, the guide on the right ---------- */
-function guides(match) {
-  const all = (S.data.guides || []).filter((g) => match(g.title, g.body, g.category));
+/* ---------- guides: chapter cards; a guide opens in the reader panel ---------- */
+function guides(all) {
   if (!all.length) return `<div class="card">${empty("No guides match.", "search")}</div>`;
-  const cur = all.find((g) => g.id === pb.item) || all[0];
+  return `<div class="chapters">${all.map((g, i) => {
+    const toc = [...g.body.matchAll(/^## (.*)$/gm)].map((m) => m[1]);
+    const mins = Math.max(1, Math.round(g.body.split(/\s+/).length / 200));
+    return `<article class="chapter in" style="--i:${i};--h:${hue(g.category)}" data-read="${g.id}" role="button" tabindex="0">
+      <header><span class="chapter__n">${pad(i + 1)}</span><span class="chapter__k">${esc(g.category)}</span>${ownerOnly(`<button class="iconbtn" data-edit="${g.id}" title="Edit">${icon("edit")}</button>`)}</header>
+      <h3>${esc(g.title)}</h3>
+      <p>${esc(preview(g.body))}</p>
+      <footer>${toc.slice(0, 3).map((t) => `<span class="chapter__sec">${esc(t)}</span>`).join("")}${toc.length > 3 ? `<span class="chapter__sec">+${toc.length - 3}</span>` : ""}<span class="grow"></span><span class="chapter__read">${mins} min ${icon("arrow")}</span></footer>
+    </article>`;
+  }).join("")}</div>`;
+}
+export function readGuide(id) {
+  const g = (S.data.guides || []).find((x) => x.id === id);
+  if (!g) return;
   let n = 0;
-  const body = md(cur.body).replace(/<h4>/g, () => `<h4 id="sec-${n++}">`);
-  const toc = [...cur.body.matchAll(/^## (.*)$/gm)].map((m) => m[1]);
-  return `<div class="reader">
-    <nav class="card reader__nav">${all.map((g, i) => `
-      <button class="ridx in ${g.id === cur.id ? "is-on" : ""}" style="--i:${i}" data-item="${g.id}"><b>${esc(g.title)}</b><small>${esc(g.category)}</small></button>`).join("")}
-    </nav>
-    <article class="card reader__doc in">
-      <header class="reader__h">
-        <div><p class="reader__k">${esc(cur.category)}</p><h2>${esc(cur.title)}</h2></div>
-        ${ownerOnly(`<button class="iconbtn" data-edit="${cur.id}" title="Edit">${icon("edit")}</button>`)}
-      </header>
-      ${toc.length > 1 ? `<div class="toc">${toc.map((t, i) => `<button class="chipbtn" data-toc="sec-${i}">${esc(t)}</button>`).join("")}</div>` : ""}
-      <div class="prose prose--doc">${body}</div>
-    </article>
-  </div>`;
+  const body = md(g.body).replace(/<h4>/g, () => `<h4 id="gsec-${n++}">`);
+  const toc = [...g.body.matchAll(/^## (.*)$/gm)].map((m) => m[1]);
+  openDrawer({
+    wide: true,
+    eyebrow: esc(g.category),
+    title: esc(g.title),
+    body: `${toc.length > 1 ? `<div class="toc">${toc.map((t, i) => `<button class="chipbtn" data-toc="gsec-${i}">${esc(t)}</button>`).join("")}</div>` : ""}
+      <div class="prose prose--doc">${body}</div>`,
+    actions: S.owner ? `<span class="grow"></span><button class="btn btn--ghost" data-edit-guide>${icon("edit")} Edit</button>` : "",
+    onMount(root) {
+      root.querySelectorAll("[data-toc]").forEach((b) => b.addEventListener("click", () => root.querySelector(`#${b.dataset.toc}`)?.scrollIntoView({ behavior: "smooth", block: "start" })));
+      root.querySelector("[data-edit-guide]")?.addEventListener("click", () => editRow({ table: "guides", row: g, fields: GUIDE_FIELDS, title: g.title }));
+    },
+  });
 }
 
-/* ---------- scripts: every message, filled in, one click to copy ---------- */
-function scripts(match) {
-  const all = (S.data.scripts || []).filter((s) => match(s.title, s.body, s.note, s.category));
-  if (!all.length) return `<div class="card">${empty("No scripts match.", "search")}</div>`;
+/* ---------- messages: each one looks like the bubble you'll send ---------- */
+function scripts(all) {
+  if (!all.length) return `<div class="card">${empty("No messages match.", "search")}</div>`;
   return Object.entries(group(all)).map(([cat, xs]) => `
     <section class="group">
-      <h3 class="band">${esc(cat)} <span>${xs.length}</span></h3>
-      <div class="scriptgrid">${xs.map((s, i) => `
-        <article class="script in ${s.id === pb.item ? "is-first" : ""}" id="s-${s.id}" style="--i:${i}">
-          <header><span class="script__n">${pad(i + 1)}</span><b>${esc(s.title)}</b>${ownerOnly(`<button class="iconbtn" data-edit="${s.id}" title="Edit">${icon("edit")}</button>`)}<button class="btn btn--ghost btn--xs" data-copy="${s.id}">${icon("copy")} Copy</button></header>
-          ${s.note ? `<p class="script__note">${esc(s.note)}</p>` : ""}
-          <pre>${marked(fillScript(s.body, { sender: me() }))}</pre>
-        </article>`).join("")}</div>
+      <p class="kicker kicker--band">${esc(cat)} <span>${xs.length}</span></p>
+      <div class="bubbles">${xs.map((s, i) => {
+        const text = fillScript(s.body, { sender: me() });
+        const long = text.split("\n").length > 7 || text.length > 420;
+        return `<article class="msg in" id="s-${s.id}" style="--i:${i}">
+          <header class="msg__h">
+            <span class="msg__n">${pad(i + 1)}</span>
+            <span class="msg__t"><b>${esc(s.title)}</b>${s.note ? `<small>${esc(s.note)}</small>` : ""}</span>
+            ${ownerOnly(`<button class="iconbtn" data-edit="${s.id}" title="Edit">${icon("edit")}</button>`)}
+          </header>
+          <div class="bubble ${long ? "is-long" : ""}"><p>${marked(text)}</p></div>
+          <footer class="msg__f">
+            ${long ? `<button class="link" data-more>Show all</button>` : ""}
+            <span class="grow"></span>
+            <button class="btn btn--primary btn--sm" data-copy="${s.id}">${icon("copy")} Copy</button>
+          </footer>
+        </article>`;
+      }).join("")}</div>
     </section>`).join("");
 }
 
-/* ---------- files: every link, then the ones attached to tasks ---------- */
-function files(match) {
-  const res = (S.data.resources || []).filter((r) => match(r.label, r.note, r.category, r.url));
+/* ---------- files: tiles, then the ones attached to tasks (folded) ---------- */
+function files(res, match) {
   const known = new Set((S.data.resources || []).map((r) => r.url));
   const fromTasks = {};
   for (const t of S.data.tasks || []) {
@@ -142,42 +179,41 @@ function files(match) {
     }
   }
   const nTask = Object.values(fromTasks).flat().length;
-  const row = (url, title, sub, i, edit = "") => { const [ic, kind] = linkKind(url); return `
-    <a class="frow in" style="--i:${i}" href="${esc(url)}" target="_blank" rel="noopener">
-      <span class="frow__ic ic--${ic}">${icon(ic)}</span>
-      <span class="frow__b"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</span>
-      <span class="frow__k">${esc(kind)}</span>
-      ${edit}${icon("arrow", "frow__go")}
+  const ftile = (url, title, sub, i, edit = "") => { const [ic, kind] = linkKind(url); return `
+    <a class="ftl in" style="--i:${i}" href="${esc(/^https?:/i.test(url) ? url : "#")}" target="_blank" rel="noopener">
+      <span class="ftl__ic ic--${ic}">${icon(ic)}</span>
+      <b>${esc(title)}</b>
+      ${sub ? `<small>${esc(sub)}</small>` : ""}
+      <span class="ftl__k">${esc(kind)} ${icon("external")}</span>
+      ${edit}
     </a>`; };
   return `${Object.entries(group(res)).map(([cat, xs]) => `
     <section class="group">
-      <h3 class="band">${esc(cat)} <span>${xs.length}</span></h3>
-      <div class="card flist">${xs.map((r, i) => row(r.url, r.label, r.note, i, ownerOnly(`<button class="iconbtn" data-edit="${r.id}" title="Edit">${icon("edit")}</button>`))).join("")}</div>
+      <p class="kicker kicker--band">${esc(cat)} <span>${xs.length}</span></p>
+      <div class="ftiles">${xs.map((r, i) => ftile(r.url, r.label, r.note, i, ownerOnly(`<button class="iconbtn ftl__edit" data-edit="${r.id}" title="Edit">${icon("edit")}</button>`))).join("")}</div>
     </section>`).join("") || (nTask ? "" : `<div class="card">${empty("No files match.", "search")}</div>`)}
-    ${nTask ? `<details class="group fromtasks" ${pb.q ? "open" : ""}>
-      <summary class="band">Attached to tasks <span>${nTask}</span>${icon("down", "fold__chev")}</summary>
+    ${nTask ? `<details class="more" ${pb.q ? "open" : ""}>
+      <summary>${icon("link")} Files attached to tasks <span class="count">${nTask}</span>${icon("down", "fold__chev")}</summary>
       ${Object.entries(fromTasks).map(([track, xs]) => `
-        <p class="sub-band">${esc(track)}</p>
-        <div class="card flist">${xs.map((l, i) => { const [, kind] = linkKind(l.url); return row(l.url, l.label && l.label !== kind ? l.label : kind, `${l.task.title} · ${l.task.owners.join(", ")}`, i); }).join("")}</div>`).join("")}
+        <p class="kicker kicker--band">${esc(track)}</p>
+        <div class="ftiles ftiles--sm">${xs.map((l, i) => { const [, kind] = linkKind(l.url); return ftile(l.url, l.label && l.label !== kind ? l.label : kind, `${l.task.title} · ${l.task.owners.join(", ")}`, i); }).join("")}</div>`).join("")}
     </details>` : ""}`;
 }
 
-/* ---------- contacts ---------- */
-function contacts(match) {
-  const all = (S.data.contacts || []).filter((c) => match(c.name, c.org, c.note, c.email, c.category));
+/* ---------- people: contact cards ---------- */
+function contacts(all) {
   if (!all.length) return `<div class="card">${empty("No contacts match.", "search")}</div>`;
   return Object.entries(group(all)).map(([cat, xs]) => `
     <section class="group">
-      <h3 class="band">${esc(cat)} <span>${xs.length}</span></h3>
-      <div class="card tablewrap"><table class="table contactt"><tbody>${xs.map((c, i) => `
-        <tr class="in" style="--i:${i}">
-          <td class="w-name"><b>${esc(c.name)}</b><small>${esc(c.org)}</small></td>
-          <td class="muted">${esc(c.note)}</td>
-          <td class="r nowrap">
-            ${c.email ? `<a class="btn btn--ghost btn--xs" href="mailto:${esc(c.email)}" title="${esc(c.email)}">${icon("mail")} Email</a><button class="iconbtn" data-copy-text="${esc(c.email)}" title="Copy ${esc(c.email)}">${icon("copy")}</button>` : ""}
+      <p class="kicker kicker--band">${esc(cat)} <span>${xs.length}</span></p>
+      <div class="pcards">${xs.map((c, i) => `
+        <article class="pcard in" style="--i:${i}">
+          <header>${avatar(c.name, "md")}<span><b>${esc(c.name)}</b><small>${esc(c.org)}</small></span>${ownerOnly(`<button class="iconbtn" data-edit="${c.id}" title="Edit">${icon("edit")}</button>`)}</header>
+          ${c.note ? `<p><span class="kicker">Ask about</span>${esc(c.note)}</p>` : ""}
+          <footer>
+            ${c.email ? `<a class="btn btn--ghost btn--xs" href="mailto:${esc(c.email)}">${icon("mail")} Email</a><button class="btn btn--ghost btn--xs" data-copy-text="${esc(c.email)}" title="${esc(c.email)}">${icon("copy")} Copy email</button>` : ""}
             ${c.phone ? `<span class="tag">${icon("phone")} ${esc(c.phone)}</span>` : ""}
-            ${ownerOnly(`<button class="iconbtn" data-edit="${c.id}" title="Edit">${icon("edit")}</button>`)}
-          </td>
-        </tr>`).join("")}</tbody></table></div>
+          </footer>
+        </article>`).join("")}</div>
     </section>`).join("");
 }

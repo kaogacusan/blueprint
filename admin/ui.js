@@ -17,9 +17,10 @@ export function dueChip(iso, time, done = false) {
   const r = rel(iso);
   return `<span class="due due--${r.tone}" title="${esc(fmtWhen(iso, time))}">${icon(r.tone === "late" ? "alert" : "clock")}${esc(r.label)}${time && ["today", "soon"].includes(r.tone) ? ` · ${esc(fmtWhen("", time).replace(/^ · /, ""))}` : ""}</span>`;
 }
+const safeUrl = (u) => (/^(https?:|mailto:)/i.test(String(u).trim()) ? u : "#");
 export const linkBtn = (l) => {
   const [ic, kind] = linkKind(l.url);
-  return `<a class="linkbtn" href="${esc(l.url)}" target="_blank" rel="noopener">${icon(ic)}<span><b>${esc(l.label || kind)}</b><small>${esc(kind)}</small></span>${icon("external", "linkbtn__go")}</a>`;
+  return `<a class="linkbtn" href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${icon(ic)}<span><b>${esc(l.label || kind)}</b><small>${esc(kind)}</small></span>${icon("external", "linkbtn__go")}</a>`;
 };
 export const empty = (msg, ic = "sparkles") => `<div class="empty in">${icon(ic)}<p>${esc(msg)}</p></div>`;
 export const ownerOnly = (html) => (S.owner ? html : "");

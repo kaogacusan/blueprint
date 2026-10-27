@@ -236,3 +236,28 @@ export function scriptsForOrg(org) {
 export const followUpDate = (o) => o.follow_up || (o.dm_date && ["Sent"].includes(o.status) ? workday(o.dm_date, 2) : null);
 
 export const daysLeft = (iso) => (iso ? daysBetween(todayISO(), iso) : null);
+
+/* ---------- who can do what ---------- */
+/* guests (e.g. a guest facilitator) see the workspace but not sign-ups */
+export const isGuest = () => S.me?.access === "guest";
+/* the owner edits any org; teammates log progress on the orgs assigned to them */
+export const canLogOrg = (o) => S.owner || (!isGuest() && !!S.me?.name && o.owner === S.me.name);
+export async function logOrg(id, patch) {
+  const { data, error } = await supa.rpc("update_org_progress", { org_id: id, patch });
+  if (error) throw error;
+  const list = S.data.orgs;
+  list[list.findIndex((o) => o.id === id)] = data;
+  emit("orgs");
+  return data;
+}
+
+/* ---------- focus: the pages that matter most to each person (settings → focus) ---------- */
+export function focusOf(name) {
+  const f = setting("focus")[name];
+  if (f?.tabs?.length) return f;
+  // nobody set one: guess from what they own
+  const tabs = [];
+  if ((S.data.orgs || []).some((o) => o.owner === name)) tabs.push("outreach");
+  tabs.push("tasks", "schedule");
+  return { tabs, why: "" };
+}

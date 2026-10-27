@@ -7,7 +7,10 @@ import { go } from "/admin/app.js";
 const FIELDS = (p) => [
   { key: "name", label: "Name", autofocus: true, help: "The name used on tasks." },
   { key: "role_title", label: "Role", help: "Just a label. It doesn’t change what they can do." },
-  ...(p?.access === "owner" ? [] : [{ key: "email", label: "Login email", type: "email", help: "Add an email to let them sign in and view the workspace." }]),
+  ...(p?.access === "owner" ? [] : [
+    { key: "email", label: "Login email", type: "email", help: "Their login is made separately (see the note under the team list)." },
+    { key: "access", label: "Access", type: "select", options: [["viewer", "Team: sees everything, logs own orgs"], ["guest", "Guest: no sign-ups or personal data"]] },
+  ]),
   { key: "aliases", label: "Also called", type: "tags", help: "Other names they go by in docs, e.g. Lorenz. Imports use these to match tasks." },
   { key: "sort", label: "Order", type: "number" },
 ];
@@ -32,7 +35,7 @@ export default {
           return `<tr class="in is-click" style="--i:${i}" data-tasks="${esc(p.name)}">
             <td><span class="who">${avatar(p.name, "md")}<span><b>${esc(p.name)}</b>${(p.aliases || []).length ? `<small>aka ${esc(p.aliases.join(", "))}</small>` : ""}</span></span></td>
             <td class="muted">${esc(p.role_title || "—")}</td>
-            <td><span class="access ${p.access === "owner" ? "access--owner" : p.email ? "" : "access--none"}">${p.access === "owner" ? "Owner" : p.email ? "Can view" : "No login"}</span></td>
+            <td><span class="access ${p.access === "owner" ? "access--owner" : !p.email ? "access--none" : p.access === "guest" ? "access--guest" : ""}">${p.access === "owner" ? "Owner" : !p.email ? "No login" : p.access === "guest" ? "Guest" : "Team"}</span></td>
             ${S.owner ? `<td class="muted">${esc(p.email || "—")}</td>` : ""}
             <td class="r"><b>${open}</b></td>
             <td class="r ${late ? "bad" : "muted"}"><b>${late}</b></td>
@@ -41,7 +44,7 @@ export default {
         }).join("")}</tbody>
       </table></div>
 
-      ${S.owner ? `<p class="footnote">To give someone access, add their email here. They open <b>${esc(location.origin)}/admin</b> and press “Create your account.”</p>` : ""}`;
+      ${S.owner ? `<p class="footnote">${icon("lock")} Public sign-up is off, so only people you make a login for can get in. On your computer, in the blueprint folder: <code>node scripts/add-login.mjs Name email [viewer|guest]</code> makes one and prints a password to send them privately. Forgot password: <code>node scripts/add-login.mjs --reset email</code>. Guests never see sign-ups.</p>` : ""}`;
 
     root.querySelectorAll("[data-tasks]").forEach((b) => b.addEventListener("click", () => go("tasks", { person: b.dataset.tasks })));
     root.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", (e) => {
@@ -61,7 +64,7 @@ export default {
         after: () => renamed && renameEverywhere(p.name, renamed),
       });
     }));
-    root.querySelector("#add")?.addEventListener("click", () => editRow({ table: "team", fields: FIELDS(), title: "Add a person", defaults: { sort: team.length, aliases: [] }, transform: cleanTeam }));
+    root.querySelector("#add")?.addEventListener("click", () => editRow({ table: "team", fields: FIELDS(), title: "Add a person", defaults: { sort: team.length, aliases: [], access: "viewer" }, transform: cleanTeam }));
   },
 };
 

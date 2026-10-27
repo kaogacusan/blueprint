@@ -23,10 +23,12 @@ Use the server. The 3D will not load if you double-click `index.html`.
 | `scene3d.js` | The 2 scroll-driven 3D pieces (see below). |
 | `assets/` | Logo files and `vendor/` (three.js, stored locally so 3D works offline). |
 | `config.js` | Public Supabase URL + anon key (safe to be public). |
-| `admin/` | Team admin page: Inquiries, Presentations, Team. Also the slide player (`present.js`, `present.css`). |
+| `admin/` | Team workspace (`/admin`). Also the slide player (`present.js`, `present.css`). |
 | `present/` | `/present/<deck>` opens a deck full screen. |
 | `supabase/migrations/` | Database tables and access rules. |
 | `scripts/upload-deck.mjs` | Uploads a deck from `private/decks/<name>/` to Supabase. |
+| `scripts/add-login.mjs` | Makes a teammate's workspace login (or resets a password). |
+| `assets/vendor/supabase.js` | The Supabase library (v2.45.4), served from our own site instead of a CDN. |
 
 ## 3D pieces
 
@@ -69,17 +71,44 @@ Payment is manual for the pilot: the team emails payment details within 24 hours
 
 ## Workspace (`/admin`)
 
-The team's hub, with the pages in a sidebar on the left. Keira is the **owner** and the only one who can change things; everyone else on the team can **view** it all. The one exception: anyone on the team can set a sign-up's status (so Amber can mark people "Paid").
-Add a teammate under **Team** with their email, then they open `/admin` and press **Create your account**.
+The team's hub, with the pages in a sidebar on the left. Each person's most important pages sit at the top under **For you** (set per person in the `focus` setting).
+
+Who can do what:
+- **Owner** (Keira): changes everything.
+- **Team**: views everything, sets a sign-up's status (so Amber can mark "Paid"), and logs progress on the orgs assigned to them (status, who replied, next step).
+- **Guest** (e.g. a guest facilitator): views the workspace but **never sees sign-ups** or their personal data.
+
+### Logins
+
+Public sign-up is switched off in Supabase Auth, so only people Keira makes a login for can get in.
+
+```bash
+node scripts/add-login.mjs Sam sam@email.com              # team
+node scripts/add-login.mjs Lee lee@email.com guest          # guest
+node scripts/add-login.mjs --reset sam@email.com          # forgot password
+```
+
+It prints a short starter password once (e.g. `Sam-4821`). Send it privately (not in the GC). It only works until their first sign-in: the workspace makes them pick their own password (10+ characters) before anything else. Anyone can change it later with the key button next to their name.
+
+### First sign-in tour
+
+After the new password, everyone gets a spotlight tour that walks through *their* pages (from the `focus` setting): what each button does and where things live. `settings → tour` set to `{ "<name>": "full" }` gives that person the tour of every page. The **?** next to your name replays it; Keira can preview anyone's tour by picking them in "Whole team" on the Overview, then pressing **?**. Tour stops are in `admin/tour.js`.
+
+### Data safety
+
+- Every table has Row Level Security: signed-out visitors can only add a registration; nothing can be read without a team login.
+- Database functions can't be called by signed-out visitors (`supabase/migrations/004_security_and_outreach.sql`).
+- `vercel.json` sends security headers. `/admin` and `/present` only run scripts from this site (plus the Excel reader from cdnjs). **If you edit the `<script type="importmap">` in `admin/index.html`, update its `sha256-` hash in `vercel.json`**, or the sign-in 3D stops loading.
+- The service role key lives only in the gitignored `.env`. Never paste it into the site or the repo.
 
 | Page | What it shows |
 |---|---|
-| Overview | One screen: what's up next, four numbers, this week, late tasks, open decisions. Copy a GC update, add your dates to your calendar. |
+| Overview | Your focus pages as tiles (a number and the one thing to do), up next, the next 7 days, what's late, open questions and what's been decided. |
 | Tasks | The project log: who, what, by when, with files. List or board. Owner can import the project log `.xlsx`. |
 | Schedule | The four sessions and a calendar. Set a session date and its prep deadlines fill in (folded under "Prep deadlines"). Key dates. |
-| Outreach | Every org, its owner and status. Open one to copy its messages with the brackets filled in. |
+| Outreach | Your orgs as boxes by category (or by status). Each org: **Copy + open** (message filled in, their page opens) and **Sent**. Open one for the 3 steps and the reply log. |
 | Budget | The costing sheet's math: the four totals, printer prices, session costs. Print list and notes are folded. |
-| Playbook | Guides, copy-ready scripts, files (incl. every file linked from a task) and contacts. |
+| Playbook | Four doors: Guides (open in a reader), Messages (chat bubbles, one-click copy), Files (tiles) and People (contact cards). |
 | Sign-ups | Everyone who registered: mobile, how they heard about Blueprint, status (registered / paid / waitlist / cancelled). First 20 paid get seats. |
 | Decks / Team | Session decks to present, people and roles (roles are labels only). |
 
