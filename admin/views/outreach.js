@@ -6,7 +6,7 @@ import { dueChip, editRow, empty, ownerOnly } from "/admin/ui.js";
 
 export const ORG_STATUS = ["Not sent", "Sent", "Followed up", "Yes", "No", "No reply"];
 const slug = (s) => s.toLowerCase().replace(/[^a-z]+/g, "-");
-const orgPill = (s) => `<span class="opill opill--${slug(s)}">${esc(s)}</span>`;
+const orgPill = (s) => `<span class="spill opill--${slug(s)}">${esc(s)}</span>`;
 const short = (n) => n.replace(/\s*\(([^)]*)\)\s*$/, "");
 const abbr = (n) => (n.match(/\(([^)]*)\)\s*$/) || [])[1] || "";
 const pageOf = (o) => (o.page.match(/https?:\/\/\S+/) || [])[0];
@@ -59,62 +59,50 @@ export default {
     const count = (s, xs = orgs) => xs.filter((o) => o.status === s).length;
     const owners = [...new Set(orgs.map((o) => o.owner).filter(Boolean))];
     const dueFollow = orgs.filter((o) => o.status === "Sent" && followUpDate(o) && followUpDate(o) <= today);
-    const code = (o) => `O-${String(orgs.indexOf(o) + 1).padStart(2, "0")}`;
     const th = (k, label) => `<th><button class="sort ${f.sort === k ? "is-on" : ""}" data-sort="${k}">${label}${f.sort === k ? icon("down") : ""}</button></th>`;
+    const sent = orgs.filter((o) => o.status !== "Not sent").length;
 
     root.innerHTML = `
       <header class="ph">
-        <h1 class="ph__title">Outreach</h1>
+        <div>
+          <h1 class="ph__title">Outreach</h1>
+          <p class="ph__sub">${orgs.length} orgs · ${sent} messaged · ${count("Yes")} said yes. Click an org to copy its message.</p>
+        </div>
         <div class="ph__actions">${ownerOnly(`<button class="btn btn--primary" id="addOrg">${icon("plus")} Add org</button>`)}</div>
       </header>
 
-      <section class="panel pipe">
-        <div class="pipe__bar">${ORG_STATUS.map((s) => { const n = count(s); return n ? `<i class="sw--${slug(s)}" style="flex:${n}" title="${esc(s)}: ${n}"></i>` : ""; }).join("")}</div>
-        <div class="pipe__cells">${ORG_STATUS.map((s) => `
-          <button class="pc ${f.status === s ? "is-on" : ""}" data-status="${esc(s)}">
-            <span class="lbl"><i class="sw sw--${slug(s)}"></i>${esc(s)}</span><b>${count(s)}</b>
-          </button>`).join("")}</div>
-      </section>
+      ${dueFollow.length ? `<div class="banner">${icon("clock")}<span><b>${dueFollow.length} follow-up${dueFollow.length > 1 ? "s" : ""} due.</b> ${dueFollow.map((o) => `<button class="chipbtn" data-org="${o.id}">${esc(short(o.name))}</button>`).join("")}</span></div>` : ""}
 
-      <section class="owners">${owners.map((n) => {
-        const mine = orgs.filter((o) => o.owner === n), sent = mine.filter((o) => o.status !== "Not sent").length;
-        return `<button class="own ${f.owner === n ? "is-on" : ""}" data-owner="${esc(n)}">
-          ${avatar(n, "md")}
-          <span class="own__t"><b>${esc(n)}</b><small>${sent}/${mine.length} messaged${count("Yes", mine) ? ` · ${count("Yes", mine)} yes` : ""}</small></span>
-          <i class="meter"><i style="--w:${(sent / mine.length) * 100}%"></i></i>
-        </button>`;
-      }).join("")}</section>
-
-      ${dueFollow.length ? `<div class="callout">${icon("clock")}<b>${dueFollow.length} follow-up${dueFollow.length > 1 ? "s" : ""} due</b>${dueFollow.map((o) => `<button class="chipbtn" data-org="${o.id}">${esc(short(o.name))}</button>`).join("")}</div>` : ""}
-
-      <div class="bar">
-        <label class="bar__cell search">${icon("search")}<input id="q" placeholder="Search orgs" value="${esc(f.q)}" /></label>
-        <div class="bar__cell"><select class="select" id="grp"><option value="">All types</option>${Object.entries(groups).map(([k, g]) => `<option value="${k}" ${f.grp === k ? "selected" : ""}>${esc(g.label)}</option>`).join("")}</select></div>
-        <div class="bar__cell bar__cell--grow bar__readout"><span class="lbl">Showing</span><b>${list.length}</b><small>of ${orgs.length}</small></div>
-        ${f.owner || f.status || f.grp || f.q ? `<div class="bar__cell"><button class="btn btn--ghost btn--sm" id="clear">${icon("x")} Clear</button></div>` : ""}
+      <div class="statuses" role="group" aria-label="Filter by status">
+        <button class="st-chip ${!f.status ? "is-on" : ""}" data-status="">All <b>${orgs.length}</b></button>
+        ${ORG_STATUS.map((s) => `<button class="st-chip ${f.status === s ? "is-on" : ""}" data-status="${esc(s)}"><i class="sw sw--${slug(s)}"></i>${esc(s)} <b>${count(s)}</b></button>`).join("")}
       </div>
 
-      <div class="results">${list.length ? `<div class="panel tablewrap"><table class="table orgt">
-        <thead><tr><th class="w-code">#</th>${th("name", "Org")}<th>Type</th>${th("owner", "Owner")}${th("status", "Status")}<th>DM’d</th><th>Follow up</th>${th("tier", "Tier")}</tr></thead>
+      <div class="card filters">
+        <label class="search">${icon("search")}<input id="q" placeholder="Search orgs" value="${esc(f.q)}" /></label>
+        <label class="pick"><span>Owner</span><select id="owner"><option value="">Everyone</option>${owners.map((n) => `<option ${f.owner === n ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
+        <label class="pick"><span>Type</span><select id="grp"><option value="">All</option>${Object.entries(groups).map(([k, g]) => `<option value="${k}" ${f.grp === k ? "selected" : ""}>${esc(g.label)}</option>`).join("")}</select></label>
+        <span class="grow"></span>
+        ${f.owner || f.status || f.grp || f.q ? `<button class="btn btn--ghost btn--sm" id="clear">${icon("x")} Clear filters</button>` : ""}
+      </div>
+
+      <div class="results">${list.length ? `<div class="card tablewrap"><table class="table orgt">
+        <thead><tr>${th("name", "Org")}${th("owner", "Owner")}${th("status", "Status")}<th>Follow up</th></tr></thead>
         <tbody>${list.map((o, i) => {
           const fu = followUpDate(o);
           return `<tr class="in is-click" style="--i:${Math.min(i, 16)}" data-org="${o.id}">
-            <td class="mono muted">${code(o)}</td>
-            <td><b>${esc(short(o.name))}</b>${abbr(o.name) ? ` <em class="abbr">${esc(abbr(o.name))}</em>` : ""}<small>${esc(o.why)}</small></td>
-            <td class="muted nowrap">${esc(o.cluster)}</td>
+            <td><b>${esc(short(o.name))}</b>${abbr(o.name) ? ` <span class="muted">${esc(abbr(o.name))}</span>` : ""}${o.tier === 1 ? ` <span class="tag tag--s1" title="Message these first">Top pick</span>` : ""}<small>${esc(o.why)}</small></td>
             <td class="nowrap">${o.owner ? `<span class="who">${avatar(o.owner, "xs")}${esc(o.owner)}</span>` : `<span class="muted">—</span>`}</td>
-            <td>${S.owner ? `<select class="ssel ssel--${slug(o.status)}" data-set="${o.id}">${ORG_STATUS.map((s) => `<option ${s === o.status ? "selected" : ""}>${s}</option>`).join("")}</select>` : orgPill(o.status)}</td>
-            <td class="mono nowrap">${o.dm_date ? esc(fmtDate(o.dm_date, { weekday: undefined })) : `<span class="muted">—</span>`}</td>
-            <td class="nowrap">${o.status === "Sent" && fu ? dueChip(fu) : `<span class="muted mono">—</span>`}</td>
-            <td class="mono">${o.tier ? `<span class="tier">T${o.tier}</span>` : ""}</td>
+            <td>${S.owner ? `<select class="spill opill--${slug(o.status)}" data-set="${o.id}" aria-label="Status">${ORG_STATUS.map((s) => `<option ${s === o.status ? "selected" : ""}>${s}</option>`).join("")}</select>` : orgPill(o.status)}</td>
+            <td class="nowrap">${o.status === "Sent" && fu ? dueChip(fu) : `<span class="muted">—</span>`}</td>
           </tr>`;
-        }).join("")}</tbody></table></div>` : `<div class="panel">${empty("No orgs match.", "search")}</div>`}</div>`;
+        }).join("")}</tbody></table></div>` : `<div class="card">${empty("No orgs match.", "search")}</div>`}</div>`;
 
     const rerender = () => this.render(root);
     const q = root.querySelector("#q");
     q.addEventListener("input", () => { f.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => { rerender(); const n = root.querySelector("#q"); n.focus(); n.setSelectionRange(f.q.length, f.q.length); }, 180); });
-    root.querySelectorAll("[data-status]").forEach((b) => b.addEventListener("click", () => { f.status = f.status === b.dataset.status ? "" : b.dataset.status; rerender(); }));
-    root.querySelectorAll("[data-owner]").forEach((b) => b.addEventListener("click", () => { f.owner = f.owner === b.dataset.owner ? "" : b.dataset.owner; rerender(); }));
+    root.querySelectorAll("[data-status]").forEach((b) => b.addEventListener("click", () => { f.status = b.dataset.status; rerender(); }));
+    root.querySelector("#owner").addEventListener("change", (e) => { f.owner = e.target.value; rerender(); });
     root.querySelectorAll("[data-sort]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); f.sort = b.dataset.sort; rerender(); }));
     root.querySelector("#grp").addEventListener("change", (e) => { f.grp = e.target.value; rerender(); });
     root.querySelector("#clear")?.addEventListener("click", () => { Object.assign(f, { q: "", owner: "", status: "", grp: "" }); rerender(); });
@@ -140,7 +128,7 @@ export function openOrg(id) {
     eyebrow: `${o.tier ? `Tier ${o.tier} · ` : ""}${esc(o.cluster)}${g?.label ? ` · ${esc(g.label)}` : ""}`,
     title: esc(o.name),
     body: `
-      <div class="dmeta">${orgPill(o.status)}${o.owner ? `<span class="who">${avatar(o.owner, "sm")}${esc(o.owner)}</span>` : ""}${o.status === "Sent" && fu ? `<span class="lbl">Follow up</span>${dueChip(fu)}` : ""}</div>
+      <div class="dmeta">${orgPill(o.status)}${o.owner ? `<span class="who">${avatar(o.owner, "sm")}${esc(o.owner)}</span>` : ""}${o.status === "Sent" && fu ? `<span class="muted">Follow up</span>${dueChip(fu)}` : ""}</div>
 
       <div class="go-row">
         ${scripts[0] ? `<button class="btn btn--primary" data-first>${icon("copy")} Copy first message${pageUrl ? " + open page" : ""}</button>` : ""}

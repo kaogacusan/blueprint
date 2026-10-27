@@ -21,7 +21,7 @@ const MILESTONE_FIELDS = [
   { key: "notes", label: "Notes", type: "textarea", rows: 3 },
   { key: "done", label: "Done", type: "toggle", text: "This has happened" },
 ];
-const KIND = { task: "Task", milestone: "Key date", ops: "Ops", session: "Session" };
+const KIND = { task: "Task", milestone: "Key date", ops: "Prep", session: "Session" };
 const cal = { month: "", sel: "", person: null };
 const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const monthName = (ym) => new Date(`${ym}-01T00:00:00Z`).toLocaleDateString("en-US", { timeZone: "UTC", month: "long", year: "numeric" });
@@ -53,92 +53,94 @@ export default {
     const selItems = on(cal.sel);
     const after = items.filter((x) => x.date > cal.sel && !x.done).slice(0, 6);
 
+    const locked = sessions.filter((s) => s.date).length;
     root.innerHTML = `
       <header class="ph">
-        <h1 class="ph__title">Schedule</h1>
+        <div>
+          <h1 class="ph__title">Schedule</h1>
+          <p class="ph__sub">Click a day to see what’s on it.${S.owner ? " Set a session’s date and its prep deadlines fill in on their own." : ""}</p>
+        </div>
         <div class="ph__actions">
-          <label class="viewas">${icon("users")}<select id="who"><option value="">Everyone</option>${people().map((p) => `<option ${cal.person === p.name ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
-          <button class="btn btn--ghost" id="toCal">${icon("calplus")} Calendar</button>
+          <label class="viewas" title="Show one person’s dates">${icon("users")}<select id="who"><option value="">Everyone</option>${people().map((p) => `<option ${cal.person === p.name ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
+          <button class="btn btn--ghost" id="toCal">${icon("calplus")} Add to calendar</button>
           ${ownerOnly(`<button class="btn btn--primary" id="addMs">${icon("plus")} Key date</button>`)}
         </div>
       </header>
 
       <section class="sessions">${sessions.map((s, i) => {
         const d = s.date ? daysBetween(today, s.date) : null;
-        return `<article class="sess in ${s.date ? "" : "is-tbd"}" style="--i:${i}" ${s.date ? `data-day="${s.date}"` : ""}>
+        return `<article class="card sess in ${s.date ? "" : "is-tbd"}" style="--i:${i}" ${s.date ? `data-day="${s.date}"` : ""}>
           <span class="sess__n">S${s.n}</span>
           <div class="sess__b">
             <b>${esc(s.title)}</b>
-            <span class="sess__d">${s.date ? `${esc(fmtDate(s.date))}${s.start_time ? ` · ${esc(fmtTime(s.start_time))}` : ""}` : "Date TBD"}</span>
-            <span class="sess__v"><i class="vs vs--${s.venue_status.toLowerCase().replace(/ /g, "-")}"></i>${esc(s.venue || "No room")} · ${esc(s.venue_status)}</span>
+            <span>${s.date ? `${esc(fmtDate(s.date))}${s.start_time ? ` · ${esc(fmtTime(s.start_time))}` : ""}${d > 0 ? ` · in ${d} days` : d === 0 ? " · today" : ""}` : "Date to be decided"}</span>
+            <span class="muted">${esc(s.venue || "Room to be decided")}${s.venue ? ` · ${esc(s.venue_status)}` : ""}</span>
           </div>
-          <span class="sess__cd">${d === null ? "—" : d > 0 ? `T−${d}d` : d === 0 ? "Today" : "Done"}</span>
-          ${ownerOnly(`<button class="iconbtn sess__edit" data-edit-session="${s.n}" title="Edit">${icon("edit")}</button>`)}
+          ${ownerOnly(`<button class="iconbtn sess__edit" data-edit-session="${s.n}" title="Edit session">${icon("edit")}</button>`)}
         </article>`;
       }).join("")}</section>
 
       <section class="calwrap">
-        <article class="panel cal">
-          <header class="pnl">
+        <article class="card cal">
+          <header class="ch">
             <h3>${esc(monthName(cal.month))}</h3>
-            <span class="grow"></span>
-            <div class="seg seg--icons">
-              <button data-month="-1" title="Previous month">${icon("left")}</button>
-              <button data-month="0" class="seg__txt" title="This month">Today</button>
-              <button data-month="1" title="Next month">${icon("right")}</button>
+            <div class="seg">
+              <button data-month="-1" title="Previous month" aria-label="Previous month">${icon("left")}</button>
+              <button data-month="0">Today</button>
+              <button data-month="1" title="Next month" aria-label="Next month">${icon("right")}</button>
             </div>
           </header>
           <div class="cal__grid">
             ${WD.map((w) => `<span class="cal__wd">${w}</span>`).join("")}
-            ${cells.map((d, i) => {
-              const xs = on(d);
-              return `<button class="cal__d in ${d.slice(0, 7) !== cal.month ? "is-out" : ""} ${d === today ? "is-today" : ""} ${d === cal.sel ? "is-sel" : ""} ${d < today ? "is-past" : ""}" style="--i:${Math.floor(i / 7) + (i % 7)}" data-day="${d}">
+            ${cells.map((d) => {
+              const xs = on(d), open = xs.filter((x) => !x.done);
+              return `<button class="cal__d ${d.slice(0, 7) !== cal.month ? "is-out" : ""} ${d === today ? "is-today" : ""} ${d === cal.sel ? "is-sel" : ""} ${d < today ? "is-past" : ""}" data-day="${d}">
                 <span class="cal__n">${Number(d.slice(8))}</span>
-                ${xs.slice(0, 3).map((x) => `<span class="cal__it cal__it--${x.kind} ${x.done ? "is-done" : ""}">${esc(x.title)}</span>`).join("")}
-                ${xs.length > 3 ? `<span class="cal__more">+${xs.length - 3}</span>` : ""}
+                ${xs.slice(0, 2).map((x) => `<span class="cal__it cal__it--${x.kind} ${x.done ? "is-done" : ""}">${esc(x.title)}</span>`).join("")}
+                ${xs.length > 2 ? `<span class="cal__more">+${xs.length - 2} more</span>` : ""}
+                ${open.length ? `<i class="cal__dot" aria-hidden="true"></i>` : ""}
               </button>`;
             }).join("")}
           </div>
           <p class="legend">${Object.entries(KIND).map(([k, l]) => `<span><i class="cal__it--${k}"></i>${l}</span>`).join("")}</p>
         </article>
 
-        <aside class="panel day">
-          <header class="pnl"><h3>${cal.sel === today ? "Today" : esc(fmtDate(cal.sel))}</h3><span class="ct">${selItems.length}</span></header>
+        <aside class="card day">
+          <header class="ch"><h3>${cal.sel === today ? "Today" : esc(fmtDate(cal.sel))}</h3><span class="count">${selItems.length}</span></header>
           ${selItems.length ? `<ul class="dlist">${selItems.map((x, i) => item(x, i)).join("")}</ul>` : empty("Nothing on this day.", "calendar")}
-          ${after.length ? `<p class="lbl day__h">After this</p><ul class="dlist dlist--soft">${after.map((x, i) => item(x, i + selItems.length, true)).join("")}</ul>` : ""}
+          ${after.length ? `<p class="day__h">Coming up after</p><ul class="dlist dlist--soft">${after.map((x, i) => item(x, i + selItems.length, true)).join("")}</ul>` : ""}
         </aside>
       </section>
 
-      <section class="panel">
-        <header class="pnl"><h3>Session deadlines</h3><span class="pnl__note">${sessions.filter((s) => s.date).length}/4 dates locked</span></header>
-        <div class="tablewrap"><table class="table matrix">
-          <thead><tr><th>Step</th><th>When</th><th>Who</th>${sessions.map((s) => `<th>S${s.n}</th>`).join("")}</tr></thead>
-          <tbody>${rules.map((r, i) => `<tr class="in" style="--i:${i}">
-            <td><b>${esc(r.label)}</b></td>
-            <td class="mono muted">−${r.days}${r.workdays ? " wd" : "d"}</td>
-            <td><span class="who">${avatar(r.owner, "xs")}${esc(r.owner)}</span></td>
-            ${sessions.map((s) => { const d = opsDeadlines(s).find((x) => x.key === r.key); return `<td>${d ? dueChip(d.date) : `<span class="muted mono">—</span>`}</td>`; }).join("")}
+      <section class="card">
+        <header class="ch ch--pad"><h3>${icon("flag")} Key dates <span class="count">${ms.length}</span></h3></header>
+        ${ms.length ? `<ul class="kd">${ms.map((m, i) => `
+          <li class="in ${m.done ? "is-done" : ""} ${m.on_date < today && !m.done ? "is-late" : ""}" style="--i:${i}">
+            ${S.owner ? `<button class="tick ${m.done ? "is-on" : ""}" data-done="${m.id}" title="${m.done ? "Mark not done" : "Mark done"}">${icon("check")}</button>` : `<span class="tick tick--ro ${m.done ? "is-on" : ""}">${icon("check")}</span>`}
+            <span class="kd__when">${esc(fmtDate(m.on_date))}${m.at_time ? `<small>${esc(fmtTime(m.at_time))}</small>` : ""}</span>
+            <span class="kd__t"><b>${esc(m.title)}</b>${m.notes ? `<small>${esc(m.notes)}</small>` : ""}</span>
+            ${m.who.includes("All") ? `<span class="tag">Everyone</span>` : avatars(m.who, "xs")}
+            ${ownerOnly(`<button class="iconbtn" data-edit-ms="${m.id}" title="Edit">${icon("edit")}</button>`)}
+          </li>`).join("")}</ul>` : empty("No key dates yet.", "flag")}
+      </section>
+
+      <details class="card fold">
+        <summary class="ch ch--pad"><h3>${icon("clock")} Prep deadlines for each session</h3><span class="muted">${locked ? `${locked} of 4 dates set` : "Fills in once session dates are set"}</span>${icon("down", "fold__chev")}</summary>
+        <div class="tablewrap"><table class="table">
+          <thead><tr><th>What</th><th>Who</th>${sessions.map((s) => `<th>Session ${s.n}</th>`).join("")}</tr></thead>
+          <tbody>${rules.map((r) => `<tr>
+            <td><b>${esc(r.label)}</b><small>${r.days} ${r.workdays ? "working days" : "days"} before</small></td>
+            <td class="nowrap"><span class="who">${avatar(r.owner, "xs")}${esc(r.owner)}</span></td>
+            ${sessions.map((s) => { const d = opsDeadlines(s).find((x) => x.key === r.key); return `<td>${d ? dueChip(d.date) : `<span class="muted">—</span>`}</td>`; }).join("")}
           </tr>`).join("")}</tbody>
         </table></div>
-      </section>
+      </details>
 
-      <section class="panel">
-        <header class="pnl"><h3>Key dates</h3><span class="ct">${ms.length}</span></header>
-        ${ms.length ? `<div class="tablewrap"><table class="table">
-          <tbody>${ms.map((m, i) => `<tr class="in ${m.done ? "is-done" : ""} ${m.on_date < today && !m.done ? "is-late" : ""}" style="--i:${i}">
-            <td class="mono nowrap">${esc(fmtDate(m.on_date))}${m.at_time ? ` · ${esc(fmtTime(m.at_time))}` : ""}</td>
-            <td><b>${esc(m.title)}</b>${m.notes ? `<small>${esc(m.notes)}</small>` : ""}</td>
-            <td>${m.who.includes("All") ? `<span class="tag">Everyone</span>` : avatars(m.who, "xs")}</td>
-            <td class="r nowrap">${S.owner ? `<button class="tick ${m.done ? "is-on" : ""}" data-done="${m.id}" title="${m.done ? "Mark not done" : "Mark done"}">${icon("check")}</button><button class="iconbtn" data-edit-ms="${m.id}" title="Edit">${icon("edit")}</button>` : m.done ? `<span class="tag tag--ok">Done</span>` : ""}</td>
-          </tr>`).join("")}</tbody>
-        </table></div>` : empty("No key dates yet.", "flag")}
-      </section>
-
-      <details class="panel notes">
-        <summary class="pnl"><h3>Venue requirements</h3>${icon("down", "notes__chev")}</summary>
-        <div class="notes__cols">
-          <div><p class="lbl">The room needs</p><ul class="checks">${(ops.checklist || []).map((c) => `<li>${icon("check")}<span>${esc(c)}</span></li>`).join("")}</ul></div>
-          <div><p class="lbl">Why the deadlines fall where they do</p><ul class="bullets">${(ops.why || []).map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>
+      <details class="card fold">
+        <summary class="ch ch--pad"><h3>${icon("pin")} What the venue needs</h3>${icon("down", "fold__chev")}</summary>
+        <div class="fold__cols">
+          <div><p class="fold__k">The room needs</p><ul class="checks">${(ops.checklist || []).map((c) => `<li>${icon("check")}<span>${esc(c)}</span></li>`).join("")}</ul></div>
+          <div><p class="fold__k">Why the deadlines fall where they do</p><ul class="bullets">${(ops.why || []).map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>
         </div>
       </details>`;
 
@@ -172,7 +174,7 @@ export default {
 };
 
 function item(x, i, soft = false) {
-  return `<li class="dl dl--${x.kind} in ${x.done ? "is-done" : ""}" style="--i:${i}" ${x.kind === "task" ? `data-task="${x.ref.id}"` : ""}>
+  return `<li class="dl dl--${x.kind} in ${x.done ? "is-done" : ""}" style="--i:${i}" ${x.kind === "task" ? `data-task="${x.ref.id}" role="button" tabindex="0"` : ""}>
     <span class="dl__time">${soft ? esc(fmtDate(x.date, { weekday: undefined })) : x.time ? esc(fmtTime(x.time)) : "All day"}</span>
     <span class="dl__b"><b>${esc(x.title)}</b><small>${KIND[x.kind]}${x.notes ? ` · ${esc(x.notes)}` : ""}</small></span>
     ${x.who.includes("All") ? `<span class="tag">All</span>` : avatars(x.who, "xs")}

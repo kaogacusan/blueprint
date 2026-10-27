@@ -18,21 +18,24 @@ export default {
     const team = people();
     root.innerHTML = `
       <header class="ph">
-        <h1 class="ph__title">Team</h1>
+        <div>
+          <h1 class="ph__title">Team</h1>
+          <p class="ph__sub">Who’s on Blueprint and what they’re carrying. Click a person to see their tasks.${S.owner ? "" : " Only Keira can make changes; everyone can view."}</p>
+        </div>
         <div class="ph__actions">${ownerOnly(`<button class="btn btn--primary" id="add">${icon("plus")} Add person</button>`)}</div>
       </header>
 
-      <div class="panel tablewrap"><table class="table teamt">
-        <thead><tr><th>Person</th><th>Role</th><th>Access</th>${S.owner ? "<th>Login email</th>" : ""}<th class="r">Open</th><th class="r">Late</th><th></th></tr></thead>
+      <div class="card tablewrap"><table class="table teamt">
+        <thead><tr><th>Person</th><th>Role</th><th>Access</th>${S.owner ? "<th>Login email</th>" : ""}<th class="r">Open tasks</th><th class="r">Late</th><th></th></tr></thead>
         <tbody>${team.map((p, i) => {
           const ts = tasksFor(p.name), open = ts.filter((t) => !isDone(t)).length, late = ts.filter(isLate).length;
           return `<tr class="in is-click" style="--i:${i}" data-tasks="${esc(p.name)}">
             <td><span class="who">${avatar(p.name, "md")}<span><b>${esc(p.name)}</b>${(p.aliases || []).length ? `<small>aka ${esc(p.aliases.join(", "))}</small>` : ""}</span></span></td>
             <td class="muted">${esc(p.role_title || "—")}</td>
             <td><span class="access ${p.access === "owner" ? "access--owner" : p.email ? "" : "access--none"}">${p.access === "owner" ? "Owner" : p.email ? "Can view" : "No login"}</span></td>
-            ${S.owner ? `<td class="mono muted">${esc(p.email || "—")}</td>` : ""}
-            <td class="r mono"><b>${open}</b></td>
-            <td class="r mono ${late ? "bad" : "muted"}"><b>${late}</b></td>
+            ${S.owner ? `<td class="muted">${esc(p.email || "—")}</td>` : ""}
+            <td class="r"><b>${open}</b></td>
+            <td class="r ${late ? "bad" : "muted"}"><b>${late}</b></td>
             <td class="r">${ownerOnly(`<button class="iconbtn" data-edit="${p.id}" title="Edit">${icon("edit")}</button>`)}</td>
           </tr>`;
         }).join("")}</tbody>

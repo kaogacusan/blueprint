@@ -1,7 +1,7 @@
-/* Blueprint workspace: sign in, top tabs, pages, quick search. */
+/* Blueprint workspace: sign in, sidebar, pages, quick search. */
 import { supa, isTeam } from "/admin/supa.js";
-import { S, loadAll, live, onChange, isLate, agenda } from "/admin/store.js";
-import { $, $$, esc, icon, avatar, closeDrawer, linkKind, todayISO, instant, countdownParts, pad2 } from "/admin/lib.js";
+import { S, loadAll, live, onChange, tasksFor, isDone } from "/admin/store.js";
+import { $, $$, esc, icon, avatar, closeDrawer, linkKind } from "/admin/lib.js";
 import { openTask, quickToggle } from "/admin/ui.js";
 import overview from "/admin/views/overview.js";
 import tasks from "/admin/views/tasks.js";
@@ -13,11 +13,15 @@ import inquiries from "/admin/views/inquiries.js";
 import presentations from "/admin/views/presentations.js";
 import team from "/admin/views/team.js";
 
-const PRIMARY = [overview, tasks, schedule, outreach, playbook];
-const MORE = [budget, inquiries, presentations, team];
-const VIEWS = Object.fromEntries([...PRIMARY, ...MORE].map((v) => [v.id, v]));
+const NAV = [
+  ["Workspace", [overview, tasks, schedule, outreach, budget]],
+  ["Resources", [playbook]],
+  ["Program", [inquiries, presentations]],
+  ["", [team]],
+];
+const VIEWS = Object.fromEntries(NAV.flatMap(([, vs]) => vs).map((v) => [v.id, v]));
 const ALIAS = { directory: ["playbook", { tab: "files" }] }; // old links still land somewhere useful
-let current = "overview", enterT = 0;
+let current = "overview";
 
 /* ---------- routing ---------- */
 export function go(id, params = {}, { quiet = false } = {}) {
@@ -28,83 +32,26 @@ export function go(id, params = {}, { quiet = false } = {}) {
   if (location.hash.slice(1) !== id) history.replaceState(null, "", `#${id}`);
   renderNav();
   const main = $("#main");
+  if (changed && !quiet) { main.classList.remove("is-in"); void main.offsetWidth; }
   VIEWS[id].render(main, params);
-  if (quiet) {
-    // live refresh: redraw in place without replaying the entrance
-    $$(".in", main).forEach((el) => el.classList.remove("in"));
-  } else {
-    main.classList.remove("is-enter");
-    [...main.children].forEach((el, i) => el.style.setProperty("--k", i));
-    void main.offsetWidth;
-    main.classList.add("is-enter");
-    clearTimeout(enterT);
-    enterT = setTimeout(() => main.classList.remove("is-enter"), 1200); // later redraws only animate their rows
-    if (changed) window.scrollTo({ top: 0 });
-  }
+  if (quiet) $$(".in", main).forEach((el) => el.classList.remove("in")); // live refresh: no replayed animation
+  else main.classList.add("is-in");
+  if (changed) window.scrollTo({ top: 0 });
   document.title = `${VIEWS[id].title} · Blueprint`;
-  closeMenus();
+  $("#app").classList.remove("nav-open");
 }
 
-const no = (v) => pad2(PRIMARY.indexOf(v) + 1);
 function renderNav() {
-  const badge = (v) => { const b = v.badge?.(); return b ? `<b class="tab__badge">${b}</b>` : ""; };
-  $("#tabs").innerHTML = PRIMARY.map((v) => `<a href="#${v.id}" class="tab ${v.id === current ? "is-on" : ""}" data-view="${v.id}"><em>${no(v)}</em><span>${v.title}</span>${badge(v)}</a>`).join("") + `<i class="tabs__bar" id="tabBar"></i>`;
-  const inMore = MORE.some((v) => v.id === current);
-  $("#moreBtn").classList.toggle("is-on", inMore);
-  $("#moreBtn span").textContent = inMore ? VIEWS[current].title : "More";
-  // Playbook only shows here on phones, where the dock has room for four tabs
-  $("#morePop").innerHTML = [playbook, ...MORE].map((v) => `<a href="#${v.id}" class="menu__item ${v === playbook ? "menu__item--m" : ""} ${v.id === current ? "is-on" : ""}" data-view="${v.id}">${icon(v.icon)}<span>${v.title}</span>${badge(v)}</a>`).join("");
-  $("#dock").innerHTML = [...PRIMARY.slice(0, 4), { id: "_more", title: "More", icon: "more" }].map((v) => `<a href="#${v.id}" class="dock__item ${v.id === current || (v.id === "_more" && (inMore || current === "playbook")) ? "is-on" : ""}" data-view="${v.id}">${icon(v.icon)}<span>${v.title}</span></a>`).join("");
-  requestAnimationFrame(moveBar);
+  $("#nav").innerHTML = NAV.map(([label, vs]) => `
+    ${label ? `<p class="nav__label">${label}</p>` : `<hr class="nav__hr" />`}
+    ${vs.map((v) => { const b = v.badge?.(); return `<a href="#${v.id}" class="nav__item ${v.id === current ? "is-on" : ""}" data-view="${v.id}">${icon(v.icon)}<span>${v.title}</span>${b ? `<b class="nav__badge">${b}</b>` : ""}</a>`; }).join("")}`).join("");
+  // teammates see how many of their own tasks are still open
+  if (!S.owner && S.me) {
+    const n = tasksFor(S.me.name).filter((t) => !isDone(t)).length;
+    const el = $('#nav [data-view="tasks"]');
+    if (n && el && !el.querySelector(".nav__badge")) el.insertAdjacentHTML("beforeend", `<b class="nav__badge nav__badge--soft">${n}</b>`);
+  }
 }
-let barReady = false;
-function moveBar() {
-  const bar = $("#tabBar"), on = $(".tab.is-on");
-  if (!bar) return;
-  if (!on) { bar.style.opacity = 0; return; }
-  if (!barReady) bar.style.transition = "none";
-  bar.style.opacity = 1;
-  bar.style.transform = `translateX(${on.offsetLeft}px)`;
-  bar.style.width = `${on.offsetWidth}px`;
-  if (!barReady) { void bar.offsetWidth; bar.style.transition = ""; barReady = true; }
-}
-window.addEventListener("resize", moveBar);
-
-/* ---------- status strip: a live readout under the tabs ---------- */
-const MNL = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Manila", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-const DAY = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Manila", weekday: "short", day: "2-digit", month: "short", year: "numeric" });
-let stripNext = null;
-function renderStrip() {
-  const today = todayISO();
-  stripNext = agenda({ from: today }).find((x) => (x.kind === "milestone" || x.kind === "session") && !x.done && instant(x.date, x.time) > new Date()) || null;
-  const late = (S.data.tasks || []).filter(isLate).length;
-  $("#strip").innerHTML = `
-    <span class="strip__live"><i></i>Live</span>
-    <span class="strip__cell">${esc(DAY.format(new Date()).toUpperCase())}</span>
-    <span class="strip__cell" id="stripClock">${MNL.format(new Date())} MNL</span>
-    ${stripNext ? `<span class="strip__cell strip__next"><em>Next</em><b>${esc(stripNext.title)}</b><span id="stripCd"></span></span>` : ""}
-    <span class="grow"></span>
-    ${late ? `<a href="#tasks" class="strip__cell strip__late" data-view="tasks">${late} late</a>` : ""}
-    <span class="strip__cell">${S.owner ? "Owner · can edit" : "View only"}</span>`;
-  tickStrip();
-}
-function tickStrip() {
-  const c = $("#stripClock");
-  if (c) c.textContent = `${MNL.format(new Date())} MNL`;
-  const cd = $("#stripCd");
-  if (cd && stripNext) { const p = countdownParts(instant(stripNext.date, stripNext.time)); cd.textContent = `T−${p.d ? `${p.d}d ` : ""}${pad2(p.h)}:${pad2(p.m)}:${pad2(p.s)}`; }
-}
-setInterval(() => { if (!$("#app").hidden) tickStrip(); }, 1000);
-
-/* ---------- menus ---------- */
-function toggleMenu(id, open) {
-  const m = $(`#${id}`), btn = m.querySelector("button");
-  const on = open ?? !m.classList.contains("is-open");
-  closeMenus();
-  m.classList.toggle("is-open", on);
-  btn.setAttribute("aria-expanded", on);
-}
-function closeMenus() { $$(".menu.is-open").forEach((m) => { m.classList.remove("is-open"); m.querySelector("button").setAttribute("aria-expanded", "false"); }); }
 
 /* ---------- quick search (⌘K) ---------- */
 function paletteItems() {
@@ -120,7 +67,6 @@ function paletteItems() {
 }
 let palIdx = 0, palResults = [];
 function openPalette() {
-  closeMenus();
   const p = $("#palette");
   p.hidden = false;
   requestAnimationFrame(() => p.classList.add("is-open"));
@@ -189,16 +135,10 @@ async function start() {
   $("#app").hidden = false;
   scene3d?.then((s) => s?.stop?.());
   document.body.classList.toggle("is-owner", S.owner);
-  $("#me").innerHTML = `${avatar(S.me.name, "md")}<span class="me__t"><b>${esc(S.me.name)}</b><small>${S.owner ? "Owner" : "View only"}</small></span>${icon("down", "me__chev")}`;
-  $("#mePop").innerHTML = `
-    <p class="menu__head"><b>${esc(S.me.name)}</b><small>${esc(S.user.email)}</small><small>${esc(S.me.role_title || "")}</small></p>
-    <a class="menu__item" href="/" target="_blank" rel="noopener">${icon("globe")}<span>Public site</span></a>
-    <button class="menu__item" id="signOut">${icon("logout")}<span>Sign out</span></button>`;
-  $("#signOut").addEventListener("click", async () => { await supa.auth.signOut(); location.replace("/admin/"); });
+  $("#me").innerHTML = `${avatar(S.me.name, "md")}<span><b>${esc(S.me.name)}</b><small>${S.owner ? `${icon("sparkles")}Owner · can edit` : "View only"}</small></span>`;
   live();
-  renderStrip();
   // re-draw the page when data changes, unless someone is typing in it
-  onChange(() => { renderStrip(); if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) renderNav(); else go(current, {}, { quiet: true }); });
+  onChange(() => { if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) renderNav(); else go(current, {}, { quiet: true }); });
   go(location.hash.slice(1) || "overview");
 }
 
@@ -222,14 +162,7 @@ $("#authForm").addEventListener("submit", async (e) => {
 $("#authSwitch").addEventListener("click", () => setMode(!creating));
 document.addEventListener("click", (e) => {
   const nav = e.target.closest("[data-view]");
-  if (nav && nav.closest("#tabs, #morePop, #dock, #strip")) {
-    e.preventDefault();
-    if (nav.dataset.view === "_more") return toggleMenu("moreMenu", true);
-    return go(nav.dataset.view);
-  }
-  if (e.target.closest("#moreBtn")) return toggleMenu("moreMenu");
-  if (e.target.closest("#me")) return toggleMenu("meMenu");
-  if (!e.target.closest(".menu__pop")) closeMenus();
+  if (nav && nav.closest("#nav")) { e.preventDefault(); return go(nav.dataset.view); }
   const q = e.target.closest("[data-quick]");
   if (q) return quickToggle(q.dataset.quick);
   // any task row anywhere opens the task panel
@@ -237,6 +170,9 @@ document.addEventListener("click", (e) => {
   if (t && !e.target.closest("a, [data-quick]")) openTask(t.dataset.task);
   if (e.target.closest("[data-close-drawer]")) closeDrawer();
 });
+$("#signOut").addEventListener("click", async () => { await supa.auth.signOut(); location.replace("/admin/"); });
+$("#menuBtn").addEventListener("click", () => $("#app").classList.add("nav-open"));
+$("#scrim").addEventListener("click", () => $("#app").classList.remove("nav-open"));
 $("#searchBtn").addEventListener("click", openPalette);
 window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h && h !== current && (VIEWS[h] || ALIAS[h])) go(h); });
 
@@ -255,7 +191,7 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && palResults[palIdx]) { closePalette(); palResults[palIdx].run(); }
     return;
   }
-  if (e.key === "Escape") { closeMenus(); closeDrawer(); }
+  if (e.key === "Escape") { closeDrawer(); $("#app").classList.remove("nav-open"); }
   if (e.key === "Enter" && document.activeElement?.matches("[data-task]")) openTask(document.activeElement.dataset.task);
 });
 

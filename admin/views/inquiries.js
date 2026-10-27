@@ -1,73 +1,90 @@
-/* Inquiries: everyone who registered on the site. The owner manages them; the team can see them. */
-import { S, update, remove, setting } from "/admin/store.js";
+/* Sign-ups: everyone who registered on the site.
+   Anyone on the team can set a status (e.g. Amber marks "Paid"); notes and deleting stay with the owner. */
+import { S, update, remove, setting, setRegStatus } from "/admin/store.js";
 import { esc, icon, copy, toast, download, confirmBox, countUps, todayISO } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
 
-const STATUSES = [["new", "New"], ["emailed", "Emailed"], ["confirmed", "Confirmed"], ["archived", "Archived"]];
+const STATUSES = [["registered", "Registered"], ["paid", "Paid"], ["waitlist", "Waitlist"], ["cancelled", "Cancelled"]];
+const HELP = { registered: "Signed up, waiting to pay", paid: "Seat confirmed", waitlist: "After the first paid seats", cancelled: "Not coming" };
 const f = { q: "", status: "" };
 const fmt = (iso) => new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const label = (k) => (STATUSES.find(([s]) => s === k) || [, k])[1];
 
 export default {
-  id: "inquiries", title: "Inquiries", icon: "inbox",
-  badge: () => (S.data.registrations || []).filter((r) => r.status === "new").length || "",
+  id: "inquiries", title: "Sign-ups", icon: "inbox",
+  badge: () => (S.data.registrations || []).filter((r) => r.status === "registered").length || "",
   render(root) {
     const regs = S.data.registrations || [];
-    const list = regs.filter((r) => (!f.status || r.status === f.status) && (!f.q || [r.name, r.email, r.course, r.year, r.notes].join(" ").toLowerCase().includes(f.q.toLowerCase())));
+    const list = regs.filter((r) => (!f.status || r.status === f.status) && (!f.q || [r.name, r.email, r.mobile, r.course, r.year, r.heard_from, r.heard_org, r.notes].join(" ").toLowerCase().includes(f.q.toLowerCase())));
     const count = (s) => regs.filter((r) => r.status === s).length;
-    const target = setting("costing").baseline || 12, cap = setting("costing").max || 20;
-    const paid = count("confirmed");
+    const seats = setting("costing").max || 20;
 
     root.innerHTML = `
       <header class="ph">
-        <h1 class="ph__title">Inquiries</h1>
+        <div>
+          <h1 class="ph__title">Sign-ups</h1>
+          <p class="ph__sub">Everyone who registered on the site. The first ${seats} to pay get seats; everyone after goes on the waitlist. Change a status in the table.</p>
+        </div>
         <div class="ph__actions">
-          <button class="btn btn--ghost" id="copyEmails">${icon("copy")} Emails</button>
-          <a class="btn btn--ghost" id="mailAll" href="#">${icon("mail")} BCC all</a>
-          <button class="btn btn--ghost" id="csv">${icon("download")} CSV</button>
+          <button class="btn btn--ghost" id="copyEmails" title="Copy the emails shown below">${icon("copy")} Copy emails</button>
+          <button class="btn btn--ghost" id="csv" title="Download the list below as a spreadsheet">${icon("download")} Download</button>
         </div>
       </header>
 
-      <section class="readouts readouts--4">
-        <button class="ro ${!f.status ? "is-on" : ""}" data-k=""><span class="lbl">Total</span><span class="ro__n"><b data-count="${regs.length}">0</b><small>/${cap}</small></span><i class="meter meter--mark" style="--at:${(target / cap) * 100}%"><i style="--w:${Math.min(100, (regs.length / cap) * 100)}%"></i></i></button>
-        ${STATUSES.slice(0, 3).map(([k, l]) => `<button class="ro ${f.status === k ? "is-on" : ""}" data-k="${k}"><span class="lbl"><i class="sdot sdot--${k}"></i>${l}</span><span class="ro__n"><b data-count="${count(k)}">0</b>${k === "confirmed" ? `<small>/${target}</small>` : ""}</span></button>`).join("")}
+      <section class="stats">
+        ${STATUSES.map(([k, l]) => `<button class="stat ${f.status === k ? "is-on" : ""}" data-k="${k}">
+          <span class="stat__k"><i class="sdot sdot--${k}"></i>${l}</span>
+          <span class="stat__n"><b data-count="${count(k)}">0</b>${k === "paid" ? `<small>of ${seats} seats</small>` : ""}</span>
+          ${k === "paid" ? `<i class="meter"><i style="--w:${Math.min(100, (count(k) / seats) * 100)}%"></i></i>` : `<span class="stat__sub">${HELP[k]}</span>`}
+        </button>`).join("")}
       </section>
 
-      <div class="bar">
-        <label class="bar__cell bar__cell--grow search">${icon("search")}<input id="q" placeholder="Search name, email, course" value="${esc(f.q)}" /></label>
-        <div class="bar__cell"><select class="select" id="st"><option value="">All statuses</option>${STATUSES.map(([k, l]) => `<option value="${k}" ${f.status === k ? "selected" : ""}>${l}</option>`).join("")}</select></div>
-        <div class="bar__cell bar__readout"><span class="lbl">Showing</span><b>${list.length}</b></div>
+      <div class="card filters">
+        <label class="search">${icon("search")}<input id="q" placeholder="Search name, email, course, org" value="${esc(f.q)}" /></label>
+        <label class="pick"><span>Status</span><select id="st"><option value="">All</option>${STATUSES.map(([k, l]) => `<option value="${k}" ${f.status === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+        <span class="grow"></span>
+        <span class="muted">${list.length} of ${regs.length}</span>
       </div>
 
-      ${list.length ? `<div class="tablewrap panel"><table class="table table--regs">
-        <thead><tr><th>Signed up</th><th>Name</th><th>Email</th><th>Course</th><th>Year</th><th>Status</th><th>Notes</th>${S.owner ? "<th></th>" : ""}</tr></thead>
-        <tbody>${list.map((r) => `<tr data-id="${r.id}" class="in st-${r.status}">
-          <td class="muted nowrap">${esc(fmt(r.created_at))}</td>
-          <td><b>${esc(r.name)}</b></td>
-          <td><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></td>
-          <td>${esc(r.course)}</td><td class="nowrap">${esc(r.year)}</td>
-          <td>${S.owner ? `<select class="spill spill--${r.status}" data-field="status">${STATUSES.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select>` : `<span class="spill spill--${r.status}">${STATUSES.find(([k]) => k === r.status)[1]}</span>`}</td>
+      ${list.length ? `<div class="card tablewrap"><table class="table table--regs">
+        <thead><tr><th>Name</th><th>Mobile</th><th>Course</th><th>Heard from</th><th>Status</th><th>Notes</th><th>Signed up</th>${S.owner ? "<th></th>" : ""}</tr></thead>
+        <tbody>${list.map((r, i) => `<tr data-id="${r.id}" class="in st-${r.status}" style="--i:${Math.min(i, 16)}">
+          <td><b>${esc(r.name)}</b><small><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></small></td>
+          <td class="nowrap">${r.mobile ? `<a href="tel:${esc(r.mobile.replace(/[^\d+]/g, ""))}">${esc(r.mobile)}</a>` : `<span class="muted">—</span>`}</td>
+          <td>${esc(r.course)}<small>${esc(r.year)}</small></td>
+          <td>${r.heard_from ? `${esc(r.heard_from)}${r.heard_org ? `<small>${esc(r.heard_org)}</small>` : ""}` : `<span class="muted">—</span>`}</td>
+          <td><select class="spill spill--${r.status}" data-status aria-label="Status">${STATUSES.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select></td>
           <td>${S.owner ? `<input class="note" data-field="notes" value="${esc(r.notes)}" placeholder="Add a note" maxlength="2000" />` : esc(r.notes)}</td>
+          <td class="muted nowrap">${esc(fmt(r.created_at))}</td>
           ${S.owner ? `<td><button class="iconbtn" data-del title="Delete">${icon("trash")}</button></td>` : ""}
-        </tr>`).join("")}</tbody></table></div>` : `<div class="panel">${empty(regs.length ? "Nothing matches that search." : "No sign-ups yet.", "inbox")}</div>`}`;
+        </tr>`).join("")}</tbody></table></div>` : `<div class="card">${empty(regs.length ? "Nothing matches that search." : "No sign-ups yet. They show up here as soon as someone registers.", "inbox")}</div>`}`;
 
     countUps(root);
     const rerender = () => this.render(root);
     const emails = list.map((r) => r.email);
-    root.querySelector("#mailAll").href = emails.length ? `mailto:?bcc=${encodeURIComponent(emails.join(","))}` : "#";
     root.querySelector("#copyEmails").addEventListener("click", () => (emails.length ? copy(emails.join(", "), `Copied ${emails.length} email${emails.length > 1 ? "s" : ""}`) : toast("No emails to copy.")));
     root.querySelector("#csv").addEventListener("click", () => {
-      const cols = ["created_at", "name", "email", "course", "year", "status", "notes"];
+      const cols = ["created_at", "name", "email", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes"];
       const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
       download(`blueprint-signups-${todayISO()}.csv`, [cols.join(","), ...list.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\n"), "text/csv");
     });
     const q = root.querySelector("#q");
     q.addEventListener("input", () => { f.q = q.value; clearTimeout(q._t); q._t = setTimeout(() => { rerender(); const n = root.querySelector("#q"); n.focus(); n.setSelectionRange(f.q.length, f.q.length); }, 180); });
     root.querySelector("#st").addEventListener("change", (e) => { f.status = e.target.value; rerender(); });
-    root.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => { f.status = b.dataset.k; rerender(); }));
+    root.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => { f.status = f.status === b.dataset.k ? "" : b.dataset.k; rerender(); }));
     root.querySelector("tbody")?.addEventListener("change", async (e) => {
-      const tr = e.target.closest("tr"), field = e.target.dataset.field;
-      if (!tr || !field) return;
-      try { await update("registrations", Number(tr.dataset.id), { [field]: e.target.value }); toast("Saved"); } catch { toast("Couldn’t save.", "bad"); }
+      const tr = e.target.closest("tr");
+      if (!tr) return;
+      const id = Number(tr.dataset.id), r = regs.find((x) => x.id === id);
+      if (e.target.matches("[data-status]")) {
+        const prev = r.status, next = e.target.value;
+        try { await setRegStatus(id, next); toast(`${r.name}: ${label(next)}`, "", { label: "Undo", run: () => setRegStatus(id, prev).catch(() => toast("Couldn’t undo.", "bad")) }); }
+        catch { e.target.value = prev; toast("Couldn’t save.", "bad"); }
+        return;
+      }
+      if (e.target.dataset.field) {
+        try { await update("registrations", id, { [e.target.dataset.field]: e.target.value }); toast("Saved"); } catch { toast("Couldn’t save.", "bad"); }
+      }
     });
     root.querySelector("tbody")?.addEventListener("click", async (e) => {
       if (!e.target.closest("[data-del]")) return;

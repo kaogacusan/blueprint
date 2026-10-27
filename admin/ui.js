@@ -24,18 +24,14 @@ export const linkBtn = (l) => {
 export const empty = (msg, ic = "sparkles") => `<div class="empty in">${icon(ic)}<p>${esc(msg)}</p></div>`;
 export const ownerOnly = (html) => (S.owner ? html : "");
 
-/* registry code for a task: T-001 … in project-log order */
-export const taskCode = (t) => `T-${String((S.data.tasks || []).indexOf(t) + 1).padStart(3, "0")}`;
-
 /* one task as a row. The owner can tick it done right from the list. */
 export function taskRow(t, i = 0) {
   const n = (t.links?.length || 0) + (t.outputs?.length || 0);
   const st = `trow__st st--${slug(t.status)}`;
+  const meta = [trackTag(t.session), t.priority === "Critical" || t.priority === "High" ? prioTag(t.priority) : "", n ? `<span class="trow__links">${icon("link")}${n}</span>` : ""].join("");
   return `<div class="trow in ${isDone(t) ? "is-done" : ""} ${isLate(t) ? "is-late" : ""}" data-task="${t.id}" role="button" tabindex="0" style="--i:${i}">
-    ${S.owner ? `<button class="${st}" data-quick="${t.id}" title="${isDone(t) ? "Mark not done" : "Mark done"}"></button>` : `<span class="${st}" title="${esc(t.status)}"></span>`}
-    <span class="trow__code">${taskCode(t)}</span>
-    <span class="trow__main"><b>${esc(t.title)}</b>${t.priority === "Critical" || t.priority === "High" ? prioTag(t.priority) : ""}${n ? `<span class="trow__links">${icon("link")}${n}</span>` : ""}</span>
-    <span class="trow__track">${trackTag(t.session)}</span>
+    ${S.owner ? `<button class="${st}" data-quick="${t.id}" title="${isDone(t) ? "Mark not done" : "Mark done"}" aria-label="${isDone(t) ? "Mark not done" : "Mark done"}"></button>` : `<span class="${st}" title="${esc(t.status)}"></span>`}
+    <span class="trow__main"><b>${esc(t.title)}</b>${meta ? `<span class="trow__meta">${meta}</span>` : ""}</span>
     ${avatars(t.owners, "sm")}
     ${dueChip(t.due, t.due_time, isDone(t))}
   </div>`;
@@ -71,7 +67,7 @@ export function openTask(id) {
   const t = S.data.tasks.find((x) => x.id === id);
   if (!t) return;
   openDrawer({
-    eyebrow: `${taskCode(t)} · ${trackName(t.session)}`,
+    eyebrow: esc(trackName(t.session)),
     title: esc(t.title),
     body: `
       ${S.owner ? `<div class="seg seg--status" role="group" aria-label="Status">${TASK_STATUS.map((s) => `<button class="${s === t.status ? "is-on" : ""}" data-status="${s}">${statusPill(s)}</button>`).join("")}</div>` : `<div class="dmeta">${statusPill(t.status)}</div>`}

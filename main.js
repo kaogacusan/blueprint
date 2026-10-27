@@ -189,6 +189,20 @@
   const form = document.getElementById("regForm");
   const done = document.getElementById("done");
   const regError = document.getElementById("regError");
+  const heard = document.getElementById("f-heard");
+  const orgField = document.getElementById("f-org-field");
+
+  /* "Which org?" only shows when "Student org" is picked */
+  const syncOrg = () => { orgField.hidden = heard.value !== "Student org"; };
+  heard.addEventListener("change", syncOrg);
+
+  /* Mobile: lenient. 10–13 digits, spaces, dashes, and a leading + are fine (0917 123 4567, +63 917 123 4567). */
+  const mobile = document.getElementById("f-mobile");
+  const checkMobile = () => {
+    const v = mobile.value.trim(), digits = v.replace(/\D/g, "");
+    mobile.setCustomValidity(/^\+?[\d\s-]+$/.test(v) && digits.length >= 10 && digits.length <= 13 ? "" : "Please use a valid mobile number.");
+  };
+  mobile.addEventListener("input", checkMobile);
 
   const openModal = () => {
     form.hidden = false;
@@ -196,6 +210,7 @@
     form.reset();
     form.querySelectorAll(".is-invalid").forEach((f) => f.classList.remove("is-invalid"));
     regError.hidden = true;
+    syncOrg();
     modal.showModal();
     setTimeout(() => form.querySelector("input")?.focus(), 60);
   };
@@ -205,8 +220,9 @@
   });
 
   const validate = () => {
+    checkMobile();
     let ok = true;
-    form.querySelectorAll(".field").forEach((f) => {
+    form.querySelectorAll(".field:not(.field--optional)").forEach((f) => {
       const input = f.querySelector("input, select");
       const valid = input.checkValidity() && input.value.trim() !== "";
       f.classList.toggle("is-invalid", !valid);
@@ -243,6 +259,9 @@
       email: data.email.trim().toLowerCase(),
       course: data.course.trim(),
       year: data.year,
+      mobile: data.mobile.trim(),
+      heard_from: data.heard_from,
+      heard_org: data.heard_from === "Student org" ? (data.heard_org || "").trim() : "",
     };
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");
@@ -259,7 +278,6 @@
       btn.classList.remove("is-loading");
       btn.disabled = false;
     }
-    document.getElementById("regNo").textContent = `#${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}`;
     document.getElementById("regName").textContent = row.name;
     document.getElementById("regMeta").textContent = `${row.course} · ${row.year}`;
     form.hidden = true;

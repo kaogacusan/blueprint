@@ -33,6 +33,12 @@ const CONTACT_FIELDS = [
 ];
 const TABS = [["guides", "Guides", "book"], ["scripts", "Scripts", "message"], ["files", "Files", "folder"], ["contacts", "Contacts", "mail"]];
 const pb = { tab: "guides", item: "", q: "" };
+const HELP = {
+  guides: "How we run things, step by step. Pick a guide on the left.",
+  scripts: "Every message we send. Copy one and paste it. Brackets fill in where we know the answer.",
+  files: "Every folder and file the team uses, plus files attached to tasks.",
+  contacts: "Who to ask for what.",
+};
 const group = (rows, key = "category") => rows.reduce((m, r) => ((m[r[key]] ||= []).push(r), m), {});
 const pad = (n) => String(n).padStart(2, "0");
 const marked = (s) => esc(s).replace(/\[[^\]]+\]/g, (m) => `<mark>${m}</mark>`);
@@ -48,13 +54,16 @@ export default {
 
     root.innerHTML = `
       <header class="ph">
-        <h1 class="ph__title">Playbook</h1>
-        <div class="ph__actions">${ownerOnly(`<button class="btn btn--ghost" id="add">${icon("plus")} ${add}</button>`)}</div>
+        <div>
+          <h1 class="ph__title">Playbook</h1>
+          <p class="ph__sub">${esc(HELP[pb.tab])}</p>
+        </div>
+        <div class="ph__actions">${ownerOnly(`<button class="btn btn--ghost" id="add">${icon("plus")} Add ${add.toLowerCase()}</button>`)}</div>
       </header>
 
-      <div class="bar">
-        <div class="bar__cell"><div class="seg seg--tabs" id="pbTabs">${TABS.map(([k, l, ic]) => `<button class="${pb.tab === k ? "is-on" : ""}" data-tab="${k}">${icon(ic)}${l}<em>${counts[k]}</em></button>`).join("")}</div></div>
-        <label class="bar__cell bar__cell--grow search">${icon("search")}<input id="q" placeholder="Search ${pb.tab}" value="${esc(pb.q)}" /></label>
+      <div class="card filters">
+        <div class="seg seg--tabs" id="pbTabs">${TABS.map(([k, l, ic]) => `<button class="${pb.tab === k ? "is-on" : ""}" data-tab="${k}">${icon(ic)}${l}<span>${counts[k]}</span></button>`).join("")}</div>
+        <label class="search">${icon("search")}<input id="q" placeholder="Search ${pb.tab}" value="${esc(pb.q)}" /></label>
       </div>
 
       <div class="results">${({ guides, scripts, files, contacts })[pb.tab](match)}</div>`;
@@ -85,18 +94,18 @@ const me = () => focusName() || S.me?.name;
 /* ---------- guides: index on the left, the guide on the right ---------- */
 function guides(match) {
   const all = (S.data.guides || []).filter((g) => match(g.title, g.body, g.category));
-  if (!all.length) return `<div class="panel">${empty("No guides match.", "search")}</div>`;
+  if (!all.length) return `<div class="card">${empty("No guides match.", "search")}</div>`;
   const cur = all.find((g) => g.id === pb.item) || all[0];
   let n = 0;
   const body = md(cur.body).replace(/<h4>/g, () => `<h4 id="sec-${n++}">`);
   const toc = [...cur.body.matchAll(/^## (.*)$/gm)].map((m) => m[1]);
   return `<div class="reader">
-    <nav class="panel reader__nav">${all.map((g, i) => `
-      <button class="ridx in ${g.id === cur.id ? "is-on" : ""}" style="--i:${i}" data-item="${g.id}"><span class="mono">G-${pad((S.data.guides || []).indexOf(g) + 1)}</span><b>${esc(g.title)}</b><small>${esc(g.category)}</small></button>`).join("")}
+    <nav class="card reader__nav">${all.map((g, i) => `
+      <button class="ridx in ${g.id === cur.id ? "is-on" : ""}" style="--i:${i}" data-item="${g.id}"><b>${esc(g.title)}</b><small>${esc(g.category)}</small></button>`).join("")}
     </nav>
-    <article class="panel reader__doc in">
+    <article class="card reader__doc in">
       <header class="reader__h">
-        <div><p class="lbl">${esc(cur.category)}</p><h2>${esc(cur.title)}</h2></div>
+        <div><p class="reader__k">${esc(cur.category)}</p><h2>${esc(cur.title)}</h2></div>
         ${ownerOnly(`<button class="iconbtn" data-edit="${cur.id}" title="Edit">${icon("edit")}</button>`)}
       </header>
       ${toc.length > 1 ? `<div class="toc">${toc.map((t, i) => `<button class="chipbtn" data-toc="sec-${i}">${esc(t)}</button>`).join("")}</div>` : ""}
@@ -108,10 +117,10 @@ function guides(match) {
 /* ---------- scripts: every message, filled in, one click to copy ---------- */
 function scripts(match) {
   const all = (S.data.scripts || []).filter((s) => match(s.title, s.body, s.note, s.category));
-  if (!all.length) return `<div class="panel">${empty("No scripts match.", "search")}</div>`;
+  if (!all.length) return `<div class="card">${empty("No scripts match.", "search")}</div>`;
   return Object.entries(group(all)).map(([cat, xs]) => `
     <section class="group">
-      <h3 class="band"><span>${esc(cat)}</span><em>${xs.length}</em></h3>
+      <h3 class="band">${esc(cat)} <span>${xs.length}</span></h3>
       <div class="scriptgrid">${xs.map((s, i) => `
         <article class="script in ${s.id === pb.item ? "is-first" : ""}" id="s-${s.id}" style="--i:${i}">
           <header><span class="script__n">${pad(i + 1)}</span><b>${esc(s.title)}</b>${ownerOnly(`<button class="iconbtn" data-edit="${s.id}" title="Edit">${icon("edit")}</button>`)}<button class="btn btn--ghost btn--xs" data-copy="${s.id}">${icon("copy")} Copy</button></header>
@@ -142,25 +151,25 @@ function files(match) {
     </a>`; };
   return `${Object.entries(group(res)).map(([cat, xs]) => `
     <section class="group">
-      <h3 class="band"><span>${esc(cat)}</span><em>${xs.length}</em></h3>
-      <div class="panel flist">${xs.map((r, i) => row(r.url, r.label, r.note, i, ownerOnly(`<button class="iconbtn" data-edit="${r.id}" title="Edit">${icon("edit")}</button>`))).join("")}</div>
-    </section>`).join("") || (nTask ? "" : `<div class="panel">${empty("No files match.", "search")}</div>`)}
+      <h3 class="band">${esc(cat)} <span>${xs.length}</span></h3>
+      <div class="card flist">${xs.map((r, i) => row(r.url, r.label, r.note, i, ownerOnly(`<button class="iconbtn" data-edit="${r.id}" title="Edit">${icon("edit")}</button>`))).join("")}</div>
+    </section>`).join("") || (nTask ? "" : `<div class="card">${empty("No files match.", "search")}</div>`)}
     ${nTask ? `<details class="group fromtasks" ${pb.q ? "open" : ""}>
-      <summary class="band"><span>From tasks</span><em>${nTask}</em>${icon("down", "notes__chev")}</summary>
+      <summary class="band">Attached to tasks <span>${nTask}</span>${icon("down", "fold__chev")}</summary>
       ${Object.entries(fromTasks).map(([track, xs]) => `
-        <p class="lbl sub-band">${esc(track)}</p>
-        <div class="panel flist">${xs.map((l, i) => { const [, kind] = linkKind(l.url); return row(l.url, l.label && l.label !== kind ? l.label : kind, `${l.task.title} · ${l.task.owners.join(", ")}`, i); }).join("")}</div>`).join("")}
+        <p class="sub-band">${esc(track)}</p>
+        <div class="card flist">${xs.map((l, i) => { const [, kind] = linkKind(l.url); return row(l.url, l.label && l.label !== kind ? l.label : kind, `${l.task.title} · ${l.task.owners.join(", ")}`, i); }).join("")}</div>`).join("")}
     </details>` : ""}`;
 }
 
 /* ---------- contacts ---------- */
 function contacts(match) {
   const all = (S.data.contacts || []).filter((c) => match(c.name, c.org, c.note, c.email, c.category));
-  if (!all.length) return `<div class="panel">${empty("No contacts match.", "search")}</div>`;
+  if (!all.length) return `<div class="card">${empty("No contacts match.", "search")}</div>`;
   return Object.entries(group(all)).map(([cat, xs]) => `
     <section class="group">
-      <h3 class="band"><span>${esc(cat)}</span><em>${xs.length}</em></h3>
-      <div class="panel tablewrap"><table class="table contactt"><tbody>${xs.map((c, i) => `
+      <h3 class="band">${esc(cat)} <span>${xs.length}</span></h3>
+      <div class="card tablewrap"><table class="table contactt"><tbody>${xs.map((c, i) => `
         <tr class="in" style="--i:${i}">
           <td class="w-name"><b>${esc(c.name)}</b><small>${esc(c.org)}</small></td>
           <td class="muted">${esc(c.note)}</td>

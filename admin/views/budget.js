@@ -17,25 +17,26 @@ export default {
 
     root.innerHTML = `
       <header class="ph">
-        <h1 class="ph__title">Budget</h1>
+        <div>
+          <h1 class="ph__title">Budget</h1>
+          <p class="ph__sub">The costing sheet’s math, worked out live for ${c.baseline} and ${c.max} participants.${S.owner ? " Change a white box and every total updates." : ""}</p>
+        </div>
       </header>
 
-      ${!B.pricesIn ? `<div class="callout callout--warn">${icon("alert")}<b>Waiting for printer prices</b><span>Print costs read ₱0 until ${esc((c.printers || []).join(", "))} quote per page.</span></div>` : ""}
+      ${!B.pricesIn ? `<div class="banner">${icon("alert")}<span><b>Waiting for printer prices.</b> Print costs show ₱0 until ${esc((c.printers || []).join(", "))} give a price per page.</span></div>` : ""}
 
-      <section class="readouts readouts--6">
+      <section class="stats">
         ${[
-          ["Ticket", c.ticket, "peso", "all four sessions"],
-          ["Revenue @ " + c.baseline, B.revenueBase, "peso", `@ ${c.max}: ${peso(B.revenueMax)}`],
-          ["Total cost @ " + c.baseline, B.totalBase, "peso", `@ ${c.max}: ${peso(B.totalMax)}`],
-          ["Left over @ " + c.baseline, B.revenueBase - B.totalBase, "peso", `@ ${c.max}: ${peso(B.revenueMax - B.totalMax)}`],
-          ["Cost per participant", B.perBase, "peso", `${c.ticket ? Math.round((B.perBase / c.ticket) * 100) : 0}% of the ticket`],
-          ["Break-even seats", B.breakEvenBase, "", "approx."],
-        ].map(([k, v, fmt, sub], i) => `<article class="ro ro--static in" style="--i:${i}"><span class="lbl">${esc(k)}</span><span class="ro__n"><b data-count="${Math.round(v || 0)}" data-fmt="${fmt}">0</b></span><span class="ro__sub">${esc(sub)}</span></article>`).join("")}
+          ["Ticket price", c.ticket, "for all four sessions"],
+          [`Total cost (${c.baseline} people)`, B.totalBase, `${peso(B.totalMax)} with ${c.max} people`],
+          ["Cost per participant", B.perBase, `${c.ticket ? Math.round((B.perBase / c.ticket) * 100) : 0}% of the ticket`],
+          [`Left over (${c.baseline} people)`, B.revenueBase - B.totalBase, `${peso(B.revenueMax - B.totalMax)} with ${c.max} people`],
+        ].map(([k, v, sub], i) => `<article class="stat stat--static in" style="--i:${i}"><span class="stat__k">${esc(k)}</span><span class="stat__n"><b data-count="${Math.round(v || 0)}" data-fmt="peso">0</b></span><span class="stat__sub">${esc(sub)}</span></article>`).join("")}
       </section>
 
       <section class="cols cols--budget">
-        <article class="panel">
-          <header class="pnl"><h3>Settings</h3></header>
+        <article class="card">
+          <header class="ch ch--pad"><h3>Settings</h3></header>
           <dl class="settings">
             <div><dt>Ticket price (₱)</dt><dd>${input("ticket", c.ticket)}</dd></div>
             <div><dt>Baseline participants</dt><dd>${input("baseline", c.baseline)}</dd></div>
@@ -45,8 +46,8 @@ export default {
           </dl>
         </article>
 
-        <article class="panel">
-          <header class="pnl"><h3>Cost per session</h3><span class="pnl__note">@${c.baseline} / @${c.max}</span></header>
+        <article class="card">
+          <header class="ch ch--pad"><h3>Cost per session</h3><span class="muted">${c.baseline} people / ${c.max} people</span></header>
           <div class="sbars">${B.sessions.map((s) => `
             <div class="sbar">
               <b>${s.s}</b>
@@ -56,14 +57,14 @@ export default {
               </div>
               <span>${peso(s.totalBase)} <small>/ ${peso(s.totalMax)}</small></span>
             </div>`).join("")}</div>
-          <p class="legend"><i class="sbar__print"></i>Print <i class="sbar__extra"></i>Venue, supplies, other</p>
+          <p class="legend"><span><i class="sbar__print"></i>Print</span><span><i class="sbar__extra"></i>Venue, supplies, other</span></p>
         </article>
       </section>
 
-      <section class="panel">
-        <header class="pnl"><h3>Printer prices</h3><span class="pnl__note">₱ per page, one side</span></header>
+      <section class="card">
+        <header class="ch ch--pad"><h3>Printer prices</h3><span class="muted">₱ per page, one side</span></header>
         <div class="tablewrap"><table class="table table--prices">
-          <thead><tr><th>Paper</th>${(c.printers || []).map((p) => `<th class="${p === c.printer ? "is-used" : ""}">${esc(p)}${p === c.printer ? " <span class='used'>in use</span>" : ""}</th>`).join("")}<th>Price used</th></tr></thead>
+          <thead><tr><th>Paper</th>${(c.printers || []).map((p) => `<th class="${p === c.printer ? "is-used" : ""}">${esc(p)}${p === c.printer ? " <span class='used'>using</span>" : ""}</th>`).join("")}<th>Price used</th></tr></thead>
           <tbody>
             ${papers.map((paper) => `<tr><td><b>${esc(paper)}</b><small>${esc(c.questions?.[paper] || "")}</small></td>${(c.printers || []).map((p) => `<td class="${p === c.printer ? "is-used" : ""}">${input(`prices.${paper}.${p}`, c.prices?.[paper]?.[p], { money: true })}</td>`).join("")}<td><b>${peso(Number(c.prices?.[paper]?.[c.printer]) || 0, 2)}</b></td></tr>`).join("")}
             <tr class="check"><td><b>Check: earlier S1 quote</b><small>${esc(c.oldQuoteNote || "")}</small></td>${(c.printers || []).map((p) => `<td>${input(`oldQuote.${p}`, c.oldQuote?.[p], { money: true })}</td>`).join("")}<td></td></tr>
@@ -73,21 +74,8 @@ export default {
         </table></div>
       </section>
 
-      <section class="panel">
-        <header class="pnl"><h3>Print list</h3>${ownerOnly(`<button class="btn btn--ghost btn--sm" id="addItem">${icon("plus")} Item</button>`)}</header>
-        <div class="tablewrap"><table class="table">
-          <thead><tr><th></th><th>Item</th><th>Paper</th><th class="r">Sides</th><th class="r">Per person</th><th class="r">Fixed</th><th class="r">Copies @${c.baseline}</th><th class="r">Copies @${c.max}</th><th class="r">₱/page</th><th class="r">Cost @${c.baseline}</th><th class="r">Cost @${c.max}</th></tr></thead>
-          <tbody>${B.items.map((it, i) => `<tr class="${S.owner ? "is-click" : ""}" data-item="${i}">
-            <td><span class="tag tag--${it.session.toLowerCase()}">${it.session}</span></td>
-            <td><b>${esc(it.item)}</b>${it.isCard ? ` <span class="tag">card</span>` : ""}${it.note ? `<small>${esc(it.note)}</small>` : ""}</td>
-            <td>${esc(it.paper)}</td><td class="r">${it.sides}</td><td class="r">${it.perPerson}</td><td class="r">${it.fixed}</td>
-            <td class="r">${it.copiesBase}</td><td class="r">${it.copiesMax}</td><td class="r">${peso(it.price, 2)}</td>
-            <td class="r"><b>${peso(it.costBase)}</b></td><td class="r">${peso(it.costMax)}</td></tr>`).join("")}</tbody>
-        </table></div>
-      </section>
-
-      <section class="panel">
-        <header class="pnl"><h3>Session costs</h3></header>
+      <section class="card">
+        <header class="ch ch--pad"><h3>Session costs</h3><span class="muted">Add venue and supplies costs here</span></header>
         <div class="tablewrap"><table class="table">
           <thead><tr><th>Session</th><th class="r">Print @${c.baseline}</th><th class="r">Print @${c.max}</th><th class="r">Venue</th><th class="r">Supplies</th><th class="r">Other</th><th class="r">Total @${c.baseline}</th><th class="r">Total @${c.max}</th><th class="r">Per person @${c.baseline}</th><th>What goes in supplies / other</th></tr></thead>
           <tbody>${B.sessions.map((s) => `<tr>
@@ -104,9 +92,23 @@ export default {
         </table></div>
       </section>
 
-      <details class="panel notes">
-        <summary class="pnl"><h3>Notes from the costing sheet</h3>${icon("down", "notes__chev")}</summary>
-        <ul class="bullets">${(c.notes || []).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+      <details class="card fold">
+        <summary class="ch ch--pad"><h3>Print list <span class="count">${B.items.length}</span></h3><span class="muted">Every worksheet and card, and how many copies</span>${icon("down", "fold__chev")}</summary>
+        ${ownerOnly(`<div class="fold__bar"><button class="btn btn--ghost btn--sm" id="addItem">${icon("plus")} Add item</button></div>`)}
+        <div class="tablewrap"><table class="table">
+          <thead><tr><th></th><th>Item</th><th>Paper</th><th class="r">Sides</th><th class="r">Per person</th><th class="r">Fixed</th><th class="r">Copies @${c.baseline}</th><th class="r">Copies @${c.max}</th><th class="r">₱/page</th><th class="r">Cost @${c.baseline}</th><th class="r">Cost @${c.max}</th></tr></thead>
+          <tbody>${B.items.map((it, i) => `<tr class="${S.owner ? "is-click" : ""}" data-item="${i}">
+            <td><span class="tag tag--${it.session.toLowerCase()}">${it.session}</span></td>
+            <td><b>${esc(it.item)}</b>${it.isCard ? ` <span class="tag">card</span>` : ""}${it.note ? `<small>${esc(it.note)}</small>` : ""}</td>
+            <td>${esc(it.paper)}</td><td class="r">${it.sides}</td><td class="r">${it.perPerson}</td><td class="r">${it.fixed}</td>
+            <td class="r">${it.copiesBase}</td><td class="r">${it.copiesMax}</td><td class="r">${peso(it.price, 2)}</td>
+            <td class="r"><b>${peso(it.costBase)}</b></td><td class="r">${peso(it.costMax)}</td></tr>`).join("")}</tbody>
+        </table></div>
+      </details>
+
+      <details class="card fold">
+        <summary class="ch ch--pad"><h3>Notes from the costing sheet</h3>${icon("down", "fold__chev")}</summary>
+        <ul class="bullets fold__body">${(c.notes || []).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
       </details>`;
 
     countUps(root);

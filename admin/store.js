@@ -82,6 +82,14 @@ export async function remove(table, key) {
   S.data[table] = S.data[table].filter((r) => r[pk(table)] !== key);
   emit(table);
 }
+/* sign-up status: anyone on the team can set it (database function checks the team list) */
+export async function setRegStatus(id, status) {
+  const { error } = await supa.rpc("set_registration_status", { reg_id: id, new_status: status });
+  if (error) throw error;
+  const r = S.data.registrations.find((x) => x.id === id);
+  if (r) r.status = status;
+  emit("registrations");
+}
 export const setting = (key) => S.data.settings?.find((s) => s.key === key)?.value || {};
 export async function saveSetting(key, value) {
   const { error } = await supa.from("settings").upsert({ key, value });

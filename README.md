@@ -39,18 +39,28 @@ If a device cannot show 3D, the page shows a flat version instead.
 
 ## Sneak peek
 
-On a computer, the section stops on screen and the 6 cards slide sideways as you scroll down. On a phone, you swipe the cards.
-Each card plays a short animation when it comes into view. The AAA Card flips by itself. Press **Send** on the Outreach Card.
+On a computer, the section stops on screen and the 10 cards slide sideways as you scroll down. On a phone, you swipe the cards.
+Each card plays a short animation when it comes into view. The AAA Card flips by itself. Press **Send** on the Outreach Card. Sessions 3–4 add Pillar Map, Four-Week Plan, Ship Card and Circle Card (Story Bank was left out to keep the row short).
 
 ## Page order
 
-Hero → Problem ("Sound familiar?" pills) → What is Blueprint → 4 sessions → What you'll do → Sneak peek → Take-home (with what each one is for) → FAQ → Final CTA → Footer
+Hero → Problem ("If any of these sound like you:" pills) → What Blueprint is + details strip (sessions, dates, venue, length, seats, ₱1,999) → 4 sessions → What you'll do in the room → Sneak peek → Take-home → Who runs the sessions → FAQ → Final CTA → Footer
 
 ## Still placeholder (on purpose)
 
-- **Sessions 3 and 4** show "Details coming soon." Add the real titles in `index.html` when they are final.
-- **No socials / email in the footer.** Add them when they are confirmed.
-- **No price anywhere.** This is on purpose (brief rule). The FAQ says fee details come by email after registering.
+Search `index.html` for `PLACEHOLDER` to find each one.
+
+- **Dates and venue** show "TBA" in the details strip and the "When and where?" FAQ. Thomas confirms.
+- **Session 4 title** "Open House" is a working title.
+- **Facilitator photos:** export them from the Canva Facilitator Profile and save as `assets/facilitators/thomas.jpg` and `assets/facilitators/kurt.jpg` (square). Until then the cards show initials.
+- **Footer contact** (email or IG) for questions.
+
+The price (₱1,999 for all four sessions) is shown in the details strip, FAQ, final call to action and the register form.
+
+## Registration
+
+The form saves name, email, course, year, mobile number, and how they heard about Blueprint (plus "Which org?" when they pick Student org) to the Supabase `registrations` table.
+Payment is manual for the pilot: the team emails payment details within 24 hours, and marks each person **registered / paid / waitlist / cancelled** in `/admin`. First 20 paid get the seats.
 
 ## Brand
 
@@ -59,19 +69,19 @@ Hero → Problem ("Sound familiar?" pills) → What is Blueprint → 4 sessions 
 
 ## Workspace (`/admin`)
 
-The team's hub. Keira is the **owner** and the only one who can change anything; everyone else on the team can **view** it all.
+The team's hub, with the pages in a sidebar on the left. Keira is the **owner** and the only one who can change things; everyone else on the team can **view** it all. The one exception: anyone on the team can set a sign-up's status (so Amber can mark people "Paid").
 Add a teammate under **Team** with their email, then they open `/admin` and press **Create your account**.
 
 | Page | What it shows |
 |---|---|
-| Overview | Up next (live countdown), the next 7 days, your tasks, open decisions, team pulse. Copy a GC update, add your dates to your calendar. |
+| Overview | One screen: what's up next, four numbers, this week, late tasks, open decisions. Copy a GC update, add your dates to your calendar. |
 | Tasks | The project log: who, what, by when, with files. List or board. Owner can import the project log `.xlsx`. |
-| Schedule | The four sessions. Set a date and every venue, print and pre-work deadline fills in. Key dates. |
+| Schedule | The four sessions and a calendar. Set a session date and its prep deadlines fill in (folded under "Prep deadlines"). Key dates. |
 | Outreach | Every org, its owner and status. Open one to copy its messages with the brackets filled in. |
-| Budget | The costing sheet's math: print list, printer prices, session costs, break-even. |
-| Playbook | Guides and copy-ready scripts. |
-| Directory | Folders, files and contacts. Also collects every file linked from a task. |
-| Inquiries / Presentations / Team | Sign-ups, session decks, people and roles (roles are labels only). |
+| Budget | The costing sheet's math: the four totals, printer prices, session costs. Print list and notes are folded. |
+| Playbook | Guides, copy-ready scripts, files (incl. every file linked from a task) and contacts. |
+| Sign-ups | Everyone who registered: mobile, how they heard about Blueprint, status (registered / paid / waitlist / cancelled). First 20 paid get seats. |
+| Decks / Team | Session decks to present, people and roles (roles are labels only). |
 
 **Updating from Thomas's files:** Tasks → Import from Excel takes the project log or the costing sheet (`.xlsx`) and shows every change before saving.
 
