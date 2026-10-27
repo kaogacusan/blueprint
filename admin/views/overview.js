@@ -1,152 +1,139 @@
-/* Overview: what's next, this week, your tasks, open decisions, team pulse. */
-import { S, agenda, tasksFor, isDone, isLate, people, focusName, update, setting, costing } from "/admin/store.js";
-import { esc, icon, avatars, avatar, fmtDate, fmtTime, fmtWhen, todayISO, addDays, instant, countdown, greeting, ring, countUps, ics, download, copy, toast, daysBetween } from "/admin/lib.js";
-import { taskRow, empty, dueChip, ownerOnly } from "/admin/ui.js";
+/* Overview: what's next, the numbers, the week at a glance, what's late, who's carrying what. */
+import { S, agenda, tasksFor, isDone, isLate, people, focusName, update, setting } from "/admin/store.js";
+import { esc, icon, avatars, avatar, fmtDate, fmtTime, todayISO, addDays, instant, countdownParts, pad2, greeting, countUps, ics, download, copy, toast } from "/admin/lib.js";
+import { taskRow, empty, ownerOnly } from "/admin/ui.js";
 import { go } from "/admin/app.js";
 
-const KIND = { task: ["tasks", "Task"], milestone: ["flag", "Key date"], ops: ["printer", "Ops"], session: ["play", "Session"] };
+const KIND = { task: "Task", milestone: "Key date", ops: "Ops", session: "Session" };
+const dayHead = (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "2-digit" }).toUpperCase();
+const shortWhen = (x) => `${dayHead(x.date)}${x.time ? ` · ${fmtTime(x.time)}` : ""}`;
 
 export default {
   id: "overview", title: "Overview", icon: "overview",
   render(root) {
     const who = focusName();
     const today = todayISO();
-    const week = agenda({ person: who, from: today, to: addDays(today, 7) });
-    const next = agenda({ person: who, from: today }).find((x) => !x.done && instant(x.date, x.time) > new Date());
+    const upcoming = agenda({ person: who, from: today }).filter((x) => !x.done && instant(x.date, x.time) > new Date());
+    const next = upcoming[0];
     const mine = tasksFor(who);
     const open = mine.filter((t) => !isDone(t));
-    const done = mine.filter(isDone).length;
-    const late = mine.filter(isLate);
-    const focus = open.filter((t) => t.due).sort((a, b) => (a.due + (a.due_time || "")).localeCompare(b.due + (b.due_time || ""))).slice(0, 6);
+    const done = mine.length - open.length;
+    const late = mine.filter(isLate).sort((a, b) => a.due.localeCompare(b.due));
+    const dueWeek = open.filter((t) => t.due && t.due >= today && t.due <= addDays(today, 6)).length;
     const decisions = (S.data.open_items || []).filter((o) => !o.resolved);
     const regs = (S.data.registrations || []).length;
     const target = setting("costing").baseline || 12;
-    const orgs = S.data.orgs || [];
-    const orgsMine = who ? orgs.filter((o) => o.owner === who) : orgs;
-    const sent = orgsMine.filter((o) => o.status !== "Not sent").length;
-    const yes = orgsMine.filter((o) => o.status === "Yes").length;
-    const me = people().find((p) => p.name === who);
+    const orgs = who ? (S.data.orgs || []).filter((o) => o.owner === who) : S.data.orgs || [];
+    const sent = orgs.filter((o) => o.status !== "Not sent").length;
+    const yes = orgs.filter((o) => o.status === "Yes").length;
+    const focus = who ? open.filter((t) => t.due).sort((a, b) => (a.due + (a.due_time || "")).localeCompare(b.due + (b.due_time || ""))).slice(0, 6) : late.slice(0, 6);
 
-    // group the week by day
-    const days = [];
-    for (const it of week) {
-      let d = days.find((x) => x.date === it.date);
-      if (!d) days.push((d = { date: it.date, items: [] }));
-      d.items.push(it);
-    }
+    // the next 7 days as columns
+    const week = agenda({ person: who, from: today, to: addDays(today, 6) });
+    const days = Array.from({ length: 7 }, (_, i) => { const date = addDays(today, i); return { date, items: week.filter((x) => x.date === date) }; });
+
+    const readouts = [
+      ["tasks", who ? "Your tasks done" : "Tasks done", done, `/${mine.length}`, mine.length ? done / mine.length : 0, ""],
+      ["tasks", "Late", late.length, "", null, late.length ? "bad" : ""],
+      ["schedule", "Due this week", dueWeek, "", null, ""],
+      ["inquiries", "Sign-ups", regs, `/${target}`, regs / target, ""],
+      ["outreach", who ? "Your orgs messaged" : "Orgs messaged", sent, `/${orgs.length}`, orgs.length ? sent / orgs.length : 0, ""],
+      ["outreach", "Orgs said yes", yes, "", null, yes ? "good" : ""],
+    ];
 
     root.innerHTML = `
       <header class="ph">
-        <div>
-          <p class="ph__eyebrow">${esc(fmtDate(today, { weekday: "long", month: "long" }))}</p>
-          <h1 class="ph__title">${greeting()}, ${esc(S.me?.name || "there")}.</h1>
-          <p class="ph__sub">${who ? `${S.owner && S.viewAs ? `Previewing <b>${esc(who)}</b>’s view` : esc(me?.role_title || "Here’s what’s on")}${S.owner && S.viewAs ? "" : ""}` : "Everything across the team, in one place."}</p>
-        </div>
+        <h1 class="ph__title">${greeting()}, ${esc(S.me?.name || "there")}.</h1>
         <div class="ph__actions">
-          ${ownerOnly(`<label class="viewas">${icon("eye")}<select id="viewAs"><option value="">Whole team</option>${people().map((p) => `<option ${S.viewAs === p.name ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
-          <button class="btn btn--ghost" id="gcUpdate">${icon("message")} Copy GC update</button>`)}
-          <button class="btn btn--ghost" id="toCal">${icon("calplus")} Add to calendar</button>
+          ${ownerOnly(`<label class="viewas" title="See the workspace as one person">${icon("eye")}<select id="viewAs"><option value="">Whole team</option>${people().map((p) => `<option ${S.viewAs === p.name ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
+          <button class="btn btn--ghost" id="gcUpdate">${icon("message")} GC update</button>`)}
+          <button class="btn btn--ghost" id="toCal" title="Download every upcoming date as a calendar file">${icon("calplus")} Calendar</button>
         </div>
       </header>
 
-      <section class="hero-grid">
-        <article class="card next stagger" style="--i:0">
-          <div class="next__grid" aria-hidden="true"></div>
-          <p class="next__k">${icon("clock")} Up next${who ? ` for ${esc(who)}` : ""}</p>
+      <section class="ov-top">
+        <article class="now">
+          <div class="now__grid" aria-hidden="true"></div>
+          <i class="now__scan" aria-hidden="true"></i>
+          <p class="lbl lbl--ice">Up next${who ? ` · ${esc(who)}` : ""}</p>
           ${next ? `
-            <h2 class="next__t">${esc(next.title)}</h2>
-            <p class="next__when">${esc(fmtWhen(next.date, next.time))}</p>
-            <div class="next__row">
-              <span class="next__cd" data-countdown="${instant(next.date, next.time).toISOString()}">${countdown(instant(next.date, next.time))}</span>
-              ${avatars(next.who.filter((w) => w !== "All"), "sm")}${next.who.includes("All") ? `<span class="next__all">Everyone</span>` : ""}
-            </div>` : `<h2 class="next__t">Nothing scheduled.</h2><p class="next__when">You’re all caught up.</p>`}
+            <h2 class="now__t" ${next.kind === "task" ? `data-task="${next.ref.id}"` : ""}>${esc(next.title)}</h2>
+            <p class="now__when"><span class="now__kind">${KIND[next.kind]}</span>${esc(fmtDate(next.date, { weekday: "long", month: "long" }))}${next.time ? ` · ${esc(fmtTime(next.time))}` : ""}</p>
+            <div class="now__row">
+              <div class="cd" data-cd="${instant(next.date, next.time).toISOString()}">${cdCells(instant(next.date, next.time))}</div>
+              ${next.who.includes("All") ? `<span class="now__all">Everyone</span>` : avatars(next.who, "sm")}
+            </div>
+            ${upcoming.length > 1 ? `<ol class="now__then">${upcoming.slice(1, 4).map((x) => `<li ${x.kind === "task" ? `data-task="${x.ref.id}"` : ""}><span>${esc(shortWhen(x))}</span><b>${esc(x.title)}</b></li>`).join("")}</ol>` : ""}` : `<h2 class="now__t">Nothing scheduled.</h2>`}
         </article>
 
-        <article class="card stat-ring stagger" style="--i:1">
-          ${ring(mine.length ? done / mine.length : 0, 76, 8)}
-          <div>
-            <p class="k">${who ? "Your tasks" : "Team tasks"}</p>
-            <p class="big"><span data-count="${done}">0</span><small>/${mine.length} done</small></p>
-            <p class="sub">${open.length} open${late.length ? ` · <b class="bad">${late.length} late</b>` : ""}</p>
-          </div>
+        <div class="readouts">${readouts.map(([to, k, n, of, pct, tone]) => `
+          <button class="ro ro--${tone}" data-go="${to}">
+            <span class="lbl">${esc(k)}</span>
+            <span class="ro__n"><b data-count="${n}">0</b>${of ? `<small>${of}</small>` : ""}</span>
+            ${pct != null ? `<i class="meter"><i style="--w:${Math.min(100, pct * 100)}%"></i></i>` : `<i class="ro__arrow">${icon("arrow")}</i>`}
+          </button>`).join("")}</div>
+      </section>
+
+      <section class="panel week">
+        <header class="pnl"><h3>Next 7 days</h3><span class="ct">${week.length}</span><button class="pnl__more" data-go="schedule">Schedule ${icon("right")}</button></header>
+        <div class="week__grid">${days.map((d, i) => `
+          <div class="wkday ${d.date === today ? "is-today" : ""} ${weekdayOf(d.date) % 6 === 0 ? "is-weekend" : ""}">
+            <p class="wkday__h"><b>${esc(dayHead(d.date).split(" ")[0])}</b><span>${esc(dayHead(d.date).split(" ")[1])}</span>${d.items.length ? `<em>${d.items.length}</em>` : ""}</p>
+            <ul>${d.items.slice(0, 4).map((x, j) => `
+              <li class="wk wk--${x.kind} in" style="--i:${i * 2 + j}" ${x.kind === "task" ? `data-task="${x.ref.id}"` : ""} title="${esc(x.title)}${x.who.length ? ` · ${esc(x.who.join(", "))}` : ""}">
+                <span class="wk__t">${esc(x.title)}</span>
+                <span class="wk__m">${x.time ? esc(fmtTime(x.time)) : KIND[x.kind]}${x.who.includes("All") ? " · All" : ""}</span>
+              </li>`).join("")}
+              ${d.items.length > 4 ? `<li class="wk wk--more" data-go="schedule">+${d.items.length - 4} more</li>` : ""}
+            </ul>
+          </div>`).join("")}</div>
+      </section>
+
+      <section class="ov-row">
+        <article class="panel">
+          <header class="pnl"><h3>${who ? "Your focus" : "Late"}</h3><span class="ct ${who ? "" : "ct--bad"}">${who ? open.length : late.length}</span><button class="pnl__more" data-go="tasks">All tasks ${icon("right")}</button></header>
+          ${focus.length ? `<div class="tlist tlist--flush">${focus.map(taskRow).join("")}</div>` : empty(who ? "No open tasks with a due date." : "Nothing late.", "check")}
         </article>
 
-        <article class="card stat stagger" style="--i:2">
-          <p class="k">${icon("inbox")} Sign-ups</p>
-          <p class="big"><span data-count="${regs}">0</span><small>/${target} target</small></p>
-          <div class="bar"><i style="--w:${Math.min(100, (regs / target) * 100)}%"></i></div>
-          <p class="sub">${regs >= target ? "Target reached" : `${target - regs} more to the baseline`}</p>
-        </article>
-
-        <article class="card stat stagger" style="--i:3">
-          <p class="k">${icon("send")} ${who ? "Your orgs" : "Org outreach"}</p>
-          <p class="big"><span data-count="${sent}">0</span><small>/${orgsMine.length} messaged</small></p>
-          <div class="bar"><i style="--w:${orgsMine.length ? (sent / orgsMine.length) * 100 : 0}%"></i></div>
-          <p class="sub">${yes} said yes</p>
+        <article class="panel">
+          <header class="pnl"><h3>Open decisions</h3><span class="ct">${decisions.length}</span></header>
+          ${decisions.length ? `<ul class="decisions">${decisions.map((o, i) => `
+            <li class="in" style="--i:${i}">
+              ${S.owner ? `<button class="tick" data-resolve="${o.id}" title="Mark decided">${icon("check")}</button>` : `<span class="tick tick--ro"></span>`}
+              <p>${esc(o.question)}</p>
+              <small>${esc(o.owner)}${o.due_label ? `<em>${esc(o.due_label)}</em>` : ""}</small>
+            </li>`).join("")}</ul>` : empty("No open decisions.", "check")}
         </article>
       </section>
 
-      <section class="cols">
-        <article class="card pad stagger" style="--i:4">
-          <header class="ch"><h3>${icon("calendar")} Next 7 days</h3><button class="link" data-go="schedule">Schedule ${icon("right")}</button></header>
-          ${days.length ? `<ol class="agenda">${days.map((d) => `
-            <li class="agenda__day">
-              <p class="agenda__date ${d.date === today ? "is-today" : ""}"><b>${d.date === today ? "Today" : daysBetween(today, d.date) === 1 ? "Tomorrow" : esc(fmtDate(d.date, { weekday: "long", month: undefined, day: undefined }))}</b><span>${esc(fmtDate(d.date, { weekday: undefined }))}</span></p>
-              <ul>${d.items.map((it) => `
-                <li class="ag ag--${it.kind} ${it.done ? "is-done" : ""}" ${it.kind === "task" ? `data-task="${it.ref.id}"` : ""}>
-                  <span class="ag__time">${it.time ? esc(fmtTime(it.time)) : "All day"}</span>
-                  <span class="ag__ic" title="${KIND[it.kind][1]}">${icon(KIND[it.kind][0])}</span>
-                  <span class="ag__t">${esc(it.title)}</span>
-                  ${avatars(it.who.filter((w) => w !== "All"), "xs")}
-                </li>`).join("")}</ul>
-            </li>`).join("")}</ol>` : empty("Nothing due in the next 7 days.", "calendar")}
-        </article>
-
-        <div class="stack">
-          <article class="card pad stagger" style="--i:5">
-            <header class="ch"><h3>${icon("target")} ${who ? `${esc(who === S.me?.name ? "Your" : who + "’s")} focus` : "Needs attention"}</h3><button class="link" data-go="tasks">All tasks ${icon("right")}</button></header>
-            ${(() => {
-              const list = who ? focus : [...(S.data.tasks || []).filter(isLate), ...(S.data.tasks || []).filter((t) => t.status === "Blocked" && !isLate(t))].slice(0, 7);
-              return list.length ? `<div class="tlist">${list.map(taskRow).join("")}</div>` : empty(who ? "No open tasks with a due date." : "Nothing late or blocked. Nice.", "check");
-            })()}
-          </article>
-
-          <article class="card pad stagger" style="--i:6">
-            <header class="ch"><h3>${icon("help")} Open decisions</h3><span class="count">${decisions.length}</span></header>
-            ${decisions.length ? `<ul class="decisions">${decisions.map((o) => `
-              <li>
-                ${S.owner ? `<button class="tick" data-resolve="${o.id}" title="Mark decided">${icon("check")}</button>` : `<span class="dot"></span>`}
-                <div><p>${esc(o.question)}</p><small>${esc(o.owner)}${o.due_label ? ` · ${esc(o.due_label)}` : ""}</small></div>
-              </li>`).join("")}</ul>` : empty("No open decisions.", "check")}
-          </article>
-        </div>
-      </section>
-
-      <section class="card pad stagger" style="--i:7">
-        <header class="ch"><h3>${icon("users")} Team pulse</h3><button class="link" data-go="team">Team ${icon("right")}</button></header>
-        <div class="pulse">${people().map((p) => {
-          const ts = tasksFor(p.name), op = ts.filter((t) => !isDone(t)), lt = ts.filter(isLate);
-          const nx = op.filter((t) => t.due).sort((a, b) => a.due.localeCompare(b.due))[0];
-          return `<button class="pulse__p" data-person="${esc(p.name)}">
-            ${avatar(p.name, "lg")}
-            <span class="pulse__who"><b>${esc(p.name)}</b><small>${esc(p.role_title || "Team")}</small></span>
-            <span class="pulse__n"><b>${op.length}</b> open${lt.length ? ` · <em>${lt.length} late</em>` : ""}</span>
-            <span class="pulse__next">${nx ? `${dueChip(nx.due, nx.due_time)}<span>${esc(nx.title)}</span>` : `<span class="muted">Nothing due</span>`}</span>
+      <section class="panel">
+        <header class="pnl"><h3>Team load</h3><button class="pnl__more" data-go="team">Team ${icon("right")}</button></header>
+        <div class="load">${people().map((p, i) => {
+          const ts = tasksFor(p.name), op = ts.filter((t) => !isDone(t)).length, lt = ts.filter(isLate).length, dn = ts.length - op;
+          const pc = (n) => (ts.length ? (n / ts.length) * 100 : 0);
+          return `<button class="load__p in" style="--i:${i}" data-person="${esc(p.name)}">
+            <span class="load__who">${avatar(p.name, "md")}<span><b>${esc(p.name)}</b><small>${esc(p.role_title || "Team")}</small></span></span>
+            <span class="load__n"><span><b>${op}</b> open</span>${lt ? `<span class="bad"><b>${lt}</b> late</span>` : ""}<span><b>${dn}</b> done</span></span>
+            <i class="stack"><i class="stack--done" style="--w:${pc(dn)}%"></i><i class="stack--open" style="--w:${pc(op - lt)}%"></i><i class="stack--late" style="--w:${pc(lt)}%"></i></i>
           </button>`;
         }).join("")}</div>
       </section>`;
 
     countUps(root);
-    // live countdown
-    const tick = () => root.querySelectorAll("[data-countdown]").forEach((el) => (el.textContent = countdown(new Date(el.dataset.countdown))));
-    const iv = setInterval(() => (root.isConnected ? tick() : clearInterval(iv)), 30000);
+    // live countdown, every second
+    const tick = () => root.querySelectorAll("[data-cd]").forEach((el) => (el.innerHTML = cdCells(new Date(el.dataset.cd))));
+    const iv = setInterval(() => (root.isConnected && root.querySelector("[data-cd]") ? tick() : clearInterval(iv)), 1000);
 
     root.querySelector("#viewAs")?.addEventListener("change", (e) => { S.viewAs = e.target.value; go("overview"); });
     root.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
     root.querySelectorAll("[data-person]").forEach((b) => b.addEventListener("click", () => go("tasks", { person: b.dataset.person })));
     root.querySelectorAll("[data-resolve]").forEach((b) => b.addEventListener("click", async () => {
       b.classList.add("is-on");
-      try { await update("open_items", b.dataset.resolve, { resolved: true }); toast("Marked as decided"); } catch { toast("Couldn’t save.", "bad"); }
+      const o = decisions.find((x) => x.id === b.dataset.resolve);
+      try {
+        await update("open_items", o.id, { resolved: true });
+        toast("Marked as decided", "", { label: "Undo", run: () => update("open_items", o.id, { resolved: false }) });
+      } catch { toast("Couldn’t save.", "bad"); }
     }));
     root.querySelector("#toCal").addEventListener("click", () => {
       const items = agenda({ person: who, from: today });
@@ -157,6 +144,12 @@ export default {
     root.querySelector("#gcUpdate")?.addEventListener("click", () => copy(gcUpdate(), "GC update copied. Paste it in the group chat."));
   },
 };
+
+const weekdayOf = (iso) => new Date(`${iso}T00:00:00Z`).getUTCDay();
+function cdCells(target) {
+  const p = countdownParts(target);
+  return [[p.d, "D"], [p.h, "H"], [p.m, "M"], [p.s, "S"]].map(([n, u]) => `<span><b>${pad2(n)}</b><small>${u}</small></span>`).join("");
+}
 
 /* A ready-to-paste group chat message built from the next 7 days and open questions. */
 function gcUpdate() {

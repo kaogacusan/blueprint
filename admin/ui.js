@@ -21,18 +21,35 @@ export const linkBtn = (l) => {
   const [ic, kind] = linkKind(l.url);
   return `<a class="linkbtn" href="${esc(l.url)}" target="_blank" rel="noopener">${icon(ic)}<span><b>${esc(l.label || kind)}</b><small>${esc(kind)}</small></span>${icon("external", "linkbtn__go")}</a>`;
 };
-export const empty = (msg, ic = "sparkles") => `<div class="empty">${icon(ic)}<p>${esc(msg)}</p></div>`;
+export const empty = (msg, ic = "sparkles") => `<div class="empty in">${icon(ic)}<p>${esc(msg)}</p></div>`;
 export const ownerOnly = (html) => (S.owner ? html : "");
 
-/* one task as a row */
-export function taskRow(t) {
+/* registry code for a task: T-001 … in project-log order */
+export const taskCode = (t) => `T-${String((S.data.tasks || []).indexOf(t) + 1).padStart(3, "0")}`;
+
+/* one task as a row. The owner can tick it done right from the list. */
+export function taskRow(t, i = 0) {
   const n = (t.links?.length || 0) + (t.outputs?.length || 0);
-  return `<button class="trow ${isDone(t) ? "is-done" : ""} ${isLate(t) ? "is-late" : ""}" data-task="${t.id}">
-    <span class="trow__st st--${slug(t.status)}" title="${esc(t.status)}"></span>
-    <span class="trow__main"><b>${esc(t.title)}</b><span class="trow__meta">${trackTag(t.session)}${t.priority === "Critical" || t.priority === "High" ? prioTag(t.priority) : ""}${n ? `<span class="trow__links">${icon("link")}${n}</span>` : ""}</span></span>
+  const st = `trow__st st--${slug(t.status)}`;
+  return `<div class="trow in ${isDone(t) ? "is-done" : ""} ${isLate(t) ? "is-late" : ""}" data-task="${t.id}" role="button" tabindex="0" style="--i:${i}">
+    ${S.owner ? `<button class="${st}" data-quick="${t.id}" title="${isDone(t) ? "Mark not done" : "Mark done"}"></button>` : `<span class="${st}" title="${esc(t.status)}"></span>`}
+    <span class="trow__code">${taskCode(t)}</span>
+    <span class="trow__main"><b>${esc(t.title)}</b>${t.priority === "Critical" || t.priority === "High" ? prioTag(t.priority) : ""}${n ? `<span class="trow__links">${icon("link")}${n}</span>` : ""}</span>
+    <span class="trow__track">${trackTag(t.session)}</span>
     ${avatars(t.owners, "sm")}
     ${dueChip(t.due, t.due_time, isDone(t))}
-  </button>`;
+  </div>`;
+}
+
+/* tick a task done (or back to in progress), with undo */
+export async function quickToggle(id) {
+  const t = S.data.tasks.find((x) => x.id === id);
+  if (!t || !S.owner) return;
+  const prev = t.status, next = isDone(t) ? "In Progress" : "Completed";
+  try {
+    await update("tasks", id, { status: next });
+    toast(next === "Completed" ? `Done: ${t.title}` : `Reopened: ${t.title}`, "", { label: "Undo", run: () => update("tasks", id, { status: prev }).catch(() => toast("Couldn’t undo.", "bad")) });
+  } catch { toast("Couldn’t save.", "bad"); }
 }
 
 /* ---------- task panel: everyone can read it; the owner can edit ---------- */
@@ -54,7 +71,7 @@ export function openTask(id) {
   const t = S.data.tasks.find((x) => x.id === id);
   if (!t) return;
   openDrawer({
-    eyebrow: `${trackName(t.session)}${t.source !== "manual" ? ` · from ${esc(t.source)}` : ""}`,
+    eyebrow: `${taskCode(t)} · ${trackName(t.session)}`,
     title: esc(t.title),
     body: `
       ${S.owner ? `<div class="seg seg--status" role="group" aria-label="Status">${TASK_STATUS.map((s) => `<button class="${s === t.status ? "is-on" : ""}" data-status="${s}">${statusPill(s)}</button>`).join("")}</div>` : `<div class="dmeta">${statusPill(t.status)}</div>`}
@@ -67,7 +84,7 @@ export function openTask(id) {
       ${t.notes ? `<section class="dsec"><h4>Notes</h4><div class="prose">${richText(t.notes)}</div></section>` : ""}
       ${t.links?.length ? `<section class="dsec"><h4>Files & links</h4><div class="linkbtns">${t.links.map(linkBtn).join("")}</div></section>` : ""}
       ${t.outputs?.length ? `<section class="dsec"><h4>Final output</h4><div class="linkbtns">${t.outputs.map(linkBtn).join("")}</div></section>` : ""}
-      ${!S.owner ? `<p class="hint">${icon("lock")} View only. Ask Keira if something here needs to change.</p>` : ""}`,
+`,
     actions: S.owner ? `<button class="btn btn--ghost btn--danger-text" data-del>${icon("trash")} Delete</button><span class="grow"></span><button class="btn btn--primary" data-edit>${icon("edit")} Edit</button>` : "",
     onMount(root) {
       root.querySelectorAll("[data-status]").forEach((b) => b.addEventListener("click", async () => {

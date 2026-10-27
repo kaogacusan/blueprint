@@ -3,34 +3,31 @@ import { S } from "/admin/store.js";
 import { esc, icon, fmtDate } from "/admin/lib.js";
 
 export default {
-  id: "presentations", title: "Presentations", icon: "play",
+  id: "presentations", title: "Decks", icon: "play",
   render(root) {
     const decks = S.data.decks || [];
     const sessions = S.data.sessions || [];
     root.innerHTML = `
       <header class="ph">
-        <div>
-          <p class="ph__eyebrow">Facilitation</p>
-          <h1 class="ph__title">Presentations</h1>
-          <p class="ph__sub">Opens full screen in a new tab. → or Space for next, ← for back, F for full screen, T for the block timer.</p>
-        </div>
+        <h1 class="ph__title">Decks</h1>
+        <p class="ph__keys"><kbd>→</kbd> next <kbd>←</kbd> back <kbd>F</kbd> full screen <kbd>T</kbd> timer</p>
       </header>
       <section class="decks">${[1, 2, 3, 4].map((n, i) => {
         const d = decks.find((x) => x.session_no === n);
         const s = sessions.find((x) => x.n === n);
         return d ? `
-          <a class="deck stagger" style="--i:${i}" href="/present/${esc(d.slug)}" target="_blank" rel="noopener">
+          <a class="deck in" style="--i:${i}" href="/present/${esc(d.slug)}" target="_blank" rel="noopener">
             <span class="deck__grid" aria-hidden="true"></span>
-            <span class="deck__num">0${n}</span>
-            <span class="deck__k">Session ${n} · ${d.slide_count} slides</span>
+            <span class="deck__num">S${n}</span>
+            <span class="lbl lbl--ice">${d.slide_count} slides${s?.date ? ` · ${esc(fmtDate(s.date))}` : ""}</span>
             <span class="deck__t">${esc(d.title)}</span>
-            <span class="deck__s">${esc(d.subtitle)}${s?.date ? ` · ${esc(fmtDate(s.date))}` : ""}</span>
+            <span class="deck__s">${esc(d.subtitle)}</span>
             <span class="deck__go">${icon("play")} Present</span>
           </a>` : `
-          <div class="deck deck--soon stagger" style="--i:${i}">
-            <span class="deck__num">0${n}</span>
+          <div class="deck deck--soon in" style="--i:${i}">
+            <span class="deck__num">S${n}</span>
+            <span class="lbl">Not uploaded</span>
             <span class="deck__t">${esc(s?.title || `Session ${n}`)}</span>
-            <span class="deck__s">Deck not uploaded yet.</span>
           </div>`;
       }).join("")}</section>`;
   },

@@ -18,35 +18,31 @@ export default {
     const team = people();
     root.innerHTML = `
       <header class="ph">
-        <div>
-          <p class="ph__eyebrow">People</p>
-          <h1 class="ph__title">Team</h1>
-          <p class="ph__sub">${S.owner ? "You’re the owner: you’re the only one who can change anything. Everyone else can view the whole workspace." : "Everyone here can view the workspace. Keira keeps it up to date."}</p>
-        </div>
+        <h1 class="ph__title">Team</h1>
         <div class="ph__actions">${ownerOnly(`<button class="btn btn--primary" id="add">${icon("plus")} Add person</button>`)}</div>
       </header>
 
-      <section class="people">${team.map((p, i) => {
-        const ts = tasksFor(p.name), open = ts.filter((t) => !isDone(t)).length, late = ts.filter(isLate).length;
-        return `<article class="card person stagger" style="--i:${i}">
-          <div class="person__top">
-            ${avatar(p.name, "xl")}
-            <span class="access ${p.access === "owner" ? "access--owner" : p.email ? "" : "access--none"}">${p.access === "owner" ? `${icon("sparkles")} Owner` : p.email ? `${icon("eye")} Can view` : `${icon("lock")} No login`}</span>
-          </div>
-          <h3>${esc(p.name)}${(p.aliases || []).length ? ` <small>aka ${esc(p.aliases.join(", "))}</small>` : ""}</h3>
-          <p class="person__role">${esc(p.role_title || "No role yet")}</p>
-          ${S.owner ? `<p class="person__mail">${p.email ? `${icon("mail")} ${esc(p.email)}` : `<span class="muted">No login email</span>`}</p>` : ""}
-          <div class="person__foot">
-            <button class="link" data-tasks="${esc(p.name)}">${open} open task${open === 1 ? "" : "s"}${late ? ` · <em>${late} late</em>` : ""} ${icon("right")}</button>
-            ${ownerOnly(`<button class="iconbtn" data-edit="${p.id}" title="Edit">${icon("edit")}</button>`)}
-          </div>
-        </article>`;
-      }).join("")}</section>
+      <div class="panel tablewrap"><table class="table teamt">
+        <thead><tr><th>Person</th><th>Role</th><th>Access</th>${S.owner ? "<th>Login email</th>" : ""}<th class="r">Open</th><th class="r">Late</th><th></th></tr></thead>
+        <tbody>${team.map((p, i) => {
+          const ts = tasksFor(p.name), open = ts.filter((t) => !isDone(t)).length, late = ts.filter(isLate).length;
+          return `<tr class="in is-click" style="--i:${i}" data-tasks="${esc(p.name)}">
+            <td><span class="who">${avatar(p.name, "md")}<span><b>${esc(p.name)}</b>${(p.aliases || []).length ? `<small>aka ${esc(p.aliases.join(", "))}</small>` : ""}</span></span></td>
+            <td class="muted">${esc(p.role_title || "—")}</td>
+            <td><span class="access ${p.access === "owner" ? "access--owner" : p.email ? "" : "access--none"}">${p.access === "owner" ? "Owner" : p.email ? "Can view" : "No login"}</span></td>
+            ${S.owner ? `<td class="mono muted">${esc(p.email || "—")}</td>` : ""}
+            <td class="r mono"><b>${open}</b></td>
+            <td class="r mono ${late ? "bad" : "muted"}"><b>${late}</b></td>
+            <td class="r">${ownerOnly(`<button class="iconbtn" data-edit="${p.id}" title="Edit">${icon("edit")}</button>`)}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table></div>
 
-      ${S.owner ? `<p class="hint hint--block">${icon("help")} To give someone access: add their email here, then they open <b>${esc(location.origin)}/admin</b> and press “Create your account.” Only emails on this list can make an account.</p>` : ""}`;
+      ${S.owner ? `<p class="footnote">To give someone access, add their email here. They open <b>${esc(location.origin)}/admin</b> and press “Create your account.”</p>` : ""}`;
 
     root.querySelectorAll("[data-tasks]").forEach((b) => b.addEventListener("click", () => go("tasks", { person: b.dataset.tasks })));
-    root.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
+    root.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", (e) => {
+      e.stopPropagation();
       const p = team.find((x) => x.id === b.dataset.edit);
       let renamed = "";
       editRow({

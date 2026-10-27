@@ -49,6 +49,14 @@ export function countdown(target) {
   const m = Math.floor(ms / 6e4);
   return d ? `${d}d ${h}h ${m}m` : h ? `${h}h ${m}m` : `${m}m`;
 }
+export function countdownParts(target) {
+  let s = Math.max(0, Math.floor((target - Date.now()) / 1000));
+  const d = Math.floor(s / 86400); s -= d * 86400;
+  const h = Math.floor(s / 3600); s -= h * 3600;
+  const m = Math.floor(s / 60); s -= m * 60;
+  return { d, h, m, s };
+}
+export const pad2 = (n) => String(n).padStart(2, "0");
 export const greeting = () => {
   const h = Number(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", hour12: false }).format(new Date()));
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
@@ -102,6 +110,10 @@ const P = {
   help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/>',
   arrow: '<path d="M7 7h10v10M7 17 17 7"/>',
   target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  left: '<path d="m15 18-6-6 6-6"/>',
+  grid: '<rect width="18" height="18" x="3" y="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
   facebook: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
 };
 export const icon = (name, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[name] || ""}</svg>`;
@@ -119,11 +131,15 @@ export const linkKind = (url = "") => {
   return ["globe", "Website"];
 };
 
-/* ---------- people avatars ---------- */
-const HUES = ["#0646c8", "#0e8a7e", "#7c3aed", "#d9480f", "#c2255c", "#2f6f3e", "#5c6ac4", "#b7791f"];
+/* ---------- people avatars: square monograms in the blueprint blues ---------- */
+const HUES = ["#061a4d", "#0646c8", "#006dff", "#1b5fd9", "#0b2f86", "#2b8cff", "#0a3fa8", "#14a9e6"];
 export const hue = (name = "") => HUES[[...name.toLowerCase()].reduce((a, c) => a + c.charCodeAt(0), 0) % HUES.length];
+export const initials = (name = "") => {
+  const w = name.trim().split(/\s+/);
+  return (w.length > 1 ? w[0][0] + w[1][0] : name.slice(0, 2)).toUpperCase();
+};
 export const avatar = (name, size = "") =>
-  name ? `<span class="av ${size}" style="--h:${hue(name)}" title="${esc(name)}">${esc(name[0].toUpperCase())}</span>` : "";
+  name ? `<span class="av ${size}" style="--h:${hue(name)}" title="${esc(name)}">${esc(initials(name))}</span>` : "";
 export const avatars = (names = [], size = "") =>
   `<span class="avs">${names.filter(Boolean).map((n) => avatar(n, size)).join("")}</span>`;
 
@@ -197,12 +213,14 @@ export function richText(src = "") {
 
 /* ---------- toast ---------- */
 let toastTimer = 0;
-export function toast(msg, tone = "") {
+/* action: optional { label, run } — e.g. an Undo button */
+export function toast(msg, tone = "", action = null) {
   const el = $("#toast");
-  el.innerHTML = `${icon(tone === "bad" ? "alert" : "check")}<span>${esc(msg)}</span>`;
+  el.innerHTML = `${icon(tone === "bad" ? "alert" : "check")}<span>${esc(msg)}</span>${action ? `<button class="toast__act">${icon("undo")}${esc(action.label)}</button>` : ""}`;
   el.className = `toast is-on ${tone}`;
+  if (action) el.querySelector(".toast__act").onclick = () => { el.classList.remove("is-on"); action.run(); };
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("is-on"), 2600);
+  toastTimer = setTimeout(() => el.classList.remove("is-on"), action ? 5000 : 2600);
 }
 export async function copy(text, what = "Copied") {
   try { await navigator.clipboard.writeText(text); toast(what); }
@@ -324,11 +342,6 @@ export function countUps(root) {
     requestAnimationFrame(tick);
   });
 }
-export const ring = (pct, size = 92, stroke = 9) => {
-  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
-  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" class="ring__bg"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" class="ring__fg" style="--c:${c};--o:${c * (1 - pct)}"/></svg>`;
-};
-
 /* ---------- calendar file ---------- */
 export function ics(events, name = "Blueprint") {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";

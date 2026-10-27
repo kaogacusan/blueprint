@@ -19,32 +19,28 @@ export default {
 
     root.innerHTML = `
       <header class="ph">
-        <div>
-          <p class="ph__eyebrow">Sign-ups</p>
-          <h1 class="ph__title">Inquiries</h1>
-          <p class="ph__sub">Everyone who filled in the Register form on the site.${S.owner ? "" : " View only."}</p>
-        </div>
+        <h1 class="ph__title">Inquiries</h1>
         <div class="ph__actions">
-          <button class="btn btn--ghost" id="copyEmails">${icon("copy")} Copy emails</button>
-          <a class="btn btn--ghost" id="mailAll" href="#">${icon("mail")} Email (BCC)</a>
+          <button class="btn btn--ghost" id="copyEmails">${icon("copy")} Emails</button>
+          <a class="btn btn--ghost" id="mailAll" href="#">${icon("mail")} BCC all</a>
           <button class="btn btn--ghost" id="csv">${icon("download")} CSV</button>
         </div>
       </header>
 
-      <section class="kpis kpis--4">
-        <button class="card kpi stagger ${!f.status ? "is-on" : ""}" style="--i:0" data-k=""><p class="k">Total</p><p class="big" data-count="${regs.length}">0</p><p class="sub">${target} is the baseline, ${cap} the cap</p><div class="bar"><i style="--w:${Math.min(100, (regs.length / cap) * 100)}%"></i><b style="--at:${(target / cap) * 100}%"></b></div></button>
-        ${STATUSES.slice(0, 3).map(([k, l], i) => `<button class="card kpi stagger ${f.status === k ? "is-on" : ""}" style="--i:${i + 1}" data-k="${k}"><p class="k"><span class="sdot sdot--${k}"></span>${l}</p><p class="big" data-count="${count(k)}">0</p><p class="sub">${k === "confirmed" ? `${Math.max(0, target - paid)} to the baseline` : k === "new" ? "Not contacted yet" : "Got the details email"}</p></button>`).join("")}
+      <section class="readouts readouts--4">
+        <button class="ro ${!f.status ? "is-on" : ""}" data-k=""><span class="lbl">Total</span><span class="ro__n"><b data-count="${regs.length}">0</b><small>/${cap}</small></span><i class="meter meter--mark" style="--at:${(target / cap) * 100}%"><i style="--w:${Math.min(100, (regs.length / cap) * 100)}%"></i></i></button>
+        ${STATUSES.slice(0, 3).map(([k, l]) => `<button class="ro ${f.status === k ? "is-on" : ""}" data-k="${k}"><span class="lbl"><i class="sdot sdot--${k}"></i>${l}</span><span class="ro__n"><b data-count="${count(k)}">0</b>${k === "confirmed" ? `<small>/${target}</small>` : ""}</span></button>`).join("")}
       </section>
 
-      <div class="filters card">
-        <label class="search">${icon("search")}<input id="q" placeholder="Search name, email, course" value="${esc(f.q)}" /></label>
-        <select class="select" id="st"><option value="">All statuses</option>${STATUSES.map(([k, l]) => `<option value="${k}" ${f.status === k ? "selected" : ""}>${l}</option>`).join("")}</select>
-        <span class="grow"></span><span class="muted">${list.length} shown</span>
+      <div class="bar">
+        <label class="bar__cell bar__cell--grow search">${icon("search")}<input id="q" placeholder="Search name, email, course" value="${esc(f.q)}" /></label>
+        <div class="bar__cell"><select class="select" id="st"><option value="">All statuses</option>${STATUSES.map(([k, l]) => `<option value="${k}" ${f.status === k ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+        <div class="bar__cell bar__readout"><span class="lbl">Showing</span><b>${list.length}</b></div>
       </div>
 
-      ${list.length ? `<div class="tablewrap card"><table class="table table--regs">
+      ${list.length ? `<div class="tablewrap panel"><table class="table table--regs">
         <thead><tr><th>Signed up</th><th>Name</th><th>Email</th><th>Course</th><th>Year</th><th>Status</th><th>Notes</th>${S.owner ? "<th></th>" : ""}</tr></thead>
-        <tbody>${list.map((r) => `<tr data-id="${r.id}" class="st-${r.status}">
+        <tbody>${list.map((r) => `<tr data-id="${r.id}" class="in st-${r.status}">
           <td class="muted nowrap">${esc(fmt(r.created_at))}</td>
           <td><b>${esc(r.name)}</b></td>
           <td><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></td>
@@ -52,7 +48,7 @@ export default {
           <td>${S.owner ? `<select class="spill spill--${r.status}" data-field="status">${STATUSES.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select>` : `<span class="spill spill--${r.status}">${STATUSES.find(([k]) => k === r.status)[1]}</span>`}</td>
           <td>${S.owner ? `<input class="note" data-field="notes" value="${esc(r.notes)}" placeholder="Add a note" maxlength="2000" />` : esc(r.notes)}</td>
           ${S.owner ? `<td><button class="iconbtn" data-del title="Delete">${icon("trash")}</button></td>` : ""}
-        </tr>`).join("")}</tbody></table></div>` : `<div class="card">${empty(regs.length ? "Nothing matches that search." : "No sign-ups yet. When someone registers on the site, they show up here instantly.", "inbox")}</div>`}`;
+        </tr>`).join("")}</tbody></table></div>` : `<div class="panel">${empty(regs.length ? "Nothing matches that search." : "No sign-ups yet.", "inbox")}</div>`}`;
 
     countUps(root);
     const rerender = () => this.render(root);

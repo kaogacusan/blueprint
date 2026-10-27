@@ -4,13 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#061a4d" />
+  <meta name="theme-color" content="#f6f8fc" />
   <title>Blueprint Workspace</title>
   <link rel="icon" href="/assets/blueprint-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/admin.css" />
+  <script type="importmap">
+    { "imports": { "three": "/assets/vendor/three.module.js", "three/addons/": "/assets/vendor/addons/" } }
+  </script>
 </head>
 <body>
 
@@ -19,58 +22,57 @@
 
   <!-- ───────────── SIGN IN ───────────── -->
   <main class="auth" id="auth" hidden>
-    <section class="auth__brand">
-      <div class="auth__grid" aria-hidden="true"></div>
-      <img src="/assets/blueprint-wordmark.png" alt="blueprint" class="auth__word" />
-      <div>
-        <p class="auth__big">Everything the team needs, <span>in one place.</span></p>
-        <ul class="auth__list">
-          <li>Your tasks and deadlines</li>
-          <li>The right folders and files</li>
-          <li>Scripts, contacts and the playbook</li>
-        </ul>
+    <div class="auth__fog" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <a href="/" class="auth__logo" title="Open the public site">
+      <img src="/assets/blueprint-mark.png" alt="" class="auth__logo-mark" />
+      <img src="/assets/blueprint-wordmark.png" alt="blueprint" class="auth__logo-word" />
+    </a>
+
+    <section class="auth__card">
+      <div class="auth__art">
+        <div class="auth__scene" id="authScene" aria-hidden="true"></div>
+        <p class="auth__tag"><b>Your team. <span>One workspace.</span></b><small>Tasks, files, and the playbook. Together.</small></p>
       </div>
-      <p class="auth__foot">Blueprint · LAS 50</p>
-    </section>
-    <section class="auth__side">
-      <form class="auth__card" id="authForm" novalidate>
+      <form class="auth__form" id="authForm" novalidate>
         <img src="/assets/blueprint-mark.png" alt="" class="auth__mark" />
         <h1 class="auth__title" id="authTitle">Welcome back</h1>
         <p class="auth__sub" id="authSub">Sign in to the Blueprint workspace.</p>
-        <label class="fld"><span>Email</span><input id="authEmail" type="email" autocomplete="email" required placeholder="you@email.com" /></label>
-        <label class="fld"><span>Password</span><input id="authPass" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters" /></label>
+        <label class="afld"><span>Email</span><input id="authEmail" type="email" autocomplete="email" required placeholder="you@email.com" /></label>
+        <label class="afld"><span>Password</span><input id="authPass" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters" /></label>
         <p class="auth__err" id="authErr" role="alert" hidden></p>
-        <button class="btn btn--primary btn--lg btn--block" type="submit" id="authBtn">Sign in</button>
-        <p class="auth__switch"><span id="authSwitchText">First time here?</span> <button type="button" class="link" id="authSwitch">Create your account</button></p>
+        <button class="auth__btn" type="submit" id="authBtn">Sign in</button>
+        <p class="auth__switch"><span id="authSwitchText">First time here?</span> <button type="button" class="auth__link" id="authSwitch">Create your account</button></p>
       </form>
     </section>
   </main>
 
   <!-- ───────────── APP ───────────── -->
   <div class="app" id="app" hidden>
-    <aside class="side">
-      <a href="/" class="side__brand" title="Open the public site">
-        <img src="/assets/blueprint-mark.png" alt="" />
-        <span><b>Blueprint</b><small>Workspace</small></span>
+    <header class="top">
+      <a href="/" class="brand" title="Open the public site">
+        <img src="/assets/blueprint-mark.png" alt="" class="brand__mark" />
+        <img src="/assets/blueprint-wordmark.png" alt="blueprint" class="brand__word" />
       </a>
-      <button class="side__search" id="searchBtn">
-        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <span>Search</span><kbd>⌘K</kbd>
-      </button>
-      <nav class="nav" id="nav" aria-label="Workspace"></nav>
-      <div class="side__me">
-        <div class="me" id="me"></div>
-        <button class="iconbtn iconbtn--dark" id="signOut" title="Sign out"><svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button>
+      <nav class="tabs" id="tabs" aria-label="Workspace"></nav>
+      <div class="top__right">
+        <div class="menu" id="moreMenu">
+          <button class="topbtn" id="moreBtn" aria-haspopup="true" aria-expanded="false"><span>More</span><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="menu__pop" id="morePop" role="menu"></div>
+        </div>
+        <button class="topbtn topbtn--search" id="searchBtn" title="Search (⌘K)">
+          <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Search</span><kbd>⌘K</kbd>
+        </button>
+        <div class="menu" id="meMenu">
+          <button class="me" id="me" aria-haspopup="true" aria-expanded="false"></button>
+          <div class="menu__pop menu__pop--right" id="mePop" role="menu"></div>
+        </div>
       </div>
-    </aside>
-    <div class="scrim" id="scrim"></div>
-
-    <div class="topbar">
-      <button class="iconbtn" id="menuBtn" aria-label="Menu"><svg class="i" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16"/></svg></button>
-      <img src="/assets/blueprint-wordmark.png" alt="blueprint" />
-    </div>
+    </header>
+    <div class="strip" id="strip"></div>
 
     <main class="main" id="main"></main>
+
+    <nav class="dock" id="dock" aria-label="Workspace"></nav>
   </div>
 
   <!-- side panel -->
@@ -84,7 +86,7 @@
     <div class="pal">
       <label class="pal__in"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="palInput" placeholder="Search tasks, orgs, links, scripts, people…" autocomplete="off" /><kbd>esc</kbd></label>
       <ul class="pal__list" id="palList"></ul>
-      <p class="pal__foot"><kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>↵</kbd> to open</p>
+      <p class="pal__foot"><kbd>↑</kbd><kbd>↓</kbd> move <kbd>↵</kbd> open</p>
     </div>
   </div>
 
