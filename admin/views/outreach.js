@@ -13,7 +13,7 @@ const abbr = (n) => (n.match(/\(([^)]*)\)\s*$/) || [])[1] || "";
 const pageOf = (o) => (o.page.match(/https?:\/\/\S+/) || [])[0];
 const isOpen = (o) => o.status === "Not sent";
 const f = { q: "", who: null, by: "type" };
-const TIP = "In person beats a cold DM. If you know someone in the org, talk to them first or ask for a referral. Messenger is the fallback, email after that.";
+const TIP = "Know someone in the org? Message them first.";
 
 const ORG_FIELDS = () => [
   { key: "name", label: "Org", full: true },
@@ -71,11 +71,10 @@ function tile(o, i, { showOwner }) {
     <b class="otile__name">${esc(name)}</b>
     ${sub ? `<small class="otile__sub">${esc(sub)}</small>` : ""}
     ${o.status === "Sent" && fu ? `<span class="otile__fu">${followDue ? icon("alert") : icon("clock")} Follow up ${esc(rel(fu).label.toLowerCase())}</span>` : ""}
-    ${o.next_step && !isOpen(o) ? `<span class="otile__next">${esc(o.next_step)}</span>` : ""}
     <footer class="otile__act">
-      ${isOpen(o) || followDue ? `<button class="obtn obtn--go" data-go="${o.id}" title="Copy the message and open their page">${icon("copy")} Copy + open</button>` : ""}
+      ${isOpen(o) || followDue ? `<button class="obtn obtn--go" data-go="${o.id}" title="Copy the message and open their page">${icon("send")} Message</button>` : ""}
       ${can && isOpen(o) ? `<button class="obtn" data-sent="${o.id}" title="I sent it">${icon("check")} Sent</button>` : ""}
-      ${can && followDue ? `<button class="obtn" data-followed="${o.id}">${icon("check")} Followed up</button>` : ""}
+      ${can && followDue ? `<button class="obtn" data-followed="${o.id}" title="I followed up">${icon("check")} Done</button>` : ""}
     </footer>
   </article>`;
 }
@@ -129,19 +128,19 @@ export default {
         </div>
         <div class="ohero__mid">
           ${progressBar(mine)}
-          <p class="ohero__legend">${ORG_STATUS.map((s) => { const c = mine.filter((o) => o.status === s).length; return c ? `<span><i class="sw sw--${slug(s)}"></i>${esc(s)} <b>${c}</b></span>` : ""; }).join("")}</p>
+          ${person ? "" : `<p class="ohero__legend">${ORG_STATUS.map((s) => { const c = mine.filter((o) => o.status === s).length; return c ? `<span><i class="sw sw--${slug(s)}"></i>${esc(s)} <b>${c}</b></span>` : ""; }).join("")}</p>`}
           ${!person ? `<div class="ohero__people">${owners.map((n) => { const xs = orgs.filter((o) => o.owner === n), d = xs.filter((o) => !isOpen(o)).length; return `<button class="operson" data-person="${esc(n)}">${avatar(n, "xs")}<span>${esc(n)}</span><b>${d}/${xs.length}</b></button>`; }).join("")}</div>` : ""}
         </div>
         ${dl ? `<div class="ohero__due ${rel(dl.due).tone}"><span class="kicker">Due</span><b>${esc(fmtWhen(dl.due, dl.due_time))}</b>${dueChip(dl.due, dl.due_time)}</div>` : ""}
       </section>
 
-      ${person && mine.some(isOpen) ? `<p class="tip">${icon("sparkles")}<span><b>Tip.</b> ${esc(out.tip || TIP)}</span></p>` : ""}
+      ${person && mine.some(isOpen) ? `<p class="tip">${icon("sparkles")}<span>${esc(out.tip || TIP)}</span></p>` : ""}
       ${dueFollow.length ? `<div class="banner">${icon("clock")}<span><b>Follow up today:</b> ${dueFollow.map((o) => `<button class="chipbtn" data-org="${o.id}">${esc(abbr(o.name) || short(o.name))}</button>`).join("")}</span></div>` : ""}
 
       <div class="obar-tools">
         <div class="seg" role="group" aria-label="Group by">
-          <button class="${f.by === "type" ? "is-on" : ""}" data-by="type">${icon("overview")} By category</button>
-          <button class="${f.by === "status" ? "is-on" : ""}" data-by="status">${icon("tasks")} By status</button>
+          <button class="${f.by === "type" ? "is-on" : ""}" data-by="type">${icon("overview")} Category</button>
+          <button class="${f.by === "status" ? "is-on" : ""}" data-by="status">${icon("tasks")} Status</button>
         </div>
         <label class="search">${icon("search")}<input id="q" placeholder="Find an org" value="${esc(f.q)}" /></label>
       </div>
@@ -201,31 +200,31 @@ export function openOrg(id) {
         <li>
           <span class="steps__n">1</span>
           <div class="steps__b">
-            <b>Copy the message${pageUrl ? " and open their page" : ""}</b>
-            ${scripts[0] ? `<div class="bubble"><p>${bubble(first)}</p></div>
-            <div class="go-row">
-              <button class="btn btn--primary" data-first>${icon("copy")} Copy${pageUrl ? " + open page" : ""}</button>
-              ${pageUrl ? `<a class="btn btn--ghost" href="${esc(pageUrl)}" target="_blank" rel="noopener">${icon(linkKind(pageUrl)[0])} Page only</a>` : ""}
-            </div>` : `<p class="muted">No message set up for this org yet.</p>`}
-            ${!pageUrl && o.page ? `<p class="steps__note">How to reach them: ${esc(o.page)}</p>` : ""}
+            <b>Send the message</b>
+            ${scripts[0] ? `<div class="go-row">
+              <button class="btn btn--primary" data-first>${icon("send")} Copy${pageUrl ? " & open page" : ""}</button>
+              ${pageUrl ? `<a class="btn btn--ghost" href="${esc(pageUrl)}" target="_blank" rel="noopener">${icon(linkKind(pageUrl)[0])} Page</a>` : ""}
+            </div>
+            <details class="peek"><summary>See the message</summary><div class="bubble"><p>${bubble(first)}</p></div></details>` : `<p class="muted">No message for this org yet.</p>`}
+            ${!pageUrl && o.page ? `<p class="steps__note">Reach them: ${esc(o.page)}</p>` : ""}
           </div>
         </li>
         <li>
           <span class="steps__n">2</span>
           <div class="steps__b">
-            <b>${can ? "Mark where it stands" : "Where it stands"}</b>
+            <b>${can ? "Mark it" : "Status"}</b>
             ${can ? `<div class="statusset" role="group" aria-label="Status">${ORG_STATUS.map((s) => `<button class="${s === o.status ? "is-on" : ""}" data-s="${esc(s)}"><i class="sw sw--${slug(s)}"></i>${esc(s)}</button>`).join("")}</div>
-            <p class="steps__note">No reply after 2 working days? Send the follow-up below, or email them.</p>` : `<p>${orgPill(o.status)}${o.dm_date ? ` <span class="muted">DM’d ${esc(fmtDate(o.dm_date))}</span>` : ""}</p>`}
+` : `<p>${orgPill(o.status)}${o.dm_date ? ` <span class="muted">DM’d ${esc(fmtDate(o.dm_date))}</span>` : ""}</p>`}
           </div>
         </li>
         <li>
           <span class="steps__n">3</span>
           <div class="steps__b">
-            <b>When they reply</b>
+            <b>Their reply</b>
             ${can ? `<div class="form form--log">
-              <label class="fld"><span>Who replied</span><input id="lgWho" value="${esc(o.replied_by)}" placeholder="Name, role" /></label>
-              <label class="fld"><span>What they agreed to</span><input id="lgAgreed" value="${esc(o.agreed)}" placeholder="e.g. post in their GC" /></label>
-              <label class="fld fld--full"><span>Next step</span><input id="lgNext" value="${esc(o.next_step)}" placeholder="e.g. send the pubmat on Thu" /></label>
+              <label class="fld"><input id="lgWho" value="${esc(o.replied_by)}" placeholder="Who replied" aria-label="Who replied" /></label>
+              <label class="fld"><input id="lgAgreed" value="${esc(o.agreed)}" placeholder="What they agreed to" aria-label="What they agreed to" /></label>
+              <label class="fld fld--full"><input id="lgNext" value="${esc(o.next_step)}" placeholder="Next step" aria-label="Next step" /></label>
               <button class="btn btn--ghost btn--sm" data-log>${icon("check")} Save</button>
             </div>` : `<dl class="facts">
               <div><dt>Replied</dt><dd>${esc(o.replied_by) || "—"}</dd></div>
@@ -239,7 +238,7 @@ export function openOrg(id) {
       ${o.why ? `<p class="why">${icon("help")}<span><b>Why them:</b> ${esc(o.why)}</span></p>` : ""}
 
       ${scripts.length > 1 ? `<details class="more">
-        <summary>${icon("message")} The other messages <span class="count">${scripts.length - 1}</span>${icon("down", "fold__chev")}</summary>
+        <summary>${icon("message")} Follow-up messages <span class="count">${scripts.length - 1}</span>${icon("down", "fold__chev")}</summary>
         <div class="scripts">${scripts.slice(1).map((s, i) => `
           <article class="script">
             <header><b>${esc(s.title)}</b>${s.note ? `<small>${esc(s.note)}</small>` : ""}<button class="btn btn--ghost btn--xs" data-copy="${i + 1}">${icon("copy")} Copy</button></header>

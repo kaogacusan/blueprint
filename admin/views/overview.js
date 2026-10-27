@@ -5,7 +5,6 @@ import { esc, icon, avatars, fmtDate, fmtTime, fmtWhen, todayISO, addDays, insta
 import { taskRow, empty, ownerOnly } from "/admin/ui.js";
 import { go } from "/admin/app.js";
 
-const KIND = { task: "Task", milestone: "Key date", ops: "Prep", session: "Session" };
 
 /* one tile per focus page: a number, and the one thing to do there */
 function focusTile(id, who) {
@@ -18,7 +17,7 @@ function focusTile(id, who) {
       const fu = orgs.filter((o) => o.status === "Sent" && followUpDate(o) && followUpDate(o) <= today).length;
       const dl = tasksFor(who).find((t) => /^org outreach/i.test(t.title) && !isDone(t) && t.due);
       return { n: `${sent}/${orgs.length}`, k: "orgs messaged", pct: orgs.length ? sent / orgs.length : 0,
-        todo: fu ? `${plural(fu, "follow-up")} due` : orgs.length - sent ? `${orgs.length - sent} left to message` : "All messaged",
+        todo: fu ? `${plural(fu, "follow-up")} due` : orgs.length - sent ? `${orgs.length - sent} to go` : "All done",
         due: dl, tone: fu ? "warn" : "" };
     },
     tasks() {
@@ -86,12 +85,12 @@ export default {
         <div class="ph__actions">
           ${ownerOnly(`<label class="viewas" title="See the workspace as one person">${icon("eye")}<select id="viewAs"><option value="">Whole team</option>${people().map((p) => `<option ${S.viewAs === p.name ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
           <button class="btn btn--ghost" id="gcUpdate" title="Copy a summary of this week to paste in the group chat">${icon("message")} Copy GC update</button>`)}
-          <button class="btn btn--ghost" id="toCal" title="Download every upcoming date as a calendar file">${icon("calplus")} Add to calendar</button>
+          <button class="btn btn--ghost" id="toCal" title="Download every upcoming date as a calendar file">${icon("calplus")} Calendar</button>
         </div>
       </header>
 
       <section class="focus">
-        <p class="kicker">${who ? `${esc(who === S.me?.name ? "Your" : who + "’s")} pages` : "Keira’s pages"}${focus.why ? ` <span>· ${esc(focus.why)}</span>` : ""}</p>
+        <p class="kicker">${who ? `${esc(who === S.me?.name ? "Your" : who + "’s")} pages` : "Keira’s pages"}</p>
         <div class="focus__row" style="--n:${tabs.length}">${tabs.map((id) => focusTile(id, who)).join("")}</div>
       </section>
 
@@ -102,7 +101,7 @@ export default {
             <h2 class="next__t">${esc(next.title)}</h2>
             <p class="next__when">${esc(fmtDate(next.date, { weekday: "short" }))}${next.time ? ` · ${esc(fmtTime(next.time))}` : ""} <span class="next__in" data-cd="${instant(next.date, next.time).toISOString()}">in ${countdown(instant(next.date, next.time))}</span></p>
             ${next.who.includes("All") ? "" : `<span class="next__who">${avatars(next.who, "sm")}</span>`}` : `<h2 class="next__t">Nothing scheduled.</h2>`}
-          ${upcoming.length > 1 ? `<div class="next__then"><p class="kicker">Then</p>${upcoming.slice(1, 4).map((x) => `<p><b>${esc(x.title)}</b><small>${esc(fmtDate(x.date, { weekday: "short" }))}${x.time ? ` · ${esc(fmtTime(x.time))}` : ""}</small></p>`).join("")}</div>` : ""}
+          ${upcoming.length > 1 ? `<div class="next__then"><p class="kicker">Then</p>${upcoming.slice(1, 3).map((x) => `<p><b>${esc(x.title)}</b><small>${esc(fmtDate(x.date, { weekday: "short" }))}${x.time ? ` · ${esc(fmtTime(x.time))}` : ""}</small></p>`).join("")}</div>` : ""}
         </article>
 
         <article class="card week">
@@ -116,7 +115,6 @@ export default {
               ${xs.length > 4 ? `<button class="wday__more" data-go="schedule">+${xs.length - 4} more</button>` : ""}
             </div>`;
           }).join("")}</div>
-          <p class="legend week__legend">${Object.entries(KIND).map(([k, l]) => `<span><i class="wit--${k}"></i>${l}</span>`).join("")}</p>
         </article>
       </section>
 
