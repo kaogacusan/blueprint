@@ -116,6 +116,12 @@ After the new password, everyone gets a spotlight tour that walks through *their
 | Sign-ups | Everyone who registered: mobile, how they heard about Blueprint, status (registered / paid / waitlist / cancelled). First 20 paid get seats. |
 | Decks / Team | Session decks to present, people and roles (roles are labels only). |
 
+### Slack Patrol (Keira + Renz only)
+
+A private joke between Keira and Renz: the **Slack Patrol** button above your name (siren icon in the top bar on phones). Report the other one and their screen goes full "code blue" with a siren until they press **I'm on it**. For 24 hours after a report, the reporter can **Shame** (words fly across their screen), **Fake crash**, and Keira can send **The General** (photo spam). **Preview** shows the alarm on your own screen first. If they're offline it plays when they next open the workspace.
+
+Nobody else sees the button or the alerts: the database only lets those two send or read them (`006_slack_patrol.sql`, names in `is_patrol()` and `admin/patrol.js`). The photo is in the private `pranks` storage bucket (source copy in `private/fun/`), not in this public repo. Sounds are made in the browser, so there are no sound files. Browsers only play sound after you've clicked somewhere on the page once.
+
 **Updating from Thomas's files:** Tasks → Import from Excel takes the project log or the costing sheet (`.xlsx`) and shows every change before saving.
 
 Data lives in Supabase (project `blueprint`); rules are in `supabase/migrations`. Team content is never in this repo.

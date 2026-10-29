@@ -4,6 +4,7 @@ import { S, loadAll, live, onChange, tasksFor, isDone, isGuest, focusOf, focusNa
 import { $, $$, esc, icon, avatar, closeDrawer, linkKind, openDrawer, toast } from "/admin/lib.js";
 import { openTask, quickToggle } from "/admin/ui.js";
 import { firstRun, startTour } from "/admin/tour.js";
+import { startPatrol } from "/admin/patrol.js";
 import overview from "/admin/views/overview.js";
 import tasks from "/admin/views/tasks.js";
 import schedule from "/admin/views/schedule.js";
@@ -155,6 +156,7 @@ async function start() {
   const access = S.owner ? `${icon("sparkles")}Owner` : isGuest() ? "Guest" : "Team member";
   $("#me").innerHTML = `${avatar(S.me.name, "md")}<span><b>${esc(S.me.name)}</b><small>${access}</small></span>`;
   live();
+  startPatrol(); // Keira and Renz only
   // re-draw the page when data changes, unless someone is typing in it
   onChange(() => { if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) renderNav(); else go(current, {}, { quiet: true }); });
   go(location.hash.slice(1) || "overview");
