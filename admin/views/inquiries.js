@@ -2,7 +2,7 @@
    They pay by GCash and upload a screenshot of the receipt on their own /pay link; anyone on the team opens it,
    checks GCash and clicks Paid, which emails the slot confirmation (api/signups.js). Notes, downloading, deleting and the payment setup stay with the owner.
    The rules box matches what privacy.html promises sign-ups. */
-import { S, update, remove, setting, saveSetting, setRegStatus, signupAction, eraseRegistrations } from "/admin/store.js";
+import { S, update, remove, setting, saveSetting, setRegStatus, signupAction, eraseRegistrations, receipt, accessLog } from "/admin/store.js";
 import { supa } from "/admin/supa.js";
 import { esc, icon, copy, toast, download, confirmBox, countUps, todayISO, peso, openDrawer, closeDrawer } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
@@ -17,7 +17,8 @@ const RULES = [
   "Emailing more than one person? Put the emails in <b>BCC</b>.",
   "No screenshots or copies in group chats. Send people here instead.",
   "Before clicking Paid, open their receipt and find the same payment in GCash (Transactions): same amount, same reference number. Paid emails them right away.",
-  "Receipts stay here. Don’t download them or send them to chats.",
+  "Receipts stay here. Don’t download them or send them to chats. They’re stored encrypted, and each time someone opens one it’s logged.",
+  "Questions from participants: answer them on the Questions page, not from your own email, DMs or group chats.",
   "Something leaked or got sent to the wrong person? Tell Keira right away. We have 72 hours to report it.",
 ];
 
@@ -47,7 +48,9 @@ export default {
         <summary>${icon("lock")} Private: how to handle sign-ups${icon("down", "fold__chev")}</summary>
         <ul class="rules">${RULES.map((r) => `<li>${r}</li>`).join("")}</ul>
         ${S.owner ? `<p class="footnote">We promised to delete everyone’s details within 60 days after the last session (<a href="/privacy.html" target="_blank" rel="noopener">privacy notice</a>). Delete any downloads too.
-          ${regs.length ? `<button class="btn btn--ghost btn--xs" id="eraseAll">${icon("trash")} Erase all ${regs.length} sign-ups</button>` : ""}</p>` : ""}
+          ${regs.length ? `<button class="btn btn--ghost btn--xs" id="eraseAll">${icon("trash")} Erase all ${regs.length} sign-ups</button>` : ""}</p>
+        <p class="footnote">${icon("eye")} <b>Access log:</b> who opened a receipt, marked someone paid, resent an email or answered a question. Check it if something looks off. <button class="btn btn--ghost btn--xs" id="showLog">Show</button></p>
+        <ul class="alog" id="alog" hidden></ul>` : ""}
       </details>
 
       ${S.owner ? paySetup() : ""}
@@ -86,6 +89,15 @@ export default {
     const emails = list.map((r) => r.email);
     root.querySelector("#copyEmails").addEventListener("click", () => (emails.length ? copy(emails.join(", "), `Copied ${emails.length} email${emails.length > 1 ? "s" : ""}. Paste them in BCC, not To.`) : toast("No emails to copy.")));
     wirePaySetup(root);
+    root.querySelector("#showLog")?.addEventListener("click", async (e) => {
+      const ul = root.querySelector("#alog");
+      try {
+        const rows = await accessLog();
+        const who = (t) => (t.startsWith("q") ? "a question" : regs.find((r) => String(r.id) === t)?.name || `sign-up #${t}`);
+        ul.innerHTML = rows.length ? rows.map((a) => `<li><span>${esc(fmt(a.at))}</span><span><b>${esc(a.who)}</b> ${esc(a.action)}: ${esc(who(a.target))}</span></li>`).join("") : `<li><span>Nothing yet.</span></li>`;
+        ul.hidden = false; e.target.hidden = true;
+      } catch { toast("Couldn’t load the log.", "bad"); }
+    });
     root.querySelector("#eraseAll")?.addEventListener("click", async () => {
       if (!(await confirmBox(`Erase all ${regs.length} sign-ups and their receipts for good? Only do this after the program is over. This can’t be undone.`))) return;
       try { await removeProofs(regs); const n = await eraseRegistrations(); toast(`Erased ${n} sign-up${n === 1 ? "" : "s"}`); } catch { toast("Couldn’t erase.", "bad"); }
@@ -155,11 +167,11 @@ async function showProof(r) {
     actions: open ? `<button class="btn btn--ghost" data-close-drawer>Not yet</button><button class="btn btn--primary" id="proofPaid">${icon("check")} Paid</button>` : "",
     onMount: async (el) => {
       el.querySelector("#proofPaid")?.addEventListener("click", async () => { if (await markPaid(r)) closeDrawer(); });
-      const { data, error } = await supa.storage.from("payment").createSignedUrl(r.proof_path, 300);
       const im = el.querySelector("#proofImg"), msg = el.querySelector("#proofLoading");
-      if (error || !data) { msg.textContent = "Couldn’t load the receipt. Try again."; return; }
-      im.onload = () => { msg.hidden = true; im.hidden = false; };
-      im.src = data.signedUrl;
+      try {
+        im.onload = () => { msg.hidden = true; im.hidden = false; };
+        im.src = await receipt(r.id); // decrypted by the server, which logs that you opened it
+      } catch { msg.textContent = "Couldn’t load the receipt. Try again."; }
     },
   });
 }

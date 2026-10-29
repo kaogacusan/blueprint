@@ -17,7 +17,7 @@
   };
   const MSG = {
     nomatch: "This payment link doesn’t work. Open the button in your Blueprint sign-up email (check spam too). Lost it? Register again with the same email and we’ll resend it.",
-    cancelled: "This sign-up was cancelled. Email admublueprint@gmail.com and we’ll sort it out.",
+    cancelled: "This sign-up was cancelled. Ask us on the site (ateneoblueprint.vercel.app/#ask) and we’ll sort it out.",
     image: "That file didn’t work. Try a screenshot (PNG or JPG) of your GCash receipt.",
     big: "That image is too big. Try a plain screenshot instead.",
   };
@@ -37,7 +37,7 @@
       $("amount").textContent = peso(p.price);
       $("payTo").textContent = [p.gcashName && `to ${p.gcashName}`, p.gcashNumber].filter(Boolean).join(" · ");
       if (p.qr) { $("qrImg").src = $("saveQr").href = p.qr; $("qrImg").hidden = $("saveQr").hidden = false; }
-      else $("qrHelp").textContent = "Our GCash QR isn’t up yet. Please check back in a bit, or email admublueprint@gmail.com.";
+      else $("qrHelp").textContent = "Our GCash QR isn’t up yet. Please check back in a bit, or ask us on the site.";
       if (p.proofAt) sentNote(p.proofAt);
       $("loading").hidden = true;
       form.hidden = false;

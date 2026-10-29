@@ -1,8 +1,9 @@
 /* /api/pay: the private payment page (/pay?t=...) from the sign-up email.
    GET  ?t=token          their name, sign-up number, the price and our GCash QR
    POST { t, image }      a screenshot of their GCash receipt (a JPEG data URL, shrunk in the browser)
-   The token is a random UUID only they got by email, so no one can see or upload for someone else. */
-import { send, body, db, enc, settings, readFile, saveFile } from "./_lib.js";
+   The token is a random UUID only they got by email, so no one can see or upload for someone else.
+   The screenshot is encrypted before it's stored; the team opens it through api/signups.js ("receipt"). */
+import { send, body, db, enc, settings, readFile, saveFile, seal } from "./_lib.js";
 
 const TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX = 3e6; // bytes, after the browser shrinks it (usually ~300 KB)
@@ -41,8 +42,8 @@ export default async function handler(req, res) {
     if (!img || img.length < 2000 || img[0] !== 0xff || img[1] !== 0xd8) return send(res, 400, { error: "image" });
     if (img.length > MAX) return send(res, 413, { error: "big" });
 
-    const path = `proofs/${r.id}.jpg`; // one per person: a new upload replaces the old one
-    await saveFile(path, img, "image/jpeg");
+    const path = `proofs/${r.id}.enc`; // one per person: a new upload replaces the old one
+    await saveFile(path, seal(img), "application/octet-stream"); // locked with our key: only api/signups.js opens it
     const proof_at = new Date().toISOString();
     await db(`registrations?id=eq.${r.id}`, { method: "PATCH", data: { proof_path: path, proof_at } });
     return send(res, 200, { ok: true, status: r.status, name: first(r.name), proofAt: proof_at });

@@ -969,6 +969,35 @@ section[id] { scroll-margin-top: 72px; }
 /* ---------- Footer ---------- */
 .foot { background: #030d2a; color: rgba(225, 235, 255, 0.7); padding: 28px 0; border-top: 1px solid rgba(185, 238, 255, 0.08); }
 .foot__inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+/* Ask us (bottom of the FAQ) */
+.ask { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(24px, 5vw, 64px); margin-top: clamp(48px, 7vw, 88px); padding: clamp(24px, 4vw, 44px); border-radius: var(--radius); background: var(--tint); border: 1px solid rgba(6, 70, 200, 0.12); scroll-margin-top: 100px; }
+.ask__kicker { margin: 0 0 8px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--core); }
+.ask__title { margin: 0 0 12px; font-family: var(--display); font-size: clamp(1.8rem, 3.4vw, 2.5rem); letter-spacing: -0.045em; line-height: 1.05; color: var(--navy); }
+.ask__copy { margin: 0; color: var(--ink-2); max-width: 30em; }
+.field-row--even { grid-template-columns: 1fr 1fr; }
+.ask .field input, .ask .field textarea { background: #fff; }
+.field textarea {
+  min-height: 112px; padding: 12px 14px; resize: vertical;
+  border: 1px solid var(--line-2); border-radius: 12px; background: var(--paper);
+  font: inherit; font-size: 1rem; line-height: 1.5; color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.field textarea::placeholder { color: #a5adbf; }
+.field textarea:focus { outline: none; border-color: var(--electric); background: #fff; box-shadow: 0 0 0 4px rgba(0, 109, 255, 0.12); }
+.field.is-invalid textarea { border-color: #e5484d; background: #fff6f6; }
+.ask__send { display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; }
+.ask__fine { margin: 0; font-size: 0.8rem; line-height: 1.5; color: var(--ink-3); max-width: 34em; }
+.ask__fine a { color: var(--core); font-weight: 600; }
+.ask__send .btn { flex: none; }
+.ask__done { grid-column: 2; align-self: center; }
+.ask__done .btn { margin-top: 18px; }
+@media (max-width: 860px) {
+  .ask { grid-template-columns: 1fr; }
+  .ask__done { grid-column: 1; }
+  .ask__send { flex-direction: column-reverse; align-items: stretch; }
+}
+@media (max-width: 560px) { .field-row--even { grid-template-columns: 1fr; gap: 0; } }
+
 .foot__brand { display: flex; flex-direction: column; gap: 8px; }
 .foot__word { height: 22px; width: auto; filter: brightness(0) invert(1); opacity: 0.9; }
 .foot__venture { margin: 0; font-size: 0.9rem; color: rgba(225, 235, 255, 0.7); }

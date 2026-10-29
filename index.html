@@ -457,6 +457,48 @@
           </details>
         </div>
       </div>
+
+      <!-- Ask us: goes to the team's Questions page in /admin (api/ask.js); the answer comes by email -->
+      <div class="wrap">
+        <div class="ask reveal" id="ask">
+          <div class="ask__intro">
+            <p class="ask__kicker">Still have a question?</p>
+            <h3 class="ask__title">Ask us.</h3>
+            <p class="ask__copy">The team reads every question and emails you back, usually within 2 days. Already signed up? Use the same email so we can find your sign-up.</p>
+          </div>
+          <form class="ask__form" id="askForm" novalidate>
+            <div class="field-row field-row--even">
+              <div class="field">
+                <label for="a-name">Name</label>
+                <input id="a-name" name="name" autocomplete="name" required maxlength="120" placeholder="Juan Dela Cruz" />
+                <span class="field__err">Please add your name.</span>
+              </div>
+              <div class="field">
+                <label for="a-email">Email</label>
+                <input id="a-email" name="email" type="email" autocomplete="email" required maxlength="200" placeholder="you@school.edu.ph" />
+                <span class="field__err">Please use a valid email.</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="a-msg">Your question</label>
+              <textarea id="a-msg" name="message" required minlength="3" maxlength="2000" rows="4" placeholder="Ask about the sessions, payment, your slot, anything."></textarea>
+              <span class="field__err">Please write your question.</span>
+            </div>
+            <input name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" hidden />
+            <div class="ask__send">
+              <p class="ask__fine">We only use your name and email to answer you, and delete them after the program. <a href="privacy.html" target="_blank" rel="noopener">Privacy notice</a>. Never send passwords, your GCash MPIN or a one-time code (OTP).</p>
+              <button class="btn btn--primary btn--lg" type="submit"><span class="btn__label">Send question</span><span class="spinner" aria-hidden="true"></span></button>
+            </div>
+            <p class="reg__error" id="askError" role="alert" hidden></p>
+          </form>
+          <div class="ask__done" id="askDone" hidden role="status">
+            <p class="ask__kicker">Sent</p>
+            <h3 class="ask__title">Got it, thanks.</h3>
+            <p class="ask__copy" id="askDoneText">We’ll email you back, usually within 2 days. Check spam if you don’t see it.</p>
+            <button class="btn btn--ghost" id="askAgain" type="button">Ask something else</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ───────────── 10. FINAL CTA ───────────── -->
@@ -477,8 +519,7 @@
       <div class="foot__brand">
         <img src="assets/blueprint-wordmark.png" alt="blueprint" class="foot__word" />
         <p class="foot__venture">A student venture under LAS 50, Ateneo de Manila University</p>
-        <!-- PLACEHOLDER: contact for questions (email or IG), e.g.
-             <a class="foot__contact" href="mailto:hello@example.com">hello@example.com</a> -->
+        <a class="foot__contact" href="#ask">Questions? Ask us →</a>
       </div>
       <button class="foot__link" data-register>Register →</button>
       <p class="foot__copy">© 2026 Blueprint · <a class="foot__privacy" href="privacy.html">Privacy</a></p>

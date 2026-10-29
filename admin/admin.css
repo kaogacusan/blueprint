@@ -1321,3 +1321,20 @@ body.is-alarmed { overflow: hidden; }
   .alarm__log { font-size: 12px; }
   .alarm__btn { flex: 1; justify-content: center; }
 }
+
+/* ---------- Questions (from the site's Ask us form) ---------- */
+.qcard { position: relative; padding: 18px 20px; }
+.qcard__head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 16px; flex-wrap: wrap; padding-right: 36px; }
+.qcard__head .tag { margin-left: 4px; }
+.qcard__msg { margin: 10px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15px; line-height: 1.55; }
+.qcard__answer { display: block; width: 100%; margin-top: 14px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: #fff; font: inherit; font-size: 14px; line-height: 1.5; resize: vertical; transition: border-color 0.2s, box-shadow 0.2s; }
+.qcard__answer:focus { outline: none; border-color: var(--electric); box-shadow: 0 0 0 3px rgba(0, 109, 255, 0.12); }
+.qcard__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.qcard__reply { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: #f3f7ff; border-left: 3px solid var(--electric); }
+.qcard__reply small { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-3); font-weight: 600; }
+.qcard__reply small .i { width: 13px; height: 13px; color: var(--good); }
+.qcard__reply p { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+.qcard__del { position: absolute; top: 12px; right: 12px; }
+.alog { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12px; max-height: 220px; overflow: auto; }
+.alog li { display: flex; gap: 10px; padding: 4px 0; border-top: 1px solid var(--line); }
+.alog li span:first-child { min-width: 108px; color: var(--ink-3); }

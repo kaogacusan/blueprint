@@ -236,7 +236,7 @@
   });
 
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
-  const PRIVACY_VERSION = "2026-10-29";
+  const PRIVACY_VERSION = "2026-10-30";
 
   /* the server saves it and emails their payment link (api/register.js). A new sign-up gets the link back. */
   const saveRegistration = async (row) => {
@@ -273,7 +273,7 @@
     } catch (err) {
       console.error(err);
       regError.textContent = err.code === "closed"
-        ? "Registration closed on Nov 9. Email admublueprint@gmail.com if you still want a slot."
+        ? "Registration closed on Nov 9. Still want a slot? Ask us with the form under the FAQ."
         : "Something went wrong. Please check your connection and try again.";
       regError.hidden = false;
       return;
@@ -293,8 +293,57 @@
       : `We emailed your payment link again to ${row.email}. Open it, then:`;
     document.getElementById("doneFine").textContent = out.pay
       ? "We also emailed you this link, so you can pay later. Can’t find the email? Check spam, or register again with the same email and we’ll resend it."
-      : "Not in your inbox? Check spam. We resend it at most every 10 minutes, so wait a bit before trying again. Still nothing? Email admublueprint@gmail.com.";
+      : "Not in your inbox? Check spam. We resend it at most every 10 minutes, so wait a bit before trying again. Still nothing? Ask us with the form under the FAQ.";
     form.hidden = true;
     done.hidden = false;
   });
+  /* ---------- Ask us (under the FAQ) ----------
+     Saved for the team's Questions page in /admin (api/ask.js). They answer by email. */
+  const askForm = document.getElementById("askForm");
+  const askDone = document.getElementById("askDone");
+  const askError = document.getElementById("askError");
+  const askCheck = () => {
+    let ok = true;
+    askForm.querySelectorAll(".field").forEach((f) => {
+      const input = f.querySelector("input, textarea");
+      const valid = input.checkValidity() && input.value.trim().length >= (input.minLength > 0 ? input.minLength : 1);
+      f.classList.toggle("is-invalid", !valid);
+      if (!valid) ok = false;
+    });
+    return ok;
+  };
+  askForm.addEventListener("input", (e) => {
+    const f = e.target.closest(".field");
+    if (f?.classList.contains("is-invalid") && e.target.checkValidity()) f.classList.remove("is-invalid");
+  });
+  askForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!askCheck()) { askForm.querySelector(".is-invalid input, .is-invalid textarea")?.focus(); return; }
+    const data = Object.fromEntries(new FormData(askForm));
+    const btn = askForm.querySelector("[type=submit]");
+    btn.classList.add("is-loading");
+    btn.disabled = true;
+    askError.hidden = true;
+    try {
+      const res = await fetch("/api/ask", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: data.name.trim(), email: data.email.trim().toLowerCase(), message: data.message.trim(), privacy_version: PRIVACY_VERSION, website: data.website || "" }),
+      });
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok) throw Object.assign(new Error(`ask ${res.status}`), { code: out.error });
+      document.getElementById("askDoneText").textContent = `We’ll email you at ${data.email.trim().toLowerCase()}, usually within 2 days. Check spam if you don’t see it.`;
+      askForm.hidden = true;
+      askDone.hidden = false;
+      askForm.reset();
+    } catch (err) {
+      askError.textContent = err.code === "busy"
+        ? "We got a lot of questions from you today. We’ll answer those first, so please wait for our email."
+        : "Something went wrong. Please check your connection and try again.";
+      askError.hidden = false;
+    } finally {
+      btn.classList.remove("is-loading");
+      btn.disabled = false;
+    }
+  });
+  document.getElementById("askAgain").addEventListener("click", () => { askDone.hidden = true; askForm.hidden = false; askForm.querySelector("textarea").focus(); });
 })();

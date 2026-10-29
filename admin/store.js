@@ -24,8 +24,10 @@ const TABLES = {
   open_items: ["*", "sort"],
   settings: ["*", "key"],
   registrations: ["*", "created_at"],
+  questions: ["*", "created_at"],
   decks: ["slug, session_no, title, subtitle, slide_count, updated_at", "session_no"],
 };
+const NEWEST_FIRST = ["registrations", "questions"];
 const PK = { sessions: "n", settings: "key", decks: "slug" };
 const pk = (t) => PK[t] || "id";
 
@@ -35,7 +37,7 @@ const emit = (table) => listeners.forEach((fn) => fn(table));
 
 export async function reload(table) {
   const [cols, order] = TABLES[table];
-  const { data, error } = await supa.from(table).select(cols).order(order, { ascending: table !== "registrations" });
+  const { data, error } = await supa.from(table).select(cols).order(order, { ascending: !NEWEST_FIRST.includes(table) });
   if (error) throw error;
   S.data[table] = data;
 }
@@ -90,21 +92,40 @@ export async function setRegStatus(id, status) {
   if (r) r.status = status;
   emit("registrations");
 }
-/* "paid" (sends the confirmation, or the waitlist email if the seats are full) and "resend":
-   these send email, so they go through the site's server (api/signups.js), signed in as you */
-export async function signupAction(action, id) {
+/* the site's server (api/), signed in as you: for anything that sends email or opens encrypted files */
+async function server(path, payload) {
   const { data } = await supa.auth.getSession();
-  const res = await fetch("/api/signups", {
+  const res = await fetch(`/api/${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token || ""}` },
-    body: JSON.stringify({ action, id }),
+    body: JSON.stringify(payload),
   });
   const out = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(out.error || `signups ${res.status}`);
+  if (!res.ok) throw new Error(out.error || `${path} ${res.status}`);
+  return out;
+}
+/* "paid" (sends the confirmation, or the waitlist email if the seats are full) and "resend" (api/signups.js) */
+export async function signupAction(action, id) {
+  const out = await server("signups", { action, id });
   const r = S.data.registrations.find((x) => x.id === id);
   if (r) Object.assign(r, out.row || {}, out.emailed_at ? { emailed_at: out.emailed_at } : {});
   emit("registrations");
   return out;
+}
+/* their receipt screenshot: stored encrypted, so the server opens it for you (and logs that you did) */
+export const receipt = async (id) => (await server("signups", { action: "receipt", id })).image;
+/* answer a question from the site: emailed from the Blueprint inbox (api/questions.js) */
+export async function answerQuestion(id, answer) {
+  const { row } = await server("questions", { action: "answer", id, answer });
+  const list = S.data.questions;
+  list[list.findIndex((q) => q.id === id)] = row;
+  emit("questions");
+}
+/* owner only: who opened receipts, marked people paid, answered questions (api/_lib.js logAccess) */
+export async function accessLog() {
+  const { data, error } = await supa.from("access_log").select("*").order("at", { ascending: false }).limit(100);
+  if (error) throw error;
+  return data;
 }
 /* owner only: delete every sign-up once the program is over (the privacy notice promises it) */
 export async function eraseRegistrations() {

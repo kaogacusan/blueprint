@@ -12,17 +12,18 @@ import outreach, { openOrg } from "/admin/views/outreach.js";
 import playbook from "/admin/views/playbook.js";
 import budget from "/admin/views/budget.js";
 import inquiries from "/admin/views/inquiries.js";
+import questions from "/admin/views/questions.js";
 import presentations from "/admin/views/presentations.js";
 import team from "/admin/views/team.js";
 
 const NAV = [
   ["Workspace", [overview, tasks, schedule, outreach, budget]],
   ["Resources", [playbook]],
-  ["Program", [inquiries, presentations]],
+  ["Program", [inquiries, questions, presentations]],
   ["", [team]],
 ];
 const VIEWS = Object.fromEntries(NAV.flatMap(([, vs]) => vs).map((v) => [v.id, v]));
-const allowed = (id) => !(id === "inquiries" && isGuest()); // guests never see sign-ups
+const allowed = (id) => !(["inquiries", "questions"].includes(id) && isGuest()); // guests never see sign-ups or questions
 const ALIAS = { directory: ["playbook", { tab: "files" }] }; // old links still land somewhere useful
 let current = "overview";
 
