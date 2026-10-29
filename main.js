@@ -184,7 +184,7 @@
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
   /* ---------- Registration modal ----------
-     Sends the sign-up to /api/register, which emails the GCash QR. The team sees it in /admin. */
+     Sends the sign-up to /api/register, which emails the GCash QR and their payment link. The team sees it in /admin. */
   const modal = document.getElementById("modal");
   const form = document.getElementById("regForm");
   const done = document.getElementById("done");
@@ -238,10 +238,11 @@
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
   const PRIVACY_VERSION = "2026-10-29";
 
-  /* the server saves it, gives them a personal code, and emails the GCash QR (api/register.js) */
+  /* the server saves it and emails the GCash QR (api/register.js). A new sign-up gets its payment link back. */
   const saveRegistration = async (row) => {
     const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(row) });
     if (!res.ok) throw new Error(`Registration failed (${res.status})`);
+    return res.json().catch(() => ({}));
   };
 
   form.addEventListener("submit", async (e) => {
@@ -265,8 +266,9 @@
     btn.disabled = true;
     regError.hidden = true;
 
+    let out;
     try {
-      await saveRegistration(row);
+      out = await saveRegistration(row);
     } catch (err) {
       console.error(err);
       regError.hidden = false;
@@ -277,6 +279,13 @@
     }
     document.getElementById("regName").textContent = row.name;
     document.getElementById("regMeta").textContent = `${row.course} · ${row.year}`;
+    /* signed up before with this email: the server only re-sends the email, so point them there */
+    const payNow = document.getElementById("payNow");
+    payNow.hidden = !out.pay;
+    if (out.pay) payNow.href = out.pay;
+    document.getElementById("doneText").textContent = out.pay
+      ? "Pay ₱1,999 by GCash and upload your receipt to lock your slot. We also emailed you this link (check spam too)."
+      : "You’ve signed up before, so we emailed your payment link again (check spam too). Pay by GCash and upload your receipt there.";
     form.hidden = true;
     done.hidden = false;
   });

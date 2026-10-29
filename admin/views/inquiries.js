@@ -1,10 +1,10 @@
 /* Sign-ups: everyone who registered on the site.
-   They pay by GCash and type their reference number on /pay; anyone on the team checks it and clicks Paid,
-   which emails the confirmation (api/signups.js). Notes, downloading, deleting and the payment setup stay with the owner.
+   They pay by GCash and upload a screenshot of the receipt on their own /pay link; anyone on the team opens it,
+   checks GCash and clicks Paid, which emails the slot confirmation (api/signups.js). Notes, downloading, deleting and the payment setup stay with the owner.
    The rules box matches what privacy.html promises sign-ups. */
 import { S, update, remove, setting, saveSetting, setRegStatus, signupAction, eraseRegistrations } from "/admin/store.js";
 import { supa } from "/admin/supa.js";
-import { esc, icon, copy, toast, download, confirmBox, countUps, todayISO } from "/admin/lib.js";
+import { esc, icon, copy, toast, download, confirmBox, countUps, todayISO, peso, openDrawer, closeDrawer } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
 
 const STATUSES = [["registered", "Registered"], ["paid", "Paid"], ["waitlist", "Waitlist"], ["cancelled", "Cancelled"]];
@@ -16,8 +16,8 @@ const RULES = [
   "Only use these details to run Blueprint.",
   "Emailing more than one person? Put the emails in <b>BCC</b>.",
   "No screenshots or copies in group chats. Send people here instead.",
-  "Before clicking Paid, find the reference number in GCash (Transactions) and check it’s ₱1,999. Paid emails them right away.",
-  "Payment screenshots: check them, then delete them from chats.",
+  "Before clicking Paid, open their receipt and find the same payment in GCash (Transactions): same amount, same reference number. Paid emails them right away.",
+  "Receipts stay here. Don’t download them or send them to chats.",
   "Something leaked or got sent to the wrong person? Tell Keira right away. We have 72 hours to report it.",
 ];
 
@@ -35,7 +35,7 @@ export default {
       <header class="ph">
         <div>
           <h1 class="ph__title">Sign-ups</h1>
-          <p class="ph__sub">${checking.length ? `<b>${checking.length} paid and waiting for you.</b> Find each reference number in GCash, then click Paid. That emails their confirmation and pre-work.` : `Everyone who registered on the site. When someone types their GCash reference number, it shows here with a Paid button.`} The first ${seats} to pay get seats.</p>
+          <p class="ph__sub">${checking.length ? `<b>${checking.length} sent a receipt.</b> Click Check receipt, find the payment in GCash, then click Paid. That emails their slot confirmation and pre-work.` : `Everyone who registered on the site. When someone uploads their GCash receipt, it shows here with a Check receipt button.`} The first ${seats} to pay get slots.</p>
         </div>
         <div class="ph__actions">
           <button class="btn btn--ghost" id="copyEmails" title="Copy the emails shown below, to paste in BCC">${icon("copy")} Copy emails</button>
@@ -87,11 +87,11 @@ export default {
     root.querySelector("#copyEmails").addEventListener("click", () => (emails.length ? copy(emails.join(", "), `Copied ${emails.length} email${emails.length > 1 ? "s" : ""}. Paste them in BCC, not To.`) : toast("No emails to copy.")));
     wirePaySetup(root);
     root.querySelector("#eraseAll")?.addEventListener("click", async () => {
-      if (!(await confirmBox(`Erase all ${regs.length} sign-ups for good? Only do this after the program is over. This can’t be undone.`))) return;
-      try { const n = await eraseRegistrations(); toast(`Erased ${n} sign-up${n === 1 ? "" : "s"}`); } catch { toast("Couldn’t erase.", "bad"); }
+      if (!(await confirmBox(`Erase all ${regs.length} sign-ups and their receipts for good? Only do this after the program is over. This can’t be undone.`))) return;
+      try { await removeProofs(regs); const n = await eraseRegistrations(); toast(`Erased ${n} sign-up${n === 1 ? "" : "s"}`); } catch { toast("Couldn’t erase.", "bad"); }
     });
     root.querySelector("#csv")?.addEventListener("click", () => {
-      const cols = ["created_at", "name", "email", "code", "gcash_ref", "ref_at", "paid_at", "paid_by", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes", "consented_at", "privacy_version"];
+      const cols = ["created_at", "name", "email", "code", "proof_at", "paid_at", "paid_by", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes", "consented_at", "privacy_version"];
       const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
       download(`blueprint-signups-${todayISO()}.csv`, [cols.join(","), ...list.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\n"), "text/csv");
     });
@@ -117,37 +117,69 @@ export default {
     root.querySelector("tbody")?.addEventListener("click", async (e) => {
       const tr = e.target.closest("tr"), r = tr && regs.find((x) => x.id === Number(tr.dataset.id));
       if (e.target.closest("[data-paid]")) return markPaid(r);
+      if (e.target.closest("[data-proof]")) return showProof(r);
       if (e.target.closest("[data-resend]")) {
         try { await signupAction("resend", r.id); toast(`Email sent again to ${r.name}`); } catch { toast("Couldn’t send. Try again in a minute.", "bad"); }
         return;
       }
       if (!e.target.closest("[data-del]")) return;
       if (!(await confirmBox(`Delete ${r.name} (${r.email})? This can’t be undone.`))) return;
-      try { await remove("registrations", r.id); toast("Deleted"); } catch { toast("Couldn’t delete.", "bad"); }
+      try { await removeProofs([r]); await remove("registrations", r.id); toast("Deleted"); } catch { toast("Couldn’t delete.", "bad"); }
     });
   },
 };
 
-/* typed a reference number, not marked yet */
-const toCheck = (r) => r.status === "registered" && r.gcash_ref;
+/* sent a receipt (or, from the first version of /pay, typed a reference number), not marked yet */
+const toCheck = (r) => r.status === "registered" && (r.proof_path || r.gcash_ref);
 
 function payCell(r) {
   const unsent = r.code && !r.emailed_at && r.status !== "cancelled";
   return `${r.code ? `<span class="mono">${esc(r.code)}</span>` : `<span class="muted">—</span>`}
-    ${r.gcash_ref ? `<small>Ref <span class="mono">${esc(r.gcash_ref)}</span>${r.ref_at ? ` · ${esc(fmt(r.ref_at))}` : ""}</small>` : r.status === "registered" ? `<small class="muted">Not paid yet</small>` : ""}
+    ${r.proof_path ? `<small>Receipt sent ${r.proof_at ? esc(fmt(r.proof_at)) : ""}</small>` : r.gcash_ref ? `<small>Ref <span class="mono">${esc(r.gcash_ref)}</span></small>` : r.status === "registered" ? `<small class="muted">Not paid yet</small>` : ""}
     ${r.paid_at ? `<small>Paid ${esc(fmt(r.paid_at))}${r.paid_by ? ` · ${esc(r.paid_by)}` : ""}</small>` : ""}
-    ${toCheck(r) ? `<button class="btn btn--primary btn--xs" data-paid>${icon("check")} Paid</button>` : ""}
+    ${r.proof_path && r.status === "registered" ? `<button class="btn btn--primary btn--xs" data-proof>${icon("eye")} Check receipt</button>`
+      : r.proof_path ? `<button class="btn btn--ghost btn--xs" data-proof>${icon("eye")} Receipt</button>`
+      : toCheck(r) ? `<button class="btn btn--primary btn--xs" data-paid>${icon("check")} Paid</button>` : ""}
     ${unsent ? `<small class="bad">Email not sent</small>` : ""}
     ${r.code && ["registered", "paid", "waitlist"].includes(r.status) ? `<button class="btn btn--ghost btn--xs" data-resend title="Send their last email again">${icon("send")} ${unsent ? "Send email" : "Resend"}</button>` : ""}`;
 }
 
+/* their receipt next to the Paid button, so checking and confirming is one place */
+async function showProof(r) {
+  const open = r.status === "registered";
+  openDrawer({
+    eyebrow: `${esc(r.code || "")} · ${esc(peso(setting("costing").ticket || 1999))}`,
+    title: esc(r.name),
+    body: `<p class="muted">${open ? "Find this payment in GCash (Transactions): same amount, same reference number. Then click Paid." : `Status: ${esc(label(r.status))}`}</p>
+      <div class="proof"><span class="muted" id="proofLoading">Loading receipt…</span><img id="proofImg" alt="${esc(r.name)}’s GCash receipt" hidden /></div>`,
+    actions: open ? `<button class="btn btn--ghost" data-close-drawer>Not yet</button><button class="btn btn--primary" id="proofPaid">${icon("check")} Paid</button>` : "",
+    onMount: async (el) => {
+      el.querySelector("#proofPaid")?.addEventListener("click", async () => { if (await markPaid(r)) closeDrawer(); });
+      const { data, error } = await supa.storage.from("payment").createSignedUrl(r.proof_path, 300);
+      const im = el.querySelector("#proofImg"), msg = el.querySelector("#proofLoading");
+      if (error || !data) { msg.textContent = "Couldn’t load the receipt. Try again."; return; }
+      im.onload = () => { msg.hidden = true; im.hidden = false; };
+      im.src = data.signedUrl;
+    },
+  });
+}
+
+/* owner: receipts go with the sign-up */
+async function removeProofs(rows) {
+  const paths = rows.map((r) => r.proof_path).filter(Boolean);
+  if (!paths.length) return;
+  const { error } = await supa.storage.from("payment").remove(paths);
+  if (error) throw error;
+}
+
 async function markPaid(r) {
-  if (!(await confirmBox(`Mark ${r.name} as paid?${r.gcash_ref ? ` Check GCash ref ${r.gcash_ref} first.` : " They haven’t typed a reference number."} This emails their confirmation and pre-work.`, { ok: "Paid", tone: "" }))) return;
+  if (!(await confirmBox(`Mark ${r.name} as paid?${r.proof_path ? " Only if you found their payment in GCash." : r.gcash_ref ? ` Check GCash ref ${r.gcash_ref} first.` : " They haven’t sent a receipt."} This emails their slot confirmation and pre-work.`, { ok: "Paid", tone: "" }))) return false;
   try {
     const out = await signupAction("paid", r.id);
     if (out.status === "waitlist") toast(`Seats are full. ${r.name} is on the waitlist${out.emailed ? " and got the waitlist email. Refund them if no seat opens" : ", but the email didn’t send"}.`, "bad");
-    else toast(out.emailed ? `${r.name} is in. Confirmation sent.` : `${r.name} is marked paid, but the email didn’t send. Click Send email.`, out.emailed ? "" : "bad");
-  } catch { toast("Couldn’t mark paid. Try again.", "bad"); }
+    else toast(out.emailed ? `${r.name} is in. Slot confirmation sent.` : `${r.name} is marked paid, but the email didn’t send. Click Send email.`, out.emailed ? "" : "bad");
+    return true;
+  } catch { toast("Couldn’t mark paid. Try again.", "bad"); return false; }
 }
 
 /* ---------- owner: what the payment emails say ---------- */
@@ -159,7 +191,7 @@ function paySetup() {
     <div class="fold__body payset">
       <label class="payset__f"><span>GCash account name <small>Shown under the QR so people know they’re paying us</small></span>
         <input class="cell-in" id="payName" value="${esc(p.gcashName || "")}" placeholder="e.g. AM**R S." maxlength="80" /></label>
-      <div class="payset__f"><span>GCash QR <small>Goes in the sign-up email. Kept private, never on the website.</small></span>
+      <div class="payset__f"><span>GCash QR <small>Goes in the sign-up email and on each person’s private payment page. Never on the public site.</small></span>
         <div class="payset__qr">${p.qrPath ? `<img id="qrImg" alt="GCash QR" />` : `<span class="muted">No QR yet</span>`}
           <label class="btn btn--ghost btn--sm">${icon("upload")} ${p.qrPath ? "Replace" : "Upload"} QR<input type="file" id="qrFile" accept="image/png,image/jpeg" hidden /></label></div></div>
       <label class="payset__f"><span>Pre-work links <small>One per line: Label | link. Sent when someone is marked Paid.</small></span>

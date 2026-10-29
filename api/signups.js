@@ -4,7 +4,7 @@
    Core team only: checked with the person's own login, not the service key. */
 import { send, body, db, settings, teamName, paymentEmail, confirmEmail, waitlistEmail } from "./_lib.js";
 
-const COLS = "id,name,email,code,status,gcash_ref";
+const COLS = "id,name,email,code,status,pay_token";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return send(res, 405, { error: "method" });

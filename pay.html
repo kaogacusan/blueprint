@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>I've paid · Blueprint</title>
-  <meta name="description" content="Paid for Blueprint with GCash? Enter your reference number here to lock your seat." />
+  <title>Pay · Blueprint</title>
+  <meta name="description" content="Pay for Blueprint with GCash and upload your receipt to lock your slot." />
   <meta name="robots" content="noindex" />
+  <meta name="referrer" content="no-referrer" />
   <link rel="icon" href="assets/blueprint-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,6 +14,7 @@
   <link rel="stylesheet" href="styles.css" />
   <style>
     body { background: var(--paper); }
+    [hidden] { display: none !important; }
     .paid { max-width: 520px; margin: 0 auto; padding: 40px var(--gutter) 96px; }
     .paid__home { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
     .paid__home img { height: 26px; width: auto; }
@@ -20,8 +22,21 @@
     .paid .reg__sub a, .paid .help a { color: var(--core); font-weight: 600; }
     .paid .help { margin: 22px 4px 0; color: var(--ink-3); font-size: 0.88rem; line-height: 1.5; }
     .paid .done__mark { width: 56px; height: 56px; margin: 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--tint); color: var(--core); font-size: 1.6rem; }
-    .paid #f-code { font-family: var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
-    .paid #f-ref { font-family: var(--mono); letter-spacing: 0.04em; }
+    .step { margin-top: 26px; }
+    .step__k { margin: 0 0 10px; color: var(--core); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .step p { margin: 0 0 10px; color: var(--ink-2); line-height: 1.5; }
+    .qr { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff; }
+    .qr img { width: min(260px, 100%); height: auto; border-radius: 10px; }
+    .qr__amt { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+    .qr__to { color: var(--ink-3); font-size: 0.9rem; }
+    .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; padding: 18px; border: 1.5px dashed var(--line-2); border-radius: var(--radius-sm); background: var(--tint); color: var(--ink-2); text-align: center; cursor: pointer; transition: border-color .15s; }
+    .drop:hover, .drop:focus-within { border-color: var(--core); }
+    .drop b { color: var(--core); }
+    .drop small { color: var(--ink-3); }
+    .drop img { max-height: 280px; max-width: 100%; border-radius: 8px; }
+    .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .sent { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--tint); color: var(--ink-2); font-size: 0.92rem; line-height: 1.45; }
+    .code { font-family: var(--mono); font-weight: 500; letter-spacing: 0.06em; }
     @media (max-width: 480px) { .paid .reg, .paid .done { padding: 28px 20px 24px; } }
   </style>
 </head>
@@ -32,28 +47,35 @@
       <img src="assets/blueprint-wordmark.png" alt="blueprint" />
     </a>
 
-    <form class="reg" id="payForm" novalidate>
-      <h1 class="reg__title">I’ve <span class="grad">paid.</span></h1>
-      <p class="reg__sub">Enter the GCash reference number so we can lock your seat. Your email and personal code are in the email we sent when you registered.</p>
+    <p class="help" id="loading">Loading your payment page…</p>
 
-      <div class="field">
-        <label for="f-email">Email you registered with</label>
-        <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="you@student.ateneo.edu" />
-        <span class="field__err">Please add your email.</span>
-      </div>
-      <div class="field">
-        <label for="f-code">Your personal code</label>
-        <input id="f-code" name="code" autocomplete="off" required placeholder="BP-7K2Q" maxlength="8" pattern="^\s*(BP-?)?[A-Za-z0-9]{4}\s*$" />
-        <span class="field__err">It looks like BP- and four letters or numbers.</span>
-      </div>
-      <div class="field">
-        <label for="f-ref">GCash reference number</label>
-        <input id="f-ref" name="ref" inputmode="numeric" autocomplete="off" required placeholder="1234 567 890123" maxlength="26" pattern="^[\d\s-]{8,26}$" />
-        <span class="field__err">Only the numbers from “Ref No.” on your GCash receipt.</span>
+    <form class="reg" id="payForm" novalidate hidden>
+      <h1 class="reg__title">Lock your <span class="grad">slot.</span></h1>
+      <p class="reg__sub" id="hello">Two quick steps.</p>
+
+      <div class="step" id="stepPay">
+        <p class="step__k">1. Pay with GCash</p>
+        <div class="qr">
+          <img id="qrImg" alt="Blueprint GCash QR code" hidden />
+          <span class="qr__amt" id="amount">₱1,999</span>
+          <span class="qr__to" id="payTo"></span>
+          <a class="btn btn--ghost btn--sm" id="saveQr" download="blueprint-gcash-qr.png" hidden>Save QR</a>
+        </div>
+        <p class="help" id="qrHelp">Paying on this phone? Save the QR (on iPhone, press and hold it), then in GCash tap <b>Pay QR</b> › <b>Upload QR</b>.</p>
       </div>
 
-      <button class="btn btn--primary btn--lg btn--block" type="submit">
-        <span class="btn__label">Lock my seat</span><span class="spinner" aria-hidden="true"></span>
+      <div class="step">
+        <p class="step__k">2. Upload your receipt</p>
+        <p class="sent" id="sent" hidden></p>
+        <label class="drop" id="drop">
+          <input type="file" id="f-proof" accept="image/*" />
+          <span id="dropText"><b>Choose a screenshot</b><br /><small>of your GCash receipt</small></span>
+          <img id="preview" alt="Your receipt" hidden />
+        </label>
+      </div>
+
+      <button class="btn btn--primary btn--lg btn--block" type="submit" style="margin-top: 22px">
+        <span class="btn__label">Send receipt</span><span class="spinner" aria-hidden="true"></span>
       </button>
       <p class="reg__error" id="payError" role="alert" hidden></p>
     </form>
@@ -61,11 +83,11 @@
     <div class="done" id="payDone" hidden>
       <div class="done__mark" aria-hidden="true">✓</div>
       <h2 class="reg__title" id="doneTitle">Got it.</h2>
-      <p class="reg__sub" id="doneText">We’ll check it in GCash and email your confirmation and pre-work within 24 hours.</p>
+      <p class="reg__sub" id="doneText">We’ll check your receipt and email your slot confirmation within 24 hours.</p>
       <a class="btn btn--ghost btn--block" href="./">Back to Blueprint</a>
     </div>
 
-    <p class="help">Lost your code? Register again with the same email and we’ll resend it. Questions? Email <a href="mailto:admublueprint@gmail.com">admublueprint@gmail.com</a>. We will never ask for your GCash MPIN or a one-time code (OTP). <a href="privacy.html">Privacy notice</a></p>
+    <p class="help">Questions? Email <a href="mailto:admublueprint@gmail.com">admublueprint@gmail.com</a>. We will never ask for your GCash MPIN or a one-time code (OTP). <a href="privacy.html">Privacy notice</a></p>
   </main>
   <script src="pay.js"></script>
 </body>

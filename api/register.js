@@ -1,5 +1,6 @@
-/* POST /api/register: the site's sign-up form. Saves the sign-up with a personal code
-   and emails the GCash QR. Same checks as the database (migrations 001, 003, 005, 006). */
+/* POST /api/register: the site's sign-up form. Saves the sign-up with a sign-up number and a private
+   payment link, and emails the GCash QR. Same checks as the database (migrations 001, 003, 005, 006, 007).
+   A new sign-up gets its payment link back so the site can send them straight to /pay. */
 import { send, body, db, enc, newCode, paymentEmail } from "./_lib.js";
 
 const YEARS = ["3rd year", "4th year", "Fresh grad", "Other"];
@@ -24,7 +25,8 @@ export default async function handler(req, res) {
 
   try {
     // already signed up: resend the payment email (at most every 10 minutes), say nothing else
-    const [old] = await db(`registrations?select=id,name,email,code,status,emailed_at&email=eq.${enc(row.email)}`);
+    // (never hand back their link here: anyone can type someone else's email)
+    const [old] = await db(`registrations?select=id,name,email,code,status,emailed_at,pay_token&email=eq.${enc(row.email)}`);
     if (old) {
       const quiet = old.emailed_at && Date.now() - Date.parse(old.emailed_at) < 10 * 60e3;
       if (old.status === "registered" && old.code && !quiet) {
@@ -52,7 +54,7 @@ export default async function handler(req, res) {
     } catch (e) {
       console.error("payment email failed", saved.id, e.message); // the team sees "email not sent" and can resend
     }
-    return send(res, 200, { ok: true });
+    return send(res, 200, { ok: true, pay: `/pay?t=${saved.pay_token}` });
   } catch (e) {
     console.error("register failed", e.message);
     return send(res, 500, { error: "server" });

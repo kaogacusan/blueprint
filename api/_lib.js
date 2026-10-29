@@ -37,10 +37,9 @@ export async function teamName(req) {
   return (await r.json()) || null;
 }
 
-/* BP-7K2Q: no 0/O or 1/I, so it reads cleanly off a phone */
+/* BP-7K2Q, their sign-up number: no 0/O or 1/I, so it reads cleanly off a phone */
 const ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const newCode = () => "BP-" + Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) => ALPHA[b % ALPHA.length]).join("");
-export const cleanCode = (s = "") => { const c = String(s).toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^BP/, ""); return c ? `BP-${c}` : ""; };
 
 /* ---------- email ---------- */
 let mailer;
@@ -75,12 +74,23 @@ async function context() {
     venue: confirmed ? `${confirmed.venue}, Ateneo de Manila` : "Ateneo de Manila (room to be confirmed, we'll email you)",
   };
 }
-async function qrAttachment(path) {
+/* ---------- private files (the "payment" bucket: our QR, and people's payment screenshots) ---------- */
+const objectUrl = (path) => `${U}/storage/v1/object/payment/${path.split("/").map(enc).join("/")}`;
+export async function readFile(path) {
   if (!path) return null;
-  const r = await fetch(`${U}/storage/v1/object/payment/${path.split("/").map(enc).join("/")}`, { headers: { apikey: K, Authorization: `Bearer ${K}` } });
+  const r = await fetch(objectUrl(path), { headers: { apikey: K, Authorization: `Bearer ${K}` } });
   if (!r.ok) return null;
-  return { filename: "blueprint-gcash-qr.png", content: Buffer.from(await r.arrayBuffer()), cid: "gcashqr" };
+  return { type: r.headers.get("content-type") || "image/png", data: Buffer.from(await r.arrayBuffer()) };
 }
+export async function saveFile(path, data, type) {
+  const r = await fetch(objectUrl(path), { method: "POST", headers: { apikey: K, Authorization: `Bearer ${K}`, "Content-Type": type, "x-upsert": "true" }, body: data });
+  if (!r.ok) throw new Error(`storage ${r.status}`);
+}
+async function qrAttachment(path) {
+  const f = await readFile(path);
+  return f && { filename: "blueprint-gcash-qr.png", content: f.data, cid: "gcashqr" };
+}
+export const payLink = (r) => `${SITE}/pay?t=${enc(r.pay_token)}`;
 
 const shell = (inner) => `<!doctype html><html><body style="margin:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;color:#101114">
 <div style="max-width:560px;margin:0 auto;padding:28px 20px">
@@ -98,33 +108,33 @@ const scheduleText = (c) => c.sessions.map((s) => `- ${s.when}: ${s.what}`).join
 export async function paymentEmail(r) {
   const c = await context();
   const qr = await qrAttachment(c.qrPath);
-  const link = `${SITE}/pay?code=${enc(r.code)}&email=${enc(r.email)}`;
+  const link = payLink(r);
   const html = shell(
     p(`Hi ${esc(first(r.name))}!`) +
-    p(`Thanks for signing up for Blueprint. <b>Your seat isn't locked until payment is in.</b> There are only ${c.seats} seats, and they go to the first ${c.seats} people who pay.`) +
+    p(`Thanks for signing up for Blueprint. Your sign-up number is <b style="font-family:'SF Mono',Menlo,monospace;letter-spacing:.06em">${esc(r.code)}</b>. <b>Your slot isn't locked until payment is in.</b> There are only ${c.seats} slots, and they go to the first ${c.seats} people who pay.`) +
     h("1. Pay with GCash") +
     p(`Send <b>${peso(c.price)}</b> for all four sessions${c.gcashName ? ` to <b>${esc(c.gcashName)}</b>` : ""}.`) +
-    (qr ? `<p style="margin:0 0 14px"><img src="cid:gcashqr" alt="Blueprint GCash QR code" width="240" style="width:240px;max-width:100%;border-radius:12px;border:1px solid rgba(6,26,77,.1)"></p>` : p(`<i>Our GCash QR is on its way in a separate email.</i>`)) +
-    p(`In the GCash message box, type your personal code:`) +
-    `<p style="margin:0 0 14px;font-family:'SF Mono',Menlo,monospace;font-size:24px;font-weight:700;letter-spacing:.08em;color:#061a4d">${esc(r.code)}</p>` +
-    h("2. Tell us your reference number") +
-    p(`After paying, GCash shows a reference number (Ref No.). Type it here:`) +
-    btn(link, "I've paid: enter my reference number") +
-    p(`We check it in GCash and email your confirmation and pre-work within 24 hours.`) +
+    (qr ? `<p style="margin:0 0 14px"><img src="cid:gcashqr" alt="Blueprint GCash QR code" width="240" style="width:240px;max-width:100%;border-radius:12px;border:1px solid rgba(6,26,77,.1)"></p>` : "") +
+    p(`On your phone? Tap the button below. The page shows the QR too, so you can save it and use <b>Upload QR</b> in GCash.`) +
+    h("2. Send us your receipt") +
+    p(`Take a screenshot of the GCash receipt, then upload it here:`) +
+    btn(link, "I've paid: upload my receipt") +
+    p(`We check it and email your slot confirmation within 24 hours.`) +
     (c.salesClose ? p(`Sales close <b>${esc(c.salesClose)}</b>.`) : "") +
     h("The schedule") + schedule(c) +
     p(`Questions? Just reply to this email.`)
   );
-  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint. Your seat isn't locked until payment is in. Only ${c.seats} seats.\n\n1. Send ${peso(c.price)} by GCash${c.gcashName ? ` to ${c.gcashName}` : ""} (QR attached). In the GCash message, type your code: ${r.code}\n2. After paying, enter your GCash reference number here: ${link}\n\nWe'll email your confirmation and pre-work within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nSchedule:\n${scheduleText(c)}\n\nQuestions? Just reply to this email.`;
-  await mail({ to: r.email, subject: `Your Blueprint code: ${r.code}. Pay to lock your seat`, html, text, attachments: qr ? [qr] : [] });
+  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Only ${c.seats} slots.\n\n1. Send ${peso(c.price)} by GCash${c.gcashName ? ` to ${c.gcashName}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nSchedule:\n${scheduleText(c)}\n\nQuestions? Just reply to this email.`;
+  await mail({ to: r.email, subject: `Pay to lock your Blueprint slot (${r.code})`, html, text, attachments: qr ? [qr] : [] });
 }
 
-/* 2. after the team clicks Paid: confirmation + pre-work */
+/* 2. after the team checks the screenshot and clicks Paid: slot confirmation + pre-work */
 export async function confirmEmail(r) {
   const c = await context();
   const html = shell(
     p(`Hi ${esc(first(r.name))}!`) +
-    p(`<b>You're in.</b> We got your ${peso(c.price)} (GCash ref ${esc(r.gcash_ref || "on file")}), and your Blueprint seat is confirmed.`) +
+    p(`<b>Your slot is confirmed.</b> We got your ${peso(c.price)}, and you're in for all four Blueprint sessions.`) +
+    `<p style="margin:0 0 14px;padding:12px 14px;border-radius:12px;background:#eef3ff;color:#061a4d;font-size:14px">Sign-up number <b style="font-family:'SF Mono',Menlo,monospace;letter-spacing:.06em">${esc(r.code)}</b> · Paid</p>` +
     h("The schedule") + schedule(c) +
     h("Before Session 1") +
     (c.prework.length
@@ -134,8 +144,8 @@ export async function confirmEmail(r) {
     p(`A laptop or phone for every session. For Session 2, bring your current résumé and your LinkedIn link.`) +
     p(`See you there! Reply to this email if anything comes up.`)
   );
-  const text = `Hi ${first(r.name)}!\n\nYou're in. We got your ${peso(c.price)} and your Blueprint seat is confirmed.\n\nSchedule:\n${scheduleText(c)}\n\n${c.prework.length ? `Pre-work (before Session 1):\n${c.prework.map((x) => `- ${x.label || "Pre-work"}: ${x.url}`).join("\n")}` : "We'll email you the short pre-work before the first session."}\n\nBring a laptop or phone to every session. For Session 2, bring your résumé and LinkedIn link.\n\nSee you there!`;
-  await mail({ to: r.email, subject: "You're in: your Blueprint seat is confirmed", html, text });
+  const text = `Hi ${first(r.name)}!\n\nYour slot is confirmed. We got your ${peso(c.price)}, and you're in for all four Blueprint sessions (sign-up number ${r.code}).\n\nSchedule:\n${scheduleText(c)}\n\n${c.prework.length ? `Pre-work (before Session 1):\n${c.prework.map((x) => `- ${x.label || "Pre-work"}: ${x.url}`).join("\n")}` : "We'll email you the short pre-work before the first session."}\n\nBring a laptop or phone to every session. For Session 2, bring your résumé and LinkedIn link.\n\nSee you there!`;
+  await mail({ to: r.email, subject: `Your Blueprint slot is confirmed (${r.code})`, html, text });
 }
 
 /* 3. paid after the seats ran out */
@@ -143,9 +153,9 @@ export async function waitlistEmail(r) {
   const c = await context();
   const html = shell(
     p(`Hi ${esc(first(r.name))}!`) +
-    p(`Thank you for paying for Blueprint. We're sorry: all ${c.seats} seats were taken before your payment came in, so you're <b>first in line on the waitlist</b>.`) +
-    p(`If a seat opens up, we'll email you right away. If not, we'll refund your ${peso(c.price)} to the same GCash account. Reply to this email if you'd rather have the refund now.`)
+    p(`Thank you for paying for Blueprint. We're sorry: all ${c.seats} slots were taken before your payment came in, so you're <b>first in line on the waitlist</b>.`) +
+    p(`If a slot opens up, we'll email you right away. If not, we'll refund your ${peso(c.price)} to the same GCash account. Reply to this email if you'd rather have the refund now.`)
   );
-  const text = `Hi ${first(r.name)}!\n\nThank you for paying for Blueprint. All ${c.seats} seats were taken before your payment came in, so you're on the waitlist. If a seat opens, we'll email you. If not, we'll refund your ${peso(c.price)} to the same GCash account. Reply if you'd rather have the refund now.`;
+  const text = `Hi ${first(r.name)}!\n\nThank you for paying for Blueprint. All ${c.seats} slots were taken before your payment came in, so you're on the waitlist. If a slot opens, we'll email you. If not, we'll refund your ${peso(c.price)} to the same GCash account. Reply if you'd rather have the refund now.`;
   await mail({ to: r.email, subject: "Blueprint is full: you're on the waitlist", html, text });
 }
