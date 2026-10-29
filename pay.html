@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>I've paid · Blueprint</title>
+  <meta name="description" content="Paid for Blueprint with GCash? Enter your reference number here to lock your seat." />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="assets/blueprint-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { background: var(--paper); }
+    .paid { max-width: 520px; margin: 0 auto; padding: 40px var(--gutter) 96px; }
+    .paid__home { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+    .paid__home img { height: 26px; width: auto; }
+    .paid .reg, .paid .done { margin-top: 40px; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); background-color: #fff; }
+    .paid .reg__sub a, .paid .help a { color: var(--core); font-weight: 600; }
+    .paid .help { margin: 22px 4px 0; color: var(--ink-3); font-size: 0.88rem; line-height: 1.5; }
+    .paid .done__mark { width: 56px; height: 56px; margin: 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--tint); color: var(--core); font-size: 1.6rem; }
+    .paid #f-code { font-family: var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+    .paid #f-ref { font-family: var(--mono); letter-spacing: 0.04em; }
+    @media (max-width: 480px) { .paid .reg, .paid .done { padding: 28px 20px 24px; } }
+  </style>
+</head>
+<body>
+  <main class="paid">
+    <a class="paid__home" href="./" aria-label="Back to Blueprint">
+      <img src="assets/blueprint-mark.png" alt="" />
+      <img src="assets/blueprint-wordmark.png" alt="blueprint" />
+    </a>
+
+    <form class="reg" id="payForm" novalidate>
+      <h1 class="reg__title">I’ve <span class="grad">paid.</span></h1>
+      <p class="reg__sub">Enter the GCash reference number so we can lock your seat. Your email and personal code are in the email we sent when you registered.</p>
+
+      <div class="field">
+        <label for="f-email">Email you registered with</label>
+        <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="you@student.ateneo.edu" />
+        <span class="field__err">Please add your email.</span>
+      </div>
+      <div class="field">
+        <label for="f-code">Your personal code</label>
+        <input id="f-code" name="code" autocomplete="off" required placeholder="BP-7K2Q" maxlength="8" pattern="^\s*(BP-?)?[A-Za-z0-9]{4}\s*$" />
+        <span class="field__err">It looks like BP- and four letters or numbers.</span>
+      </div>
+      <div class="field">
+        <label for="f-ref">GCash reference number</label>
+        <input id="f-ref" name="ref" inputmode="numeric" autocomplete="off" required placeholder="1234 567 890123" maxlength="26" pattern="^[\d\s-]{8,26}$" />
+        <span class="field__err">Only the numbers from “Ref No.” on your GCash receipt.</span>
+      </div>
+
+      <button class="btn btn--primary btn--lg btn--block" type="submit">
+        <span class="btn__label">Lock my seat</span><span class="spinner" aria-hidden="true"></span>
+      </button>
+      <p class="reg__error" id="payError" role="alert" hidden></p>
+    </form>
+
+    <div class="done" id="payDone" hidden>
+      <div class="done__mark" aria-hidden="true">✓</div>
+      <h2 class="reg__title" id="doneTitle">Got it.</h2>
+      <p class="reg__sub" id="doneText">We’ll check it in GCash and email your confirmation and pre-work within 24 hours.</p>
+      <a class="btn btn--ghost btn--block" href="./">Back to Blueprint</a>
+    </div>
+
+    <p class="help">Lost your code? Register again with the same email and we’ll resend it. Questions? Email <a href="mailto:admublueprint@gmail.com">admublueprint@gmail.com</a>. We will never ask for your GCash MPIN or a one-time code (OTP). <a href="privacy.html">Privacy notice</a></p>
+  </main>
+  <script src="pay.js"></script>
+</body>
+</html>

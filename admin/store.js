@@ -90,6 +90,22 @@ export async function setRegStatus(id, status) {
   if (r) r.status = status;
   emit("registrations");
 }
+/* "paid" (sends the confirmation, or the waitlist email if the seats are full) and "resend":
+   these send email, so they go through the site's server (api/signups.js), signed in as you */
+export async function signupAction(action, id) {
+  const { data } = await supa.auth.getSession();
+  const res = await fetch("/api/signups", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token || ""}` },
+    body: JSON.stringify({ action, id }),
+  });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(out.error || `signups ${res.status}`);
+  const r = S.data.registrations.find((x) => x.id === id);
+  if (r) Object.assign(r, out.row || {}, out.emailed_at ? { emailed_at: out.emailed_at } : {});
+  emit("registrations");
+  return out;
+}
 /* owner only: delete every sign-up once the program is over (the privacy notice promises it) */
 export async function eraseRegistrations() {
   const { data, error } = await supa.rpc("erase_registrations");

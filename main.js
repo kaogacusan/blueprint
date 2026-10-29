@@ -184,7 +184,7 @@
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
   /* ---------- Registration modal ----------
-     Saves to the Supabase "registrations" table (see config.js). The team sees it in /admin. */
+     Sends the sign-up to /api/register, which emails the GCash QR. The team sees it in /admin. */
   const modal = document.getElementById("modal");
   const form = document.getElementById("regForm");
   const done = document.getElementById("done");
@@ -238,18 +238,9 @@
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
   const PRIVACY_VERSION = "2026-10-29";
 
+  /* the server saves it, gives them a personal code, and emails the GCash QR (api/register.js) */
   const saveRegistration = async (row) => {
-    const { supabaseUrl, supabaseAnonKey } = window.BLUEPRINT;
-    const res = await fetch(`${supabaseUrl}/rest/v1/registrations`, {
-      method: "POST",
-      headers: {
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(row),
-    });
+    const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(row) });
     if (!res.ok) throw new Error(`Registration failed (${res.status})`);
   };
 
@@ -267,6 +258,7 @@
       heard_org: data.heard_from === "Student org" ? (data.heard_org || "").trim() : "",
       consent: true,
       privacy_version: PRIVACY_VERSION,
+      website: data.website || "",
     };
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");

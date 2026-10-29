@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/pay",
+      "destination": "/pay.html"
+    },
+    {
       "source": "/present/:slug",
       "destination": "/present/index.html"
     }

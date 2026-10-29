@@ -441,11 +441,11 @@
           </details>
           <details class="qa reveal">
             <summary>How much does it cost?</summary>
-            <p>₱1,999 for all four sessions. You pay after you register, and we’ll email you how. Your seat is confirmed once payment is in.</p>
+            <p>₱1,999 for all four sessions, by GCash. After you register, we email you our QR and a personal code. Pay, then enter your GCash reference number on <a href="/pay">the payment page</a>. Your seat is confirmed once we check it, within 24 hours.</p>
           </details>
           <details class="qa reveal">
             <summary>How do I sign up?</summary>
-            <p>Click Register and fill in the short form. We’ll email you the payment details and the schedule.</p>
+            <p>Click Register and fill in the short form. We’ll email you our GCash QR, your personal code and the schedule.</p>
           </details>
           <details class="qa reveal">
             <summary>When and where?</summary>
@@ -491,7 +491,7 @@
 
     <form class="reg" id="regForm" novalidate>
       <h2 class="reg__title" id="modalTitle">Start your <span class="grad">Blueprint.</span></h2>
-      <p class="reg__sub">It takes a minute. We’ll email you the payment details and the schedule.</p>
+      <p class="reg__sub">It takes a minute. We’ll email you our GCash QR, your personal code and the schedule.</p>
 
       <div class="field">
         <label for="f-name">Full name</label>
@@ -543,6 +543,8 @@
         <span class="field__err">Please tick this box so we can save your sign-up.</span>
       </div>
 
+      <input name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" hidden />
+
       <button class="btn btn--primary btn--lg btn--block" type="submit">
         <span class="btn__label">Continue</span><span class="spinner" aria-hidden="true"></span>
       </button>
@@ -562,7 +564,7 @@
         <p class="ticket__foot mono">Status · Registered, awaiting payment</p>
       </div>
       <h2 class="reg__title">You’re on the list.</h2>
-      <p class="reg__sub">Check your email within 24 hours for payment details. Your seat is confirmed once payment is in.</p>
+      <p class="reg__sub">We just emailed you our GCash QR and your personal code (check spam too). Pay, then enter your GCash reference number on <a href="/pay">ateneoblueprint.vercel.app/pay</a>. Your seat is locked once payment is in.</p>
       <button class="btn btn--ghost btn--block" data-close>Back to the page</button>
     </div>
   </dialog>
