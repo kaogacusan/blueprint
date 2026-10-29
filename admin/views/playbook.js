@@ -1,6 +1,6 @@
 /* Playbook: four doors (guides, messages, files, people). Pick one, then everything is a card:
    guides open in a reader panel, messages look like the chat bubble you'll send, files are tiles, people are contact cards. */
-import { S, fillScript, focusName } from "/admin/store.js";
+import { S, fillScript, focusName, isGuest } from "/admin/store.js";
 import { esc, icon, md, copy, linkKind, openDrawer, avatar } from "/admin/lib.js";
 import { editRow, empty, ownerOnly, trackName } from "/admin/ui.js";
 
@@ -60,9 +60,12 @@ export default {
   id: "playbook", title: "Playbook", icon: "book",
   render(root, params = {}) {
     if (params.tab) pb.tab = params.tab;
+    // guests don't see People (outside contacts' emails and numbers); the database hides them too
+    const doors = DOORS.filter(([k]) => !(k === "contacts" && isGuest()));
+    if (!doors.some(([k]) => k === pb.tab)) pb.tab = "guides";
     const match = (...xs) => !pb.q || xs.join(" ").toLowerCase().includes(pb.q.toLowerCase());
     const rows = (tab) => (S.data[TABLE[tab]] || []).filter((r) => match(...MATCH[tab](r)));
-    const door = DOORS.find((d) => d[0] === pb.tab);
+    const door = doors.find((d) => d[0] === pb.tab);
 
     root.innerHTML = `<div class="page">
       <header class="ph">
@@ -76,7 +79,7 @@ export default {
         </div>
       </header>
 
-      <nav class="doors" aria-label="Playbook sections">${DOORS.map(([k, l, ic, sub], i) => `
+      <nav class="doors" aria-label="Playbook sections">${doors.map(([k, l, ic, sub], i) => `
         <button class="door door--${k} ${pb.tab === k ? "is-on" : ""}" data-tab="${k}" style="--i:${i}">
           <span class="door__ic">${icon(ic)}</span>
           <span class="door__t"><b>${l}</b><small>${sub}</small></span>

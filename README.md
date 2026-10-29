@@ -62,6 +62,10 @@ The price (₱1,999 for all four sessions) is shown in the details strip, FAQ, f
 ## Registration
 
 The form saves name, email, course, year, mobile number, and how they heard about Blueprint (plus "Which org?" when they pick Student org) to the Supabase `registrations` table.
+The form can't be sent without ticking the consent box. Each sign-up saves when they agreed and which privacy notice (`privacy_version`, the date on `privacy.html`). If you change `privacy.html`, change its date and `PRIVACY_VERSION` in `main.js` too.
+
+**Data privacy (Data Privacy Act, RA 10173):** `privacy.html` tells sign-ups what we collect, why, who sees it, how long we keep it (deleted within 60 days after the last session) and how to reach us. In `/admin`, Sign-ups has the team's handling rules, only the owner can download the list, and the owner can **Erase all** when the program is over. Visitors who aren't signed in can only add a sign-up (`005_data_privacy.sql`).
+
 Payment is manual for the pilot: the team emails payment details within 24 hours, and marks each person **registered / paid / waitlist / cancelled** in `/admin`. First 20 paid get the seats.
 
 ## Brand
@@ -76,7 +80,7 @@ The team's hub, with the pages in a sidebar on the left. Each person's most impo
 Who can do what:
 - **Owner** (Keira): changes everything.
 - **Team**: views everything, sets a sign-up's status (so Amber can mark "Paid"), and logs progress on the orgs assigned to them (status, who replied, next step).
-- **Guest** (e.g. a guest facilitator): views the workspace but **never sees sign-ups** or their personal data.
+- **Guest** (e.g. a guest facilitator): views the workspace but **never sees sign-ups or the People list** (outside contacts' emails and numbers).
 
 ### Logins
 

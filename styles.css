@@ -1034,6 +1034,12 @@ section[id] { scroll-margin-top: 72px; }
 .field[hidden] { display: none; }
 .field.is-invalid input, .field.is-invalid select { border-color: #e5484d; background: #fff6f6; }
 .field.is-invalid .field__err { display: block; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-weight: 500 !important; line-height: 1.45; cursor: pointer; }
+.field .consent input { flex: none; width: 18px; height: 18px; margin: 2px 0 0; padding: 0; border-radius: 4px; -webkit-appearance: auto; appearance: auto; accent-color: var(--core); box-shadow: none; }
+.consent a { color: var(--core); font-weight: 600; }
+.field--check.is-invalid .consent { color: #d23b3f; }
+.foot__privacy { color: rgba(225, 235, 255, 0.7); }
+.foot__privacy:hover { color: var(--cyan); }
 
 .spinner { display: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35); border-top-color: #fff; animation: spin 0.7s linear infinite; }
 .is-loading .spinner { display: inline-block; }

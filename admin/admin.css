@@ -1104,3 +1104,8 @@ select.cell-in { width: 140px; text-align: left; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
 }
+
+/* sign-ups: handling rules */
+.rules { margin: 0 0 10px; padding: 14px 16px 14px 34px; border-radius: 12px; background: #fff; border: 1px solid var(--line); color: var(--ink-2); font-size: 14px; }
+.rules li { margin: 4px 0; }
+.rules b { color: var(--ink); }

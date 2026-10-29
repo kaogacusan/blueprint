@@ -5,7 +5,7 @@
 //   node scripts/add-login.mjs --reset <email>                  new password for an existing login
 //
 // "viewer" = core team, sees everything incl. sign-ups. "guest" = sees the workspace but not sign-ups' personal data.
-// Prints a short starter password once (e.g. Sam-4821). Send it privately. It's only for the first sign-in:
+// Prints a short starter password once (e.g. Sam-482190). Send it privately. It's only for the first sign-in:
 // the workspace makes them pick their own password before anything else.
 // Needs .env with SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY. Never commit .env.
 import fs from "node:fs";
@@ -21,10 +21,10 @@ if (!URL_ || !KEY) throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROL
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
 
 const cap = (w) => w[0].toUpperCase() + w.slice(1);
-/* Name + digits, at least 8 characters (Supabase's minimum): Sam-4821, Robin-482, Al-12345 */
+/* Name + digits, at least 10 characters (our Supabase minimum): Sam-482190, Robin-4821, Al-1234567 */
 const password = (name) => {
   const first = cap(name.split(/\s+/)[0].split("@")[0]);
-  const n = Math.max(3, 8 - first.length - 1);
+  const n = Math.max(4, 10 - first.length - 1);
   return `${first}-${crypto.randomInt(10 ** (n - 1), 10 ** n)}`;
 };
 

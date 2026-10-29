@@ -481,7 +481,7 @@
              <a class="foot__contact" href="mailto:hello@example.com">hello@example.com</a> -->
       </div>
       <button class="foot__link" data-register>Register →</button>
-      <p class="foot__copy">© 2026 Blueprint</p>
+      <p class="foot__copy">© 2026 Blueprint · <a class="foot__privacy" href="privacy.html">Privacy</a></p>
     </div>
   </footer>
 
@@ -534,6 +534,13 @@
       <div class="field field--optional" id="f-org-field" hidden>
         <label for="f-org">Which org? <span class="field__opt">Optional</span></label>
         <input id="f-org" name="heard_org" maxlength="120" placeholder="Your org’s name" />
+      </div>
+      <div class="field field--check">
+        <label class="consent" for="f-consent">
+          <input id="f-consent" name="consent" type="checkbox" required />
+          <span>I agree that Blueprint can use these details to handle my registration and contact me about the sessions. <a href="privacy.html" target="_blank" rel="noopener">How we handle your data</a></span>
+        </label>
+        <span class="field__err">Please tick this box so we can save your sign-up.</span>
       </div>
 
       <button class="btn btn--primary btn--lg btn--block" type="submit">

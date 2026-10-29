@@ -235,6 +235,9 @@
     if (f && f.classList.contains("is-invalid") && e.target.checkValidity()) f.classList.remove("is-invalid");
   });
 
+  /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
+  const PRIVACY_VERSION = "2026-10-29";
+
   const saveRegistration = async (row) => {
     const { supabaseUrl, supabaseAnonKey } = window.BLUEPRINT;
     const res = await fetch(`${supabaseUrl}/rest/v1/registrations`, {
@@ -262,6 +265,8 @@
       mobile: data.mobile.trim(),
       heard_from: data.heard_from,
       heard_org: data.heard_from === "Student org" ? (data.heard_org || "").trim() : "",
+      consent: true,
+      privacy_version: PRIVACY_VERSION,
     };
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");

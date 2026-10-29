@@ -1,6 +1,7 @@
 /* Sign-ups: everyone who registered on the site.
-   Anyone on the team can set a status (e.g. Amber marks "Paid"); notes and deleting stay with the owner. */
-import { S, update, remove, setting, setRegStatus } from "/admin/store.js";
+   Anyone on the team can set a status (e.g. Amber marks "Paid"); notes, downloading and deleting stay with the owner.
+   The rules box matches what privacy.html promises sign-ups. */
+import { S, update, remove, setting, setRegStatus, eraseRegistrations } from "/admin/store.js";
 import { esc, icon, copy, toast, download, confirmBox, countUps, todayISO } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
 
@@ -9,6 +10,13 @@ const HELP = { registered: "Signed up, waiting to pay", paid: "Seat confirmed", 
 const f = { q: "", status: "" };
 const fmt = (iso) => new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const label = (k) => (STATUSES.find(([s]) => s === k) || [, k])[1];
+const RULES = [
+  "Only use these details to run Blueprint.",
+  "Emailing more than one person? Put the emails in <b>BCC</b>.",
+  "No screenshots or copies in group chats. Send people here instead.",
+  "Payment screenshots: check them, mark Paid, then delete them from chats.",
+  "Something leaked or got sent to the wrong person? Tell Keira right away. We have 72 hours to report it.",
+];
 
 export default {
   id: "inquiries", title: "Sign-ups", icon: "inbox",
@@ -26,10 +34,17 @@ export default {
           <p class="ph__sub">Everyone who registered on the site. The first ${seats} to pay get seats; everyone after goes on the waitlist. Change a status in the table.</p>
         </div>
         <div class="ph__actions">
-          <button class="btn btn--ghost" id="copyEmails" title="Copy the emails shown below">${icon("copy")} Copy emails</button>
-          <button class="btn btn--ghost" id="csv" title="Download the list below as a spreadsheet">${icon("download")} Download</button>
+          <button class="btn btn--ghost" id="copyEmails" title="Copy the emails shown below, to paste in BCC">${icon("copy")} Copy emails</button>
+          ${S.owner ? `<button class="btn btn--ghost" id="csv" title="Download the list below as a spreadsheet">${icon("download")} Download</button>` : ""}
         </div>
       </header>
+
+      <details class="more">
+        <summary>${icon("lock")} Private: how to handle sign-ups${icon("down", "fold__chev")}</summary>
+        <ul class="rules">${RULES.map((r) => `<li>${r}</li>`).join("")}</ul>
+        ${S.owner ? `<p class="footnote">We promised to delete everyone’s details within 60 days after the last session (<a href="/privacy.html" target="_blank" rel="noopener">privacy notice</a>). Delete any downloads too.
+          ${regs.length ? `<button class="btn btn--ghost btn--xs" id="eraseAll">${icon("trash")} Erase all ${regs.length} sign-ups</button>` : ""}</p>` : ""}
+      </details>
 
       <section class="stats">
         ${STATUSES.map(([k, l]) => `<button class="stat ${f.status === k ? "is-on" : ""}" data-k="${k}">
@@ -62,9 +77,13 @@ export default {
     countUps(root);
     const rerender = () => this.render(root);
     const emails = list.map((r) => r.email);
-    root.querySelector("#copyEmails").addEventListener("click", () => (emails.length ? copy(emails.join(", "), `Copied ${emails.length} email${emails.length > 1 ? "s" : ""}`) : toast("No emails to copy.")));
-    root.querySelector("#csv").addEventListener("click", () => {
-      const cols = ["created_at", "name", "email", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes"];
+    root.querySelector("#copyEmails").addEventListener("click", () => (emails.length ? copy(emails.join(", "), `Copied ${emails.length} email${emails.length > 1 ? "s" : ""}. Paste them in BCC, not To.`) : toast("No emails to copy.")));
+    root.querySelector("#eraseAll")?.addEventListener("click", async () => {
+      if (!(await confirmBox(`Erase all ${regs.length} sign-ups for good? Only do this after the program is over. This can’t be undone.`))) return;
+      try { const n = await eraseRegistrations(); toast(`Erased ${n} sign-up${n === 1 ? "" : "s"}`); } catch { toast("Couldn’t erase.", "bad"); }
+    });
+    root.querySelector("#csv")?.addEventListener("click", () => {
+      const cols = ["created_at", "name", "email", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes", "consented_at", "privacy_version"];
       const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
       download(`blueprint-signups-${todayISO()}.csv`, [cols.join(","), ...list.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\n"), "text/csv");
     });

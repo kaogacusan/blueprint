@@ -90,6 +90,14 @@ export async function setRegStatus(id, status) {
   if (r) r.status = status;
   emit("registrations");
 }
+/* owner only: delete every sign-up once the program is over (the privacy notice promises it) */
+export async function eraseRegistrations() {
+  const { data, error } = await supa.rpc("erase_registrations");
+  if (error) throw error;
+  S.data.registrations = [];
+  emit("registrations");
+  return data;
+}
 export const setting = (key) => S.data.settings?.find((s) => s.key === key)?.value || {};
 export async function saveSetting(key, value) {
   const { error } = await supa.from("settings").upsert({ key, value });

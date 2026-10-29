@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy notice · Blueprint</title>
+  <meta name="description" content="How Blueprint collects, uses, keeps and protects the details you give when you register." />
+  <link rel="icon" href="assets/blueprint-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .legal { max-width: 760px; margin: 0 auto; padding: 40px var(--gutter) 96px; }
+    .legal__home { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+    .legal__home img { height: 26px; width: auto; }
+    .legal h1 { margin: 56px 0 8px; font-family: var(--display); font-size: clamp(2.2rem, 6vw, 3.2rem); letter-spacing: -0.045em; line-height: 1; }
+    .legal__date { margin: 0 0 32px; color: var(--ink-3); font-family: var(--mono); font-size: 0.82rem; }
+    .legal__lead { font-size: 1.15rem; color: var(--ink-2); }
+    .legal h2 { margin: 44px 0 10px; font-family: var(--display); font-size: 1.35rem; letter-spacing: -0.03em; }
+    .legal p, .legal li { color: var(--ink-2); }
+    .legal ul { padding-left: 1.2em; }
+    .legal li { margin: 6px 0; }
+    .legal b { color: var(--ink); }
+    .legal a { color: var(--core); font-weight: 600; }
+    .legal__note { margin: 20px 0; padding: 16px 18px; border-radius: var(--radius-sm); background: var(--tint); border: 1px solid var(--line); }
+  </style>
+</head>
+<body>
+  <main class="legal">
+    <a class="legal__home" href="./" aria-label="Back to Blueprint">
+      <img src="assets/blueprint-mark.png" alt="" />
+      <img src="assets/blueprint-wordmark.png" alt="blueprint" />
+    </a>
+
+    <h1>Privacy notice</h1>
+    <!-- When this notice changes, update the date here AND PRIVACY_VERSION in main.js. -->
+    <p class="legal__date">Last updated October 29, 2026</p>
+
+    <p class="legal__lead">Blueprint is a student venture under LAS 50, Ateneo de Manila University. This page explains what we do with the details you give us when you register. We follow the Data Privacy Act of 2012 (Republic Act No. 10173).</p>
+
+    <h2>What we collect</h2>
+    <p>Only what you type in the registration form:</p>
+    <ul>
+      <li>Full name, email and mobile number</li>
+      <li>Course and year</li>
+      <li>How you heard about Blueprint, and your org if you choose to tell us</li>
+    </ul>
+    <p>We also keep the date you signed up, that you agreed to this notice, and your seat status (registered, paid, waitlist or cancelled).</p>
+    <p>This site has no ads, tracking or analytics, and sets no cookies on visitors.</p>
+
+    <h2>Why we use it</h2>
+    <ul>
+      <li>To save your seat and send you the payment details and schedule</li>
+      <li>To confirm your payment and tell you about the sessions, including changes</li>
+      <li>To see which outreach worked, counted only as totals</li>
+    </ul>
+    <p>We use it because you agreed to it and because you asked us to register you. We don’t sell it, rent it, or give it to sponsors or partner orgs. We won’t send you other marketing.</p>
+
+    <h2>Who can see it</h2>
+    <p>Only Blueprint’s core team, each with their own password-protected login. Guest facilitators can’t see sign-ups.</p>
+    <p>The details are stored with <b>Supabase</b> (our database, servers in Singapore). The site is hosted on <b>Vercel</b>. They only store and serve the data for us. Like any website that uses Google Fonts, Google can see your IP address when the page loads.</p>
+
+    <div class="legal__note">
+      <p><b>About payment:</b> we’ll email you how to pay. We will never ask for your GCash MPIN, a one-time code (OTP) or card details. If someone asks for these and says they’re from Blueprint, it isn’t us.</p>
+    </div>
+
+    <h2>How long we keep it</h2>
+    <p>We delete everyone’s registration details within 60 days after the last session. If you cancel, we can delete yours right away if you ask. We may keep totals with no names in them, like “40 people signed up.”</p>
+
+    <h2>How we protect it</h2>
+    <ul>
+      <li>The site only uses secure connections (HTTPS).</li>
+      <li>The public form can only add a sign-up. Nobody can read the list without a team login.</li>
+      <li>The team follows written rules for handling your details, like emailing groups with BCC so no one sees anyone else’s address.</li>
+      <li>If your details are ever exposed in a way that could harm you, we’ll tell you and the National Privacy Commission within 72 hours of finding out.</li>
+    </ul>
+
+    <h2>Your rights</h2>
+    <p>Under the Data Privacy Act, you can:</p>
+    <ul>
+      <li>Ask what details we have about you and get a copy</li>
+      <li>Have wrong details corrected</li>
+      <li>Withdraw your consent, or have your details deleted (if you do this before the sessions, we can’t hold your seat)</li>
+      <li>File a complaint with the <a href="https://privacy.gov.ph" target="_blank" rel="noopener">National Privacy Commission</a></li>
+    </ul>
+
+    <h2>Contact us</h2>
+    <p>Email <a href="mailto:amber.uyliapco@gmail.com">amber.uyliapco@gmail.com</a> for any of the above. We’ll reply within 5 working days.</p>
+  </main>
+</body>
+</html>
