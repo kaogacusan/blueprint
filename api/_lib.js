@@ -155,11 +155,12 @@ export async function paymentEmail(r) {
       step(2, "Upload your receipt",
         p(`Screenshot the GCash receipt, then upload it here:`) +
         btn(link, "I've paid: upload my receipt") +
-        p(`We check it and email your slot confirmation within 24 hours.${c.salesClose ? ` Sales close <b>${esc(c.salesClose)}</b>.` : ""}`, "font-size:14px;color:#3b4255")) +
+        p(`We check it and email your slot confirmation within 24 hours.${c.salesClose ? ` Sales close <b>${esc(c.salesClose)}</b>.` : ""}`, "font-size:14px;color:#3b4255") +
+        p(`Keep this email: the button is your own payment page, so you can pay later or upload a new screenshot. Lost it? Register again on the site with the same email and we'll send it again.`, "font-size:13px;color:#5b6378")) +
       h("The schedule") + schedule(c) +
       p(`Questions? Just reply to this email.`, "margin:18px 0 0"),
   });
-  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Only ${c.seats} slots.\n\n1. Send ${peso(c.price)} by GCash${to ? ` to ${to}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nSchedule:\n${scheduleText(c)}\n\nQuestions? Just reply to this email.`;
+  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Only ${c.seats} slots.\n\n1. Send ${peso(c.price)} by GCash${to ? ` to ${to}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nKeep this email: the link is your own payment page. Lost it? Register again on the site with the same email and we'll send it again.\n\nSchedule:\n${scheduleText(c)}\n\nQuestions? Just reply to this email.`;
   await mail({ to: r.email, subject: `Pay to lock your Blueprint slot (${r.code})`, html, text, attachments: qr ? [qr] : [] });
 }
 

@@ -563,10 +563,18 @@
         <div class="ticket__perf" aria-hidden="true"></div>
         <p class="ticket__foot mono">Status · Registered, awaiting payment</p>
       </div>
-      <h2 class="reg__title">You’re on the list.</h2>
-      <p class="reg__sub" id="doneText">Pay ₱1,999 by GCash and upload your receipt to lock your slot. We also emailed you this link (check spam too).</p>
-      <a class="btn btn--primary btn--lg btn--block" id="payNow" href="/pay">Pay now</a>
-      <button class="btn btn--ghost btn--block" data-close>Back to the page</button>
+      <h2 class="reg__title" id="doneTitle">You’re on the list.</h2>
+      <p class="reg__sub" id="doneText">Your slot isn’t locked until you pay. Three steps:</p>
+      <ol class="next">
+        <li><b>Pay ₱1,999 by GCash</b> using the QR on your payment page.</li>
+        <li><b>Upload a screenshot</b> of your GCash receipt on the same page.</li>
+        <li><b>Get your slot confirmation</b> by email within 24 hours.</li>
+      </ol>
+      <div class="done__ctas">
+        <a class="btn btn--primary btn--lg btn--block" id="payNow" href="/pay">Pay now</a>
+        <button class="btn btn--ghost btn--block" data-close>Back to the page</button>
+      </div>
+      <p class="done__fine" id="doneFine">We also emailed you this link, so you can pay later. Can’t find the email? Check spam, or register again with the same email and we’ll resend it.</p>
     </div>
   </dialog>
 

@@ -283,9 +283,13 @@
     const payNow = document.getElementById("payNow");
     payNow.hidden = !out.pay;
     if (out.pay) payNow.href = out.pay;
+    document.getElementById("doneTitle").textContent = out.pay ? "You’re on the list." : "You’ve signed up before.";
     document.getElementById("doneText").textContent = out.pay
-      ? "Pay ₱1,999 by GCash and upload your receipt to lock your slot. We also emailed you this link (check spam too)."
-      : "You’ve signed up before, so we emailed your payment link again (check spam too). Pay by GCash and upload your receipt there.";
+      ? "Your slot isn’t locked until you pay. Three steps:"
+      : `We emailed your payment link again to ${row.email}. Open it, then:`;
+    document.getElementById("doneFine").textContent = out.pay
+      ? "We also emailed you this link, so you can pay later. Can’t find the email? Check spam, or register again with the same email and we’ll resend it."
+      : "Not in your inbox? Check spam. We resend it at most every 10 minutes, so wait a bit before trying again. Still nothing? Email admublueprint@gmail.com.";
     form.hidden = true;
     done.hidden = false;
   });
