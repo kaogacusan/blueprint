@@ -124,7 +124,7 @@ export default {
           </li>`).join("")}</ul>` : empty("No key dates yet.", "flag")}
       </section>
 
-      <details class="card fold">
+      ${rules.length ? `<details class="card fold">
         <summary class="ch ch--pad"><h3>${icon("clock")} Prep deadlines for each session</h3><span class="muted">${locked ? `${locked} of 4 dates set` : "Fills in once session dates are set"}</span>${icon("down", "fold__chev")}</summary>
         <div class="tablewrap"><table class="table">
           <thead><tr><th>What</th><th>Who</th>${sessions.map((s) => `<th>Session ${s.n}</th>`).join("")}</tr></thead>
@@ -134,7 +134,7 @@ export default {
             ${sessions.map((s) => { const d = opsDeadlines(s).find((x) => x.key === r.key); return `<td>${d ? dueChip(d.date) : `<span class="muted">—</span>`}</td>`; }).join("")}
           </tr>`).join("")}</tbody>
         </table></div>
-      </details>
+      </details>` : ""}
 
       <details class="card fold">
         <summary class="ch ch--pad"><h3>${icon("pin")} What the venue needs</h3>${icon("down", "fold__chev")}</summary>
