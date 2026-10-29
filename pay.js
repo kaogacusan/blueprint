@@ -37,7 +37,7 @@
       $("amount").textContent = peso(p.price);
       $("payTo").textContent = [p.gcashName && `to ${p.gcashName}`, p.gcashNumber].filter(Boolean).join(" · ");
       if (p.qr) { $("qrImg").src = $("saveQr").href = p.qr; $("qrImg").hidden = $("saveQr").hidden = false; }
-      else $("qrHelp").textContent = "Our GCash QR is in your sign-up email.";
+      else $("qrHelp").textContent = "Our GCash QR isn’t up yet. Please check back in a bit, or email admublueprint@gmail.com.";
       if (p.proofAt) sentNote(p.proofAt);
       $("loading").hidden = true;
       form.hidden = false;

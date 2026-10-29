@@ -1,7 +1,7 @@
 /* POST /api/register: the site's sign-up form. Saves the sign-up with a sign-up number and a private
    payment link, and emails the GCash QR. Same checks as the database (migrations 001, 003, 005, 006, 007).
    A new sign-up gets its payment link back so the site can send them straight to /pay. */
-import { send, body, db, enc, newCode, paymentEmail } from "./_lib.js";
+import { send, body, db, enc, settings, newCode, paymentEmail } from "./_lib.js";
 
 const YEARS = ["3rd year", "4th year", "Fresh grad", "Other"];
 const HEARD = ["", "Student org", "Friend", "Facebook", "Instagram", "Email", "Other"];
@@ -35,6 +35,10 @@ export default async function handler(req, res) {
       }
       return send(res, 200, { ok: true, again: true });
     }
+
+    // new sign-ups stop after the sales-close day (Manila time), set in Payment setup
+    const { payment } = await settings("payment");
+    if (payment?.salesClose && Date.now() > Date.parse(`${payment.salesClose}T23:59:59+08:00`)) return send(res, 403, { error: "closed" });
 
     // a flood of sign-ups in an hour is a bot, not a class: stop before Gmail blocks us
     const hourAgo = new Date(Date.now() - 3600e3).toISOString();

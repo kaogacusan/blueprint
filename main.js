@@ -184,7 +184,7 @@
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
   /* ---------- Registration modal ----------
-     Sends the sign-up to /api/register, which emails the GCash QR and their payment link. The team sees it in /admin. */
+     Sends the sign-up to /api/register, which emails the link to their payment page (it has the GCash QR). The team sees it in /admin. */
   const modal = document.getElementById("modal");
   const form = document.getElementById("regForm");
   const done = document.getElementById("done");
@@ -238,11 +238,12 @@
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
   const PRIVACY_VERSION = "2026-10-29";
 
-  /* the server saves it and emails the GCash QR (api/register.js). A new sign-up gets its payment link back. */
+  /* the server saves it and emails their payment link (api/register.js). A new sign-up gets the link back. */
   const saveRegistration = async (row) => {
     const res = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(row) });
-    if (!res.ok) throw new Error(`Registration failed (${res.status})`);
-    return res.json().catch(() => ({}));
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(`Registration failed (${res.status})`), { code: out.error });
+    return out;
   };
 
   form.addEventListener("submit", async (e) => {
@@ -271,6 +272,9 @@
       out = await saveRegistration(row);
     } catch (err) {
       console.error(err);
+      regError.textContent = err.code === "closed"
+        ? "Registration closed on Nov 9. Email admublueprint@gmail.com if you still want a slot."
+        : "Something went wrong. Please check your connection and try again.";
       regError.hidden = false;
       return;
     } finally {

@@ -198,7 +198,7 @@ function paySetup() {
           <label class="btn btn--ghost btn--sm">${icon("upload")} ${p.qrPath ? "Replace" : "Upload"} QR<input type="file" id="qrFile" accept="image/png,image/jpeg" hidden /></label></div></div>
       <label class="payset__f"><span>Pre-work links <small>One per line: Label | link. Sent when someone is marked Paid.</small></span>
         <textarea class="cell-in" id="payPrework" rows="3" placeholder="Session 1 pre-work | https://forms.gle/...">${esc((p.prework || []).map((x) => `${x.label} | ${x.url}`).join("\n"))}</textarea></label>
-      <label class="payset__f"><span>Sales close <small>Said in the sign-up email</small></span>
+      <label class="payset__f"><span>Sales close <small>New sign-ups stop after this day (Manila time). Said in the sign-up email.</small></span>
         <input class="cell-in" id="payClose" type="date" value="${esc(p.salesClose || "")}" /></label>
     </div>
   </details>`;

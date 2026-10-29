@@ -53,7 +53,6 @@ Hero → Problem ("If any of these sound like you:" pills) → What Blueprint is
 Search `index.html` for `PLACEHOLDER` to find each one.
 
 - **Dates and venue** show "TBA" in the details strip and the "When and where?" FAQ. Thomas confirms.
-- **Session 4 title** "Open House" is a working title.
 - **Facilitator photos:** export them from the Canva Facilitator Profile and save as `assets/facilitators/thomas.jpg` and `assets/facilitators/kurt.jpg` (square). Until then the cards show initials.
 - **Footer contact** (email or IG) for questions.
 
