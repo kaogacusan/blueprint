@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       const qr = r.status === "registered" ? await readFile(payment.qrPath) : null;
       return send(res, 200, {
         name: first(r.name), code: r.code, status: r.status, price: costing.ticket || 1999,
-        gcashName: payment.gcashName || "",
+        gcashName: payment.gcashName || "", gcashNumber: payment.gcashNumber || "",
         qr: qr ? `data:${qr.type};base64,${qr.data.toString("base64")}` : null,
         proofAt: r.proof_path ? r.proof_at : null,
       });

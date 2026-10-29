@@ -67,6 +67,7 @@ async function context() {
     price: s.costing?.ticket || 1999,
     seats: s.costing?.max || 20,
     gcashName: pay.gcashName || "",
+    gcashNumber: pay.gcashNumber || "",
     qrPath: pay.qrPath || "",
     prework: (pay.prework || []).filter((p) => p?.url),
     salesClose: pay.salesClose ? day(pay.salesClose, { weekday: "long", month: "long" }) : "",
@@ -92,16 +93,46 @@ async function qrAttachment(path) {
 }
 export const payLink = (r) => `${SITE}/pay?t=${enc(r.pay_token)}`;
 
-const shell = (inner) => `<!doctype html><html><body style="margin:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;color:#101114">
-<div style="max-width:560px;margin:0 auto;padding:28px 20px">
-<p style="margin:0 0 20px;font-weight:800;font-size:20px;letter-spacing:-0.03em;color:#061a4d">blueprint</p>
-<div style="background:#fff;border:1px solid rgba(6,26,77,.1);border-radius:16px;padding:24px">${inner}</div>
-<p style="margin:16px 4px 0;color:#6b7387;font-size:12px;line-height:1.5">Blueprint is an LAS 50 student venture at Ateneo de Manila. We will never ask for your GCash MPIN or a one-time code (OTP). <a href="${SITE}/privacy.html" style="color:#6b7387">Privacy notice</a></p>
-</div></body></html>`;
-const p = (s) => `<p style="margin:0 0 14px;line-height:1.55;font-size:15px">${s}</p>`;
-const h = (s) => `<p style="margin:22px 0 8px;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#0646c8">${s}</p>`;
-const btn = (href, label) => `<p style="margin:18px 0"><a href="${href}" style="display:inline-block;background:#0646c8;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:999px">${label}</a></p>`;
-const schedule = (c) => `<table style="border-collapse:collapse;width:100%;font-size:14px">${c.sessions.map((s) => `<tr><td style="padding:6px 12px 6px 0;color:#3b4255;white-space:nowrap;vertical-align:top">${esc(s.when)}</td><td style="padding:6px 0">${esc(s.what)}</td></tr>`).join("")}</table>${p(`<span style="color:#3b4255;font-size:14px">${esc(c.venue)}</span>`)}`;
+/* ---------- email layout: tables + inline styles, because that's all Gmail and Outlook reliably keep ---------- */
+const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif";
+const MONO = "'SF Mono',Menlo,Consolas,monospace";
+const shell = ({ preview, kicker, title, body }) => `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(title)}</title></head>
+<body style="margin:0;padding:0;background:#eef2f8;font-family:${FONT};color:#101114;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(preview)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f8"><tr><td align="center" style="padding:28px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #dde4f0;border-radius:18px;overflow:hidden">
+  <tr><td style="height:6px;line-height:6px;font-size:0;background:#0646c8;background-image:linear-gradient(100deg,#0646c8 0%,#006dff 55%,#2bb8f0 100%)">&nbsp;</td></tr>
+  <tr><td style="padding:26px 28px 0"><a href="${SITE}" style="text-decoration:none"><img src="${SITE}/assets/email-logo.png" width="148" height="44" alt="blueprint" style="display:block;border:0;width:148px;height:44px;font-weight:800;font-size:22px;color:#061a4d"></a></td></tr>
+  <tr><td style="padding:26px 28px 6px">
+    <p style="margin:0 0 8px;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#0646c8">${kicker}</p>
+    <h1 style="margin:0;font-size:26px;line-height:1.2;letter-spacing:-0.02em;font-weight:800;color:#061a4d">${title}</h1>
+  </td></tr>
+  <tr><td style="padding:16px 28px 30px">${body}</td></tr>
+</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px"><tr><td style="padding:18px 28px 0;color:#6b7387;font-size:12px;line-height:1.6;text-align:center">
+  Blueprint is an LAS 50 student venture at Ateneo de Manila.<br>We will never ask for your GCash MPIN or a one-time code (OTP).<br>
+  <a href="${SITE}" style="color:#6b7387">ateneoblueprint.vercel.app</a> · <a href="${SITE}/privacy.html" style="color:#6b7387">Privacy notice</a>
+</td></tr></table>
+</td></tr></table></body></html>`;
+const p = (s, extra = "") => `<p style="margin:0 0 14px;line-height:1.6;font-size:15px;color:#2a3042;${extra}">${s}</p>`;
+const h = (s) => `<p style="margin:28px 0 12px;padding-top:22px;border-top:1px solid #e6ebf3;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#0646c8">${s}</p>`;
+const code = (s) => `<b style="font-family:${MONO};letter-spacing:.06em;color:#061a4d">${esc(s)}</b>`;
+const chip = (inner) => `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:4px 0 18px"><tr><td style="padding:10px 16px;border-radius:12px;background:#eef4ff;color:#061a4d;font-size:14px">${inner}</td></tr></table>`;
+const btn = (href, label) => `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 16px"><tr><td style="border-radius:999px;background:#0646c8"><a href="${href}" style="display:inline-block;padding:14px 26px;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;border-radius:999px">${label}</a></td></tr></table>`;
+/* a numbered step: blue circle on the left, content on the right */
+const step = (n, title, body) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 10px"><tr>
+  <td width="40" valign="top" style="padding-top:1px"><div style="width:28px;height:28px;line-height:28px;border-radius:50%;background:#0646c8;color:#fff;text-align:center;font-weight:800;font-size:14px">${n}</div></td>
+  <td valign="top"><p style="margin:3px 0 10px;font-weight:700;font-size:17px;color:#061a4d">${title}</p>${body}</td></tr></table>`;
+/* the QR card: code, amount, who it goes to */
+const payCard = (c, qr) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 14px;border:1px solid #dde4f0;border-radius:16px"><tr><td align="center" style="padding:22px 16px">
+  ${qr ? `<img src="cid:gcashqr" alt="Blueprint GCash QR code" width="210" height="210" style="display:block;width:210px;height:210px;max-width:100%;border:0">` : ""}
+  <p style="margin:${qr ? "14px" : "0"} 0 2px;font-size:28px;font-weight:800;letter-spacing:-0.02em;color:#061a4d">${peso(c.price)}</p>
+  ${c.gcashName ? `<p style="margin:0;font-size:14px;color:#3b4255">to <b>${esc(c.gcashName)}</b></p>` : ""}
+  ${c.gcashNumber ? `<p style="margin:2px 0 0;font-size:14px;color:#3b4255">GCash <span style="font-family:${MONO}">${esc(c.gcashNumber)}</span></p>` : ""}
+</td></tr></table>`;
+const schedule = (c) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">${c.sessions.map((s, i) => `<tr>
+  <td style="padding:10px 0;${i ? "border-top:1px solid #eef1f6;" : ""}vertical-align:top"><b style="color:#061a4d">${esc(s.what)}</b><br><span style="color:#5b6378">${esc(s.when)}</span></td></tr>`).join("")}</table>
+  ${p(`📍 ${esc(c.venue)}`, "margin-top:10px;font-size:14px;color:#3b4255")}`;
 const scheduleText = (c) => c.sessions.map((s) => `- ${s.when}: ${s.what}`).join("\n") + `\n${c.venue}`;
 
 /* 1. right after signing up: how to pay */
@@ -109,41 +140,48 @@ export async function paymentEmail(r) {
   const c = await context();
   const qr = await qrAttachment(c.qrPath);
   const link = payLink(r);
-  const html = shell(
-    p(`Hi ${esc(first(r.name))}!`) +
-    p(`Thanks for signing up for Blueprint. Your sign-up number is <b style="font-family:'SF Mono',Menlo,monospace;letter-spacing:.06em">${esc(r.code)}</b>. <b>Your slot isn't locked until payment is in.</b> There are only ${c.seats} slots, and they go to the first ${c.seats} people who pay.`) +
-    h("1. Pay with GCash") +
-    p(`Send <b>${peso(c.price)}</b> for all four sessions${c.gcashName ? ` to <b>${esc(c.gcashName)}</b>` : ""}.`) +
-    (qr ? `<p style="margin:0 0 14px"><img src="cid:gcashqr" alt="Blueprint GCash QR code" width="240" style="width:240px;max-width:100%;border-radius:12px;border:1px solid rgba(6,26,77,.1)"></p>` : "") +
-    p(`On your phone? Tap the button below. The page shows the QR too, so you can save it and use <b>Upload QR</b> in GCash.`) +
-    h("2. Send us your receipt") +
-    p(`Take a screenshot of the GCash receipt, then upload it here:`) +
-    btn(link, "I've paid: upload my receipt") +
-    p(`We check it and email your slot confirmation within 24 hours.`) +
-    (c.salesClose ? p(`Sales close <b>${esc(c.salesClose)}</b>.`) : "") +
-    h("The schedule") + schedule(c) +
-    p(`Questions? Just reply to this email.`)
-  );
-  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Only ${c.seats} slots.\n\n1. Send ${peso(c.price)} by GCash${c.gcashName ? ` to ${c.gcashName}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nSchedule:\n${scheduleText(c)}\n\nQuestions? Just reply to this email.`;
+  const to = [c.gcashName, c.gcashNumber && `GCash ${c.gcashNumber}`].filter(Boolean).join(", ");
+  const html = shell({
+    preview: `Send ${peso(c.price)} by GCash and upload your receipt to lock your slot.`,
+    kicker: "You're signed up",
+    title: "Pay to lock your slot",
+    body:
+      p(`Hi ${esc(first(r.name))}! Thanks for signing up for Blueprint. <b>Your slot isn't locked until payment is in.</b> There are only ${c.seats} slots, and they go to the first ${c.seats} people who pay.`) +
+      chip(`Your sign-up number &nbsp;${code(r.code)}`) +
+      step(1, "Pay with GCash",
+        p(`Send <b>${peso(c.price)}</b> for all four sessions. Scan the QR in GCash, or send to the number below.`) +
+        payCard(c, qr) +
+        p(`On your phone? The button below shows the QR too. Save it, then in GCash tap <b>Pay QR</b> › <b>Upload QR</b>.`, "font-size:13px;color:#5b6378")) +
+      step(2, "Upload your receipt",
+        p(`Screenshot the GCash receipt, then upload it here:`) +
+        btn(link, "I've paid: upload my receipt") +
+        p(`We check it and email your slot confirmation within 24 hours.${c.salesClose ? ` Sales close <b>${esc(c.salesClose)}</b>.` : ""}`, "font-size:14px;color:#3b4255")) +
+      h("The schedule") + schedule(c) +
+      p(`Questions? Just reply to this email.`, "margin:18px 0 0"),
+  });
+  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Only ${c.seats} slots.\n\n1. Send ${peso(c.price)} by GCash${to ? ` to ${to}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nSchedule:\n${scheduleText(c)}\n\nQuestions? Just reply to this email.`;
   await mail({ to: r.email, subject: `Pay to lock your Blueprint slot (${r.code})`, html, text, attachments: qr ? [qr] : [] });
 }
 
 /* 2. after the team checks the screenshot and clicks Paid: slot confirmation + pre-work */
 export async function confirmEmail(r) {
   const c = await context();
-  const html = shell(
-    p(`Hi ${esc(first(r.name))}!`) +
-    p(`<b>Your slot is confirmed.</b> We got your ${peso(c.price)}, and you're in for all four Blueprint sessions.`) +
-    `<p style="margin:0 0 14px;padding:12px 14px;border-radius:12px;background:#eef3ff;color:#061a4d;font-size:14px">Sign-up number <b style="font-family:'SF Mono',Menlo,monospace;letter-spacing:.06em">${esc(r.code)}</b> · Paid</p>` +
-    h("The schedule") + schedule(c) +
-    h("Before Session 1") +
-    (c.prework.length
-      ? p(`Please do the pre-work before the first session. It's short:`) + `<ul style="margin:0 0 14px;padding-left:20px;line-height:1.7">${c.prework.map((x) => `<li><a href="${esc(x.url)}" style="color:#0646c8;font-weight:600">${esc(x.label || "Pre-work")}</a></li>`).join("")}</ul>`
-      : p(`We'll email you the short pre-work before the first session.`)) +
-    h("What to bring") +
-    p(`A laptop or phone for every session. For Session 2, bring your current résumé and your LinkedIn link.`) +
-    p(`See you there! Reply to this email if anything comes up.`)
-  );
+  const html = shell({
+    preview: `You're in for all four Blueprint sessions. Here's the schedule and pre-work.`,
+    kicker: "Payment received",
+    title: "Your slot is confirmed",
+    body:
+      p(`Hi ${esc(first(r.name))}! We got your ${peso(c.price)}, and you're in for all four Blueprint sessions.`) +
+      chip(`Sign-up number &nbsp;${code(r.code)} &nbsp;·&nbsp; <b style="color:#0a7a3e">Paid</b>`) +
+      h("The schedule") + schedule(c) +
+      h("Before Session 1") +
+      (c.prework.length
+        ? p(`Please do the pre-work before the first session. It's short:`) + `<ul style="margin:0 0 14px;padding-left:20px;line-height:1.8;font-size:15px">${c.prework.map((x) => `<li><a href="${esc(x.url)}" style="color:#0646c8;font-weight:600">${esc(x.label || "Pre-work")}</a></li>`).join("")}</ul>`
+        : p(`We'll email you the short pre-work before the first session.`)) +
+      h("What to bring") +
+      p(`A laptop or phone for every session. For Session 2, bring your current résumé and your LinkedIn link.`) +
+      p(`See you there! Reply to this email if anything comes up.`, "margin:18px 0 0"),
+  });
   const text = `Hi ${first(r.name)}!\n\nYour slot is confirmed. We got your ${peso(c.price)}, and you're in for all four Blueprint sessions (sign-up number ${r.code}).\n\nSchedule:\n${scheduleText(c)}\n\n${c.prework.length ? `Pre-work (before Session 1):\n${c.prework.map((x) => `- ${x.label || "Pre-work"}: ${x.url}`).join("\n")}` : "We'll email you the short pre-work before the first session."}\n\nBring a laptop or phone to every session. For Session 2, bring your résumé and LinkedIn link.\n\nSee you there!`;
   await mail({ to: r.email, subject: `Your Blueprint slot is confirmed (${r.code})`, html, text });
 }
@@ -151,11 +189,15 @@ export async function confirmEmail(r) {
 /* 3. paid after the seats ran out */
 export async function waitlistEmail(r) {
   const c = await context();
-  const html = shell(
-    p(`Hi ${esc(first(r.name))}!`) +
-    p(`Thank you for paying for Blueprint. We're sorry: all ${c.seats} slots were taken before your payment came in, so you're <b>first in line on the waitlist</b>.`) +
-    p(`If a slot opens up, we'll email you right away. If not, we'll refund your ${peso(c.price)} to the same GCash account. Reply to this email if you'd rather have the refund now.`)
-  );
+  const html = shell({
+    preview: `All ${c.seats} slots filled before your payment came in. You're first in line.`,
+    kicker: "Waitlist",
+    title: "You're first in line",
+    body:
+      p(`Hi ${esc(first(r.name))}! Thank you for paying for Blueprint. We're sorry: all ${c.seats} slots were taken before your payment came in, so you're <b>on the waitlist</b>.`) +
+      p(`If a slot opens up, we'll email you right away. If not, we'll refund your ${peso(c.price)} to the same GCash account.`) +
+      p(`Reply to this email if you'd rather have the refund now.`, "margin:18px 0 0"),
+  });
   const text = `Hi ${first(r.name)}!\n\nThank you for paying for Blueprint. All ${c.seats} slots were taken before your payment came in, so you're on the waitlist. If a slot opens, we'll email you. If not, we'll refund your ${peso(c.price)} to the same GCash account. Reply if you'd rather have the refund now.`;
   await mail({ to: r.email, subject: "Blueprint is full: you're on the waitlist", html, text });
 }

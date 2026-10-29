@@ -191,6 +191,8 @@ function paySetup() {
     <div class="fold__body payset">
       <label class="payset__f"><span>GCash account name <small>Shown under the QR so people know they’re paying us</small></span>
         <input class="cell-in" id="payName" value="${esc(p.gcashName || "")}" placeholder="e.g. AM**R S." maxlength="80" /></label>
+      <label class="payset__f"><span>GCash number <small>For people who send by number instead of the QR</small></span>
+        <input class="cell-in" id="payNumber" value="${esc(p.gcashNumber || "")}" placeholder="0917 123 4567" maxlength="20" inputmode="tel" /></label>
       <div class="payset__f"><span>GCash QR <small>Goes in the sign-up email and on each person’s private payment page. Never on the public site.</small></span>
         <div class="payset__qr">${p.qrPath ? `<img id="qrImg" alt="GCash QR" />` : `<span class="muted">No QR yet</span>`}
           <label class="btn btn--ghost btn--sm">${icon("upload")} ${p.qrPath ? "Replace" : "Upload"} QR<input type="file" id="qrFile" accept="image/png,image/jpeg" hidden /></label></div></div>
@@ -209,6 +211,7 @@ function wirePaySetup(root) {
     try { await saveSetting("payment", { ...setting("payment"), ...patch }); toast("Saved. New emails use it."); } catch { toast("Couldn’t save.", "bad"); }
   };
   root.querySelector("#payName")?.addEventListener("change", (e) => save({ gcashName: e.target.value.trim() }));
+  root.querySelector("#payNumber")?.addEventListener("change", (e) => save({ gcashNumber: e.target.value.trim() }));
   root.querySelector("#payClose")?.addEventListener("change", (e) => save({ salesClose: e.target.value }));
   root.querySelector("#payPrework")?.addEventListener("change", (e) => {
     const rows = e.target.value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {

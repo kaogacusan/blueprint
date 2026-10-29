@@ -35,7 +35,7 @@
 
       $("hello").innerHTML = `Hi ${esc(p.name)}! Your sign-up number is <span class="code">${esc(p.code)}</span>.`;
       $("amount").textContent = peso(p.price);
-      $("payTo").textContent = p.gcashName ? `to ${p.gcashName}` : "";
+      $("payTo").textContent = [p.gcashName && `to ${p.gcashName}`, p.gcashNumber].filter(Boolean).join(" · ");
       if (p.qr) { $("qrImg").src = $("saveQr").href = p.qr; $("qrImg").hidden = $("saveQr").hidden = false; }
       else $("qrHelp").textContent = "Our GCash QR is in your sign-up email.";
       if (p.proofAt) sentNote(p.proofAt);
