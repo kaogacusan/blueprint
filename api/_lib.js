@@ -38,6 +38,28 @@ export async function teamName(req) {
   return (await r.json()) || null;
 }
 
+/* ---------- tickets (migration 010). The site shows the same prices (index.html, main.js PRICE). ---------- */
+export const PRICE = { full: 1999, single: 699 };
+const ALL = [1, 2, 3, 4];
+/* what they picked on the site → what we save, or null if it doesn't add up.
+   Picking all four singles gets them the Full Pass: it's cheaper and comes with the pre-work bundle. */
+export function ticketFor(ticket, sessions) {
+  if (ticket === "full") return { ticket: "full", sessions: ALL, amount: PRICE.full };
+  if (ticket !== "single" || !Array.isArray(sessions) || !sessions.length) return null;
+  const s = [...new Set(sessions)].filter((n) => ALL.includes(n)).sort((a, b) => a - b);
+  if (s.length !== sessions.length) return null;
+  if (s.length === 4) return ticketFor("full");
+  return { ticket: "single", sessions: s, amount: s.length * PRICE.single };
+}
+const and = (a) => (a.length < 2 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a.at(-1)}`);
+/* "the Full Pass (all four sessions)" or "Session 2: Proof on Paper" (titles: { 2: "Proof on Paper" }) */
+export const ticketLine = (r, titles = {}) => r.ticket === "single"
+  ? and((r.sessions || []).map((n) => `Session ${n}${titles[n] ? `: ${titles[n]}` : ""}`))
+  : "the Full Pass (all four sessions)";
+export async function sessionTitles() {
+  return Object.fromEntries((await db("sessions?select=n,title&order=n")).map((x) => [x.n, x.title]));
+}
+
 /* BP-7K2Q, their sign-up number: no 0/O or 1/I, so it reads cleanly off a phone */
 const ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const newCode = () => "BP-" + Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) => ALPHA[b % ALPHA.length]).join("");
@@ -55,27 +77,31 @@ const peso = (n) => `₱${Number(n || 0).toLocaleString("en-PH")}`;
 const day = (iso, o = {}) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric", ...o });
 const time = (t) => { if (!t) return ""; const [h, m] = t.split(":").map(Number); return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; };
 
-/* what every email needs: price, sessions, payment setup */
-async function context() {
-  const [s, sessions] = await Promise.all([settings("payment", "costing"), db("sessions?select=n,title,date,start_time,end_time,venue,venue_status&order=n")]);
+/* what every email needs: their ticket, amount and sessions, and the payment setup */
+async function context(r) {
+  const [s, sessions] = await Promise.all([settings("payment"), db("sessions?select=n,title,date,start_time,end_time,venue,venue_status&order=n")]);
   const pay = s.payment || {};
-  const lines = sessions.filter((x) => x.date).map((x) => ({
+  const mine = r.ticket === "single" ? r.sessions || [] : ALL;
+  const lines = sessions.filter((x) => x.date && mine.includes(x.n)).map((x) => ({
     mon: day(x.date, { weekday: undefined, day: undefined }).toUpperCase(),
     dd: day(x.date, { weekday: undefined, month: undefined }),
     when: `${day(x.date)}, ${time(x.start_time)}–${time(x.end_time)}`,
     what: `Session ${x.n}: ${x.title}`,
   }));
-  const confirmed = sessions.find((x) => x.venue && x.venue_status === "Confirmed");
+  // the room shown on the site (FA Annex 104), from Schedule; the site and the emails should always agree
+  const room = sessions.find((x) => mine.includes(x.n) && x.venue) || sessions.find((x) => x.venue);
   return {
-    price: s.costing?.ticket || 1999,
-    seats: s.costing?.max || 20,
+    price: r.amount || PRICE.full,
+    full: r.ticket !== "single",
+    mine,
+    what: ticketLine(r, Object.fromEntries(sessions.map((x) => [x.n, x.title]))),
     gcashName: pay.gcashName || "",
     gcashNumber: pay.gcashNumber || "",
     qrPath: pay.qrPath || "",
     prework: (pay.prework || []).filter((p) => p?.url),
     salesClose: pay.salesClose ? day(pay.salesClose, { weekday: "long", month: "long" }) : "",
     sessions: lines,
-    venue: confirmed ? `${confirmed.venue}, Ateneo de Manila` : "Ateneo de Manila (room to be confirmed, we'll email you)",
+    venue: room ? `${room.venue}, Ateneo de Manila` : "Ateneo de Manila (room to be confirmed, we'll email you)",
   };
 }
 /* ---------- private files (the "payment" bucket: our QR, and people's payment screenshots) ---------- */
@@ -195,14 +221,24 @@ const infoBox = (rows) => `<table role="presentation" width="100%" cellpadding="
     <td valign="top" style="padding:${i ? "20px" : "0"} 0 22px">
       <p style="margin:4px 0 6px;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${BLUE}">${head}</p>
       <div style="font-size:15px;line-height:1.55;color:${TEXT}">${body}</div></td></tr></table></td></tr>`).join("")}</table>`;
-const prework = (c) => c.prework.length
+/* the pre-work bundle comes with the Full Pass; single-session people hear from us before their session */
+const yours = (c) => (c.mine.length > 1 ? "your sessions" : "your session");
+const prework = (c) => !c.full
+  ? `We’ll email you what to prep before ${yours(c)}.`
+  : c.prework.length
   ? `Do this short pre-work before the first session:<br>${c.prework.map((x) => `<a href="${esc(x.url)}" style="color:${BLUE};font-weight:600">${esc(x.label || "Pre-work")}</a>`).join("<br>")}`
-  : "We’ll email you the short pre-work before the first session.";
-const BRING = "A laptop or phone for every session. For Session 2, bring your current résumé and your LinkedIn link.";
+  : "We’ll email you the full pre-work bundle before the first session.";
+const preworkText = (c) => !c.full
+  ? `We'll email you what to prep before ${yours(c)}.`
+  : c.prework.length
+  ? `Your pre-work bundle (before Session 1):\n${c.prework.map((x) => `- ${x.label || "Pre-work"}: ${x.url}`).join("\n")}`
+  : "We'll email you the full pre-work bundle before the first session.";
+const bring = (c) => (c.mine.length > 1 ? "A laptop or phone for every session." : "A laptop or phone.") + (c.mine.includes(2) ? " For Session 2, bring your current résumé and your LinkedIn link." : "");
+const scheduleHead = (c) => (c.full ? "The schedule" : c.mine.length > 1 ? "Your sessions" : "Your session");
 
 /* 1. right after signing up: how to pay */
 export async function paymentEmail(r) {
-  const c = await context();
+  const c = await context(r);
   const qr = await qrAttachment(c.qrPath);
   const link = payLink(r);
   const to = [c.gcashName, c.gcashNumber && `GCash ${c.gcashNumber}`].filter(Boolean).join(", ");
@@ -211,11 +247,11 @@ export async function paymentEmail(r) {
     kicker: "You're signed up",
     title: "Pay to lock your slot",
     body:
-      p(`Hi ${esc(first(r.name))}! Thanks for signing up for Blueprint. <b>Your slot isn't locked until payment is in.</b> There are only ${c.seats} slots, and they go to the first ${c.seats} people who pay.`) +
+      p(`Hi ${esc(first(r.name))}! Thanks for signing up for Blueprint. <b>Your slot isn't locked until payment is in.</b> Seats are limited, and they go to the first people who pay.`) +
       chip(r.code, "unpaid") +
       h("How to pay") +
       step(1, "Pay with GCash",
-        p(`Send <b>${peso(c.price)}</b> for all four sessions. Scan the QR in GCash, or send to the number below.`) +
+        p(`Send <b>${peso(c.price)}</b> for ${esc(c.what)}. Scan the QR in GCash, or send to the number below.`) +
         payCard(c, qr) +
         p(`On your phone? The button below shows the QR too. Save it, then in GCash tap <b>Pay QR</b> › <b>Upload QR</b>.`, `font-size:14px;color:${MUTED}`)) +
       step(2, "Upload your receipt",
@@ -223,46 +259,46 @@ export async function paymentEmail(r) {
         btn(link, "I've paid: upload my receipt") +
         p(`We check it and email your slot confirmation within 24 hours.${c.salesClose ? ` Sales close <b>${esc(c.salesClose)}</b>.` : ""}`, "font-size:15px") +
         p(`Keep this email: the button is your own payment page, so you can pay later or upload a new screenshot. Lost it? Register again on the site with the same email and we'll send it again.`, `font-size:14px;color:${MUTED}`)) +
-      h("The schedule") + schedule(c),
+      h(scheduleHead(c)) + schedule(c),
   });
-  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Only ${c.seats} slots.\n\n1. Send ${peso(c.price)} by GCash${to ? ` to ${to}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nKeep this email: the link is your own payment page. Lost it? Register again on the site with the same email and we'll send it again.\n\nSchedule:\n${scheduleText(c)}\n\n${askText}`;
+  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Seats are limited.\n\n1. Send ${peso(c.price)} by GCash for ${c.what}${to ? ` to ${to}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nKeep this email: the link is your own payment page. Lost it? Register again on the site with the same email and we'll send it again.\n\n${scheduleHead(c)}:\n${scheduleText(c)}\n\n${askText}`;
   await mail({ to: r.email, subject: `Pay to lock your Blueprint slot (${r.code})`, html, text, attachments: qr ? [qr] : [] });
 }
 
-/* 2. after the team checks the screenshot and clicks Paid: slot confirmation + pre-work */
+/* 2. after the team checks the screenshot and clicks Paid: slot confirmation (+ the pre-work bundle for the Full Pass) */
 export async function confirmEmail(r) {
-  const c = await context();
+  const c = await context(r);
   const html = shell({
-    preview: `You're in for all four Blueprint sessions. Here's the schedule and pre-work.`,
+    preview: c.full ? `You're in for all four Blueprint sessions. Here's the schedule and pre-work.` : `You're in for ${c.what}. Here's when and where.`,
     kicker: "Payment received",
     title: "Your slot is confirmed",
     body:
-      p(`Hi ${esc(first(r.name))}! We got your ${peso(c.price)}, and you’re in for all four Blueprint sessions.`) +
+      p(`Hi ${esc(first(r.name))}! We got your ${peso(c.price)}, and you’re in for ${c.full ? "all four Blueprint sessions" : esc(c.what)}.`) +
       chip(r.code, "paid") +
-      h("The schedule") + schedule(c) +
-      infoBox([["doc", "Before Session 1", prework(c)], ["laptop", "What to bring", BRING]]),
+      h(scheduleHead(c)) + schedule(c) +
+      infoBox([["doc", c.full ? "Your pre-work bundle" : `Before ${yours(c)}`, prework(c)], ["laptop", "What to bring", bring(c)]]),
     end: "See you there!",
   });
-  const text = `Hi ${first(r.name)}!\n\nYour slot is confirmed. We got your ${peso(c.price)}, and you're in for all four Blueprint sessions (sign-up number ${r.code}).\n\nSchedule:\n${scheduleText(c)}\n\n${c.prework.length ? `Pre-work (before Session 1):\n${c.prework.map((x) => `- ${x.label || "Pre-work"}: ${x.url}`).join("\n")}` : "We'll email you the short pre-work before the first session."}\n\nWhat to bring: ${BRING}\n\nSee you there! ${askText}`;
+  const text = `Hi ${first(r.name)}!\n\nYour slot is confirmed. We got your ${peso(c.price)}, and you're in for ${c.full ? "all four Blueprint sessions" : c.what} (sign-up number ${r.code}).\n\n${scheduleHead(c)}:\n${scheduleText(c)}\n\n${preworkText(c)}\n\nWhat to bring: ${bring(c)}\n\nSee you there! ${askText}`;
   await mail({ to: r.email, subject: `Your Blueprint slot is confirmed (${r.code})`, html, text });
 }
 
 /* 3. paid after the seats ran out */
 export async function waitlistEmail(r) {
-  const c = await context();
+  const c = await context(r);
   const html = shell({
-    preview: `All ${c.seats} slots filled before your payment came in. You're first in line.`,
+    preview: `The seats filled up before your payment came in. You're first in line.`,
     kicker: "Waitlist",
     title: "You're first in line",
     body:
-      p(`Hi ${esc(first(r.name))}! Thank you for paying for Blueprint. We’re sorry: all ${c.seats} slots were taken before your payment came in, so you’re <b>on the waitlist</b>.`) +
+      p(`Hi ${esc(first(r.name))}! Thank you for paying for Blueprint. We’re sorry: the seats ${c.full ? "" : `for ${esc(c.what)} `}were all taken before your payment came in, so you’re <b>on the waitlist</b>.`) +
       chip(r.code, "waitlist") +
       h("What happens next") +
       p(`If a slot opens up, we’ll email you right away. If not, we’ll refund your ${peso(c.price)} to the same GCash account.`) +
       p(`Would you rather have the refund now? Ask us on the site and we’ll send it.`),
   });
-  const text = `Hi ${first(r.name)}!\n\nThank you for paying for Blueprint. All ${c.seats} slots were taken before your payment came in, so you're on the waitlist (sign-up number ${r.code}). If a slot opens, we'll email you. If not, we'll refund your ${peso(c.price)} to the same GCash account. Would you rather have the refund now? Ask us on the site and we'll send it.\n\n${askText}`;
-  await mail({ to: r.email, subject: "Blueprint is full: you're on the waitlist", html, text });
+  const text = `Hi ${first(r.name)}!\n\nThank you for paying for Blueprint. The seats ${c.full ? "" : `for ${c.what} `}were all taken before your payment came in, so you're on the waitlist (sign-up number ${r.code}). If a slot opens, we'll email you. If not, we'll refund your ${peso(c.price)} to the same GCash account. Would you rather have the refund now? Ask us on the site and we'll send it.\n\n${askText}`;
+  await mail({ to: r.email, subject: "You're on the Blueprint waitlist", html, text });
 }
 
 /* 4. the team's answer to a question sent from the site's Ask form (api/questions.js).

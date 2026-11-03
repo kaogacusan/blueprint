@@ -12,6 +12,12 @@ const HELP = { registered: "Signed up, waiting to pay", paid: "Seat confirmed", 
 const f = { q: "", status: "" };
 const fmt = (iso) => new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const label = (k) => (STATUSES.find(([s]) => s === k) || [, k])[1];
+/* their ticket (migration 010): "Full Pass", or "Single · S2, S3" */
+const ALL = [1, 2, 3, 4];
+const sessionsOf = (r) => (r.ticket === "single" ? r.sessions || [] : ALL);
+const ticketOf = (r) => (r.ticket === "single" ? `Single · ${sessionsOf(r).map((n) => `S${n}`).join(", ")}` : "Full Pass");
+/* seats are per session: a Full Pass takes one in all four (same count as api/signups.js) */
+const seatsTaken = (regs) => ALL.map((n) => regs.filter((r) => r.status === "paid" && sessionsOf(r).includes(n)).length);
 const RULES = [
   "Only use these details to run Blueprint.",
   "Emailing more than one person? Put the emails in <b>BCC</b>.",
@@ -27,16 +33,17 @@ export default {
   badge: () => (S.data.registrations || []).filter(toCheck).length || "",
   render(root) {
     const regs = S.data.registrations || [];
-    const list = regs.filter((r) => (!f.status || r.status === f.status) && (!f.q || [r.name, r.email, r.mobile, r.course, r.year, r.heard_from, r.heard_org, r.notes].join(" ").toLowerCase().includes(f.q.toLowerCase())));
+    const list = regs.filter((r) => (!f.status || r.status === f.status) && (!f.q || [r.name, r.email, r.mobile, r.course, r.year, r.heard_from, r.heard_org, r.notes, ticketOf(r)].join(" ").toLowerCase().includes(f.q.toLowerCase())));
     const count = (s) => regs.filter((r) => r.status === s).length;
     const seats = setting("costing").max || 20;
+    const taken = seatsTaken(regs), fullest = Math.max(...taken);
     const checking = regs.filter(toCheck);
 
     root.innerHTML = `
       <header class="ph">
         <div>
           <h1 class="ph__title">Sign-ups</h1>
-          <p class="ph__sub">${checking.length ? `<b>${checking.length} sent a receipt.</b> Click Check receipt, find the payment in GCash, then click Paid. That emails their slot confirmation and pre-work.` : `Everyone who registered on the site. When someone uploads their GCash receipt, it shows here with a Check receipt button.`} The first ${seats} to pay get slots.</p>
+          <p class="ph__sub">${checking.length ? `<b>${checking.length} sent a receipt.</b> Click Check receipt, find the payment in GCash, then click Paid. That emails their slot confirmation and pre-work.` : `Everyone who registered on the site. When someone uploads their GCash receipt, it shows here with a Check receipt button.`} Each session has ${seats} seats, and they go to whoever pays first. A Full Pass takes a seat in all four.</p>
         </div>
         <div class="ph__actions">
           <button class="btn btn--ghost" id="copyEmails" title="Copy the emails shown below, to paste in BCC">${icon("copy")} Copy emails</button>
@@ -58,10 +65,11 @@ export default {
       <section class="stats">
         ${STATUSES.map(([k, l]) => `<button class="stat ${f.status === k ? "is-on" : ""}" data-k="${k}">
           <span class="stat__k"><i class="sdot sdot--${k}"></i>${l}</span>
-          <span class="stat__n"><b data-count="${count(k)}">0</b>${k === "paid" ? `<small>of ${seats} seats</small>` : ""}</span>
-          ${k === "paid" ? `<i class="meter"><i style="--w:${Math.min(100, (count(k) / seats) * 100)}%"></i></i>` : `<span class="stat__sub">${HELP[k]}</span>`}
+          <span class="stat__n"><b data-count="${count(k)}">0</b>${k === "paid" ? `<small>fullest session ${fullest} of ${seats}</small>` : ""}</span>
+          ${k === "paid" ? `<i class="meter" title="Seats taken: ${taken.map((t, i) => `S${i + 1} ${t}/${seats}`).join(", ")}"><i style="--w:${Math.min(100, (fullest / seats) * 100)}%"></i></i>` : `<span class="stat__sub">${HELP[k]}</span>`}
         </button>`).join("")}
       </section>
+      <p class="seatline">Seats taken (paid): ${taken.map((t, i) => `<span class="${t >= seats ? "bad" : ""}">S${i + 1} <b>${t}</b>/${seats}</span>`).join("")}</p>
 
       <div class="card filters">
         <label class="search">${icon("search")}<input id="q" placeholder="Search name, email, course, org" value="${esc(f.q)}" /></label>
@@ -103,8 +111,8 @@ export default {
       try { await removeProofs(regs); const n = await eraseRegistrations(); toast(`Erased ${n} sign-up${n === 1 ? "" : "s"}`); } catch { toast("Couldn’t erase.", "bad"); }
     });
     root.querySelector("#csv")?.addEventListener("click", () => {
-      const cols = ["created_at", "name", "email", "code", "proof_at", "paid_at", "paid_by", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes", "consented_at", "privacy_version"];
-      const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const cols = ["created_at", "name", "email", "code", "ticket", "sessions", "amount", "proof_at", "paid_at", "paid_by", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes", "consented_at", "privacy_version"];
+      const cell = (v) => `"${String(Array.isArray(v) ? v.join(" ") : v ?? "").replace(/"/g, '""')}"`;
       download(`blueprint-signups-${todayISO()}.csv`, [cols.join(","), ...list.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\n"), "text/csv");
     });
     const q = root.querySelector("#q");
@@ -147,6 +155,7 @@ const toCheck = (r) => r.status === "registered" && (r.proof_path || r.gcash_ref
 function payCell(r) {
   const unsent = r.code && !r.emailed_at && r.status !== "cancelled";
   return `${r.code ? `<span class="mono">${esc(r.code)}</span>` : `<span class="muted">—</span>`}
+    <small class="tk"><b>${esc(peso(r.amount || 1999))}</b> · ${esc(ticketOf(r))}</small>
     ${r.proof_path ? `<small>Receipt sent ${r.proof_at ? esc(fmt(r.proof_at)) : ""}</small>` : r.gcash_ref ? `<small>Ref <span class="mono">${esc(r.gcash_ref)}</span></small>` : r.status === "registered" ? `<small class="muted">Not paid yet</small>` : ""}
     ${r.paid_at ? `<small>Paid ${esc(fmt(r.paid_at))}${r.paid_by ? ` · ${esc(r.paid_by)}` : ""}</small>` : ""}
     ${r.proof_path && r.status === "registered" ? `<button class="btn btn--primary btn--xs" data-proof>${icon("eye")} Check receipt</button>`
@@ -160,9 +169,9 @@ function payCell(r) {
 async function showProof(r) {
   const open = r.status === "registered";
   openDrawer({
-    eyebrow: `${esc(r.code || "")} · ${esc(peso(setting("costing").ticket || 1999))}`,
+    eyebrow: `${esc(r.code || "")} · ${esc(peso(r.amount || 1999))} · ${esc(ticketOf(r))}`,
     title: esc(r.name),
-    body: `<p class="muted">${open ? "Find this payment in GCash (Transactions): same amount, same reference number. Then click Paid." : `Status: ${esc(label(r.status))}`}</p>
+    body: `<p class="muted">${open ? `Find this payment in GCash (Transactions): <b>${esc(peso(r.amount || 1999))}</b>, same reference number. Then click Paid.` : `Status: ${esc(label(r.status))}`}</p>
       <div class="proof"><span class="muted" id="proofLoading">Loading receipt…</span><img id="proofImg" alt="${esc(r.name)}’s GCash receipt" hidden /></div>`,
     actions: open ? `<button class="btn btn--ghost" data-close-drawer>Not yet</button><button class="btn btn--primary" id="proofPaid">${icon("check")} Paid</button>` : "",
     onMount: async (el) => {
@@ -188,7 +197,7 @@ async function markPaid(r) {
   if (!(await confirmBox(`Mark ${r.name} as paid?${r.proof_path ? " Only if you found their payment in GCash." : r.gcash_ref ? ` Check GCash ref ${r.gcash_ref} first.` : " They haven’t sent a receipt."} This emails their slot confirmation and pre-work.`, { ok: "Paid", tone: "" }))) return false;
   try {
     const out = await signupAction("paid", r.id);
-    if (out.status === "waitlist") toast(`Seats are full. ${r.name} is on the waitlist${out.emailed ? " and got the waitlist email. Refund them if no seat opens" : ", but the email didn’t send"}.`, "bad");
+    if (out.status === "waitlist") toast(`${r.ticket === "single" ? "Their session is" : "A session is"} full. ${r.name} is on the waitlist${out.emailed ? " and got the waitlist email. Refund them if no seat opens" : ", but the email didn’t send"}.`, "bad");
     else toast(out.emailed ? `${r.name} is in. Slot confirmation sent.` : `${r.name} is marked paid, but the email didn’t send. Click Send email.`, out.emailed ? "" : "bad");
     return true;
   } catch { toast("Couldn’t mark paid. Try again.", "bad"); return false; }

@@ -103,16 +103,16 @@
         </div>
       </div>
 
-      <!-- Details strip. PLACEHOLDERS: dates and venue (Thomas to confirm). -->
+      <!-- Details strip -->
       <div class="wrap">
         <ul class="facts reveal" aria-label="Workshop details">
           <li><b>4</b> sessions</li>
-          <li><b>Dates</b> TBA</li>
-          <li class="facts__venue"><b>Venue</b> TBA, Ateneo de Manila</li>
-          <li><b>90</b> minutes each</li>
-          <li><b>20</b> seats</li>
+          <li class="facts__when"><b>Nov 10 to 13</b></li>
+          <li class="facts__time"><b>5:30 to 7:00</b> PM</li>
+          <li class="facts__venue"><b>FA Annex 104</b></li>
+          <li><b>Limited</b> seats</li>
           <li class="facts__close"><b>Register</b> by Nov 9</li>
-          <li class="facts__price"><b>₱1,999</b> for all four</li>
+          <li class="facts__price"><b>₱1,999</b> all four, or ₱699 a session</li>
         </ul>
       </div>
     </section>
@@ -161,6 +161,7 @@
               <li>Match a real story to each pillar</li>
               <li>Plan four weeks of posts (posting stays optional)</li>
             </ul>
+            <p class="session__by">Facilitator: <b>Kurt Boquiren</b></p>
           </article>
 
           <article class="session reveal" data-session="3">
@@ -380,8 +381,8 @@
         </ol>
 
         <div class="band reveal">
-          <p class="band__t">It starts with a short form.</p>
-          <button class="btn btn--primary btn--lg" data-register>Reserve your spot <span class="btn__arrow" aria-hidden="true">→</span></button>
+          <p class="band__t">All four sessions, or just the ones you need.</p>
+          <button class="btn btn--primary btn--lg" data-register>See tickets <span class="btn__arrow" aria-hidden="true">→</span></button>
         </div>
       </div>
     </section>
@@ -408,7 +409,7 @@
             <div class="person__pic" data-initials="KB"><img src="assets/facilitators/kurt.jpg" alt="Kurt Boquiren" loading="lazy" onerror="this.remove()" /></div>
             <div class="person__body">
               <h3 class="person__name">Kurt Boquiren</h3>
-              <p class="person__role">Facilitator of Workshop 3</p>
+              <p class="person__role">Session 3 Facilitator</p>
               <p class="person__bio">Kurt works in learning and organizational development. At Breakthrough Leadership, he’s part of the learning experience design team, co-designing leadership programs, workbooks and digital toolkits for local and global clients. As an associate consultant at Project Purpose, he supports government agencies, development institutions and MSMEs with organizational development and planning. He graduated magna cum laude from iACADEMY in Marketing Management, where he led the student business organization Wonder.</p>
             </div>
           </article>
@@ -441,19 +442,19 @@
           </details>
           <details class="qa reveal">
             <summary>How much does it cost?</summary>
-            <p>₱1,999 for all four sessions, by GCash. After you register, you get your own payment page with our GCash QR, and we email you the link to it. Pay, then upload a screenshot of your GCash receipt there. We check it and email your slot confirmation within 24 hours.</p>
+            <p>There are two tickets. The <b>Full Pass</b> is ₱1,999 for all four sessions: a locked seat for all four days and the full pre-work bundle. A <b>Single Session</b> is ₱699 for each session you pick. You pay by GCash: after you register, you get your own payment page with our GCash QR and your amount, and we email you the link to it. Pay, then upload a screenshot of your GCash receipt there. We check it and email your slot confirmation within 24 hours.</p>
           </details>
           <details class="qa reveal">
             <summary>How do I sign up?</summary>
-            <p>Click Register and fill in the short form by <b>Nov 9</b>. You can pay right away on your payment page, and we’ll email you its link and the schedule.</p>
+            <p>Pick a ticket below and fill in the short form by <b>Nov 9</b>. You can pay right away on your payment page, and we’ll email you its link and the schedule.</p>
           </details>
           <details class="qa reveal">
             <summary>When and where?</summary>
-            <p><!-- PLACEHOLDER: dates and venue -->Dates TBA at Venue TBA, Ateneo de Manila. Each session runs 90 minutes.</p>
+            <p>Nov 10 to 13, Tuesday to Friday, one session a day. Every session runs 5:30 to 7:00 PM at FA Annex 104, Ateneo de Manila.</p>
           </details>
           <details class="qa reveal">
             <summary>Who runs the sessions?</summary>
-            <p>Thomas Santos and Kurt Boquiren. Their bios are above.</p>
+            <p>Thomas Santos, with Kurt Boquiren facilitating Session 3. Their bios are above.</p>
           </details>
         </div>
       </div>
@@ -501,14 +502,48 @@
       </div>
     </section>
 
-    <!-- ───────────── 10. FINAL CTA ───────────── -->
+    <!-- ───────────── 10. TICKETS (final CTA) ─────────────
+         Every Register button on the page scrolls here (main.js). The ticket buttons open the sign-up form.
+         Prices are also in main.js (PRICE) and api/_lib.js (PRICE): the server works out what each person pays. -->
     <section class="final" id="register">
       <div class="final__grid" aria-hidden="true"></div>
       <div class="final__ghost" aria-hidden="true">blueprint</div>
       <div class="wrap final__inner">
         <h2 class="display final__title reveal">Build <span class="grad grad--light">yours.</span></h2>
-        <p class="final__copy reveal">4 sessions. ₱1,999. A resume, LinkedIn, intro, and content plan you can use.</p>
-        <button class="btn btn--light btn--xl reveal" data-register>Register for Blueprint <span class="btn__arrow" aria-hidden="true">→</span></button>
+        <p class="final__copy reveal">Pick your ticket. Sign up in a minute, then pay by GCash.</p>
+
+        <div class="tix" id="tickets">
+          <article class="tix__card tix__card--pass reveal">
+            <span class="tix__badge">Best value</span>
+            <h3 class="tix__name">Full Pass</h3>
+            <p class="tix__price"><b>₱1,999</b> <span>for all four sessions</span></p>
+            <ul class="tix__pick" aria-label="Included: all four sessions">
+              <li class="tix__k">All four included <span>· ₱797 less than four singles</span></li>
+              <li class="slot is-in"><i class="slot__tick" aria-hidden="true"></i><span class="slot__n">01</span><span class="slot__t">Sino Ka?<small>Tue, Nov 10</small></span></li>
+              <li class="slot is-in"><i class="slot__tick" aria-hidden="true"></i><span class="slot__n">02</span><span class="slot__t">Proof on Paper<small>Wed, Nov 11</small></span></li>
+              <li class="slot is-in"><i class="slot__tick" aria-hidden="true"></i><span class="slot__n">03</span><span class="slot__t">Proof in Public<small>Thu, Nov 12 · with Kurt Boquiren</small></span></li>
+              <li class="slot is-in"><i class="slot__tick" aria-hidden="true"></i><span class="slot__n">04</span><span class="slot__t">Ako ’To<small>Fri, Nov 13</small></span></li>
+            </ul>
+            <button class="btn btn--primary btn--lg btn--block" type="button" data-ticket="full">Get the Full Pass <span class="btn__arrow" aria-hidden="true">→</span></button>
+            <p class="tix__note">Locked seat for all four days + full pre-work bundle.</p>
+          </article>
+
+          <article class="tix__card reveal">
+            <h3 class="tix__name">Single Session</h3>
+            <p class="tix__price"><b>₱699</b> <span>per session</span></p>
+            <fieldset class="tix__pick" id="pickSessions">
+              <legend>Pick your session</legend>
+              <label class="slot"><input type="checkbox" value="1" /><span class="slot__n">01</span><span class="slot__t">Sino Ka?<small>Tue, Nov 10</small></span></label>
+              <label class="slot"><input type="checkbox" value="2" /><span class="slot__n">02</span><span class="slot__t">Proof on Paper<small>Wed, Nov 11</small></span></label>
+              <label class="slot"><input type="checkbox" value="3" /><span class="slot__n">03</span><span class="slot__t">Proof in Public<small>Thu, Nov 12 · with Kurt Boquiren</small></span></label>
+              <label class="slot"><input type="checkbox" value="4" /><span class="slot__n">04</span><span class="slot__t">Ako ’To<small>Fri, Nov 13</small></span></label>
+              <span class="tix__err" role="alert">Pick at least one session.</span>
+            </fieldset>
+            <p class="tix__up" id="upsell" aria-live="polite" hidden></p>
+            <button class="btn btn--ghost btn--lg btn--block" type="button" data-ticket="single" id="singleBtn">Get a single session</button>
+            <p class="tix__note">A seat in each session you pick.</p>
+          </article>
+        </div>
       </div>
     </section>
   </main>
@@ -533,6 +568,18 @@
     <form class="reg" id="regForm" novalidate>
       <h2 class="reg__title" id="modalTitle">Start your <span class="grad">Blueprint.</span></h2>
       <p class="reg__sub">It takes a minute. Then pay by GCash and upload your receipt to lock your slot. Registration closes Nov 9.</p>
+
+      <div class="mine" aria-live="polite">
+        <div>
+          <p class="mine__k">Your ticket</p>
+          <p class="mine__name" id="mineName">Full Pass</p>
+          <p class="mine__meta" id="mineMeta">All four sessions, Nov 10 to 13</p>
+        </div>
+        <div class="mine__side">
+          <b class="mine__price" id="minePrice">₱1,999</b>
+          <button class="mine__change" type="button" id="mineChange">Change</button>
+        </div>
+      </div>
 
       <div class="field">
         <label for="f-name">Full name</label>
@@ -590,14 +637,14 @@
         <span class="btn__label">Continue</span><span class="spinner" aria-hidden="true"></span>
       </button>
       <p class="reg__error" id="regError" role="alert" hidden>Something went wrong. Please check your connection and try again.</p>
-      <p class="reg__fine">No payment now. ₱1,999 for all four sessions, paid after you register.</p>
+      <p class="reg__fine" id="regFine">No payment yet. You pay by GCash right after this form.</p>
     </form>
 
     <div class="done" id="done" hidden>
       <div class="ticket">
         <div class="ticket__top">
           <img src="assets/blueprint-mark.png" alt="" />
-          <span class="mono">Blueprint · 4 sessions</span>
+          <span class="mono" id="regTicket">Blueprint · Full Pass</span>
         </div>
         <p class="ticket__name" id="regName">You</p>
         <p class="ticket__meta mono" id="regMeta">—</p>
@@ -607,7 +654,7 @@
       <h2 class="reg__title" id="doneTitle">You’re on the list.</h2>
       <p class="reg__sub" id="doneText">Your slot isn’t locked until you pay. Three steps:</p>
       <ol class="next">
-        <li><b>Pay ₱1,999 by GCash</b> using the QR on your payment page.</li>
+        <li id="stepPay"><b>Pay by GCash</b> using the QR on your payment page.</li>
         <li><b>Upload a screenshot</b> of your GCash receipt on the same page.</li>
         <li><b>Get your slot confirmation</b> by email within 24 hours.</li>
       </ol>

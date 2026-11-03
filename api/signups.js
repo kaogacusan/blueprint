@@ -1,12 +1,12 @@
 /* POST /api/signups: the team's buttons on the Sign-ups page.
-   { action: "paid", id }   marks paid (or waitlist if the seats are full) and sends that email
+   { action: "paid", id }   marks paid (or waitlist if one of their sessions is full) and sends that email
    { action: "resend", id } sends the last email again
    { action: "receipt", id } their receipt screenshot, decrypted (it's stored encrypted, see _lib.js)
    Every action is written to the access log.
    Core team only: checked with the person's own login, not the service key. */
 import { send, body, db, settings, teamName, readFile, unseal, logAccess, paymentEmail, confirmEmail, waitlistEmail } from "./_lib.js";
 
-const COLS = "id,name,email,code,status,pay_token,proof_path";
+const COLS = "id,name,email,code,status,pay_token,proof_path,ticket,sessions,amount";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return send(res, 405, { error: "method" });
@@ -29,8 +29,10 @@ export default async function handler(req, res) {
 
     if (action === "paid") {
       if (r.status === "paid") return send(res, 200, { status: "paid", emailed: false });
-      const [{ costing }, paid] = await Promise.all([settings("costing"), db("registrations?select=id&status=eq.paid")]);
-      const full = paid.length >= (costing?.max || 20);
+      // seats are per session: a Full Pass takes one in all four, a single only in the sessions picked
+      const [{ costing }, paid] = await Promise.all([settings("costing"), db("registrations?select=sessions&status=eq.paid")]);
+      const max = costing?.max || 20;
+      const full = r.sessions.some((n) => paid.filter((x) => x.sessions.includes(n)).length >= max);
       const patch = full ? { status: "waitlist" } : { status: "paid", paid_at: stamp, paid_by: who };
       const [next] = await db(`registrations?id=eq.${id}`, { method: "PATCH", data: patch, prefer: "return=representation" });
       let emailed = true;

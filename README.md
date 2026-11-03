@@ -46,17 +46,23 @@ Each card plays a short animation when it comes into view. The AAA Card flips by
 
 ## Page order
 
-Hero → Problem ("If any of these sound like you:" pills) → What Blueprint is + details strip (sessions, dates, venue, length, seats, ₱1,999) → 4 sessions → What you'll do in the room → Sneak peek → Take-home → Who runs the sessions → FAQ → Final CTA → Footer
+Hero → Problem ("If any of these sound like you:" pills) → What Blueprint is + details strip (4 sessions, Nov 10 to 13, 5:30 to 7:00 PM, FA Annex 104, limited seats, register by Nov 9, prices) → 4 sessions → What you'll do in the room → Sneak peek → Take-home → Who runs the sessions → FAQ → Tickets (final CTA) → Footer
 
 ## Still placeholder (on purpose)
 
 Search `index.html` for `PLACEHOLDER` to find each one.
 
-- **Dates and venue** show "TBA" in the details strip and the "When and where?" FAQ. Thomas confirms.
 - **Facilitator photos:** export them from the Canva Facilitator Profile and save as `assets/facilitators/thomas.jpg` and `assets/facilitators/kurt.jpg` (square). Until then the cards show initials.
 - **Footer contact** (email or IG) for questions.
 
-The price (₱1,999 for all four sessions) is shown in the details strip, FAQ, final call to action and the register form.
+## Tickets
+
+Two tickets, in the dark section at the bottom (`#tickets`). Every Register button on the page scrolls there; the ticket buttons open the form.
+
+- **Full Pass**, ₱1,999 (marked Best value): all four sessions, a locked seat for all four days and the full pre-work bundle.
+- **Single Session**, ₱699 each, with a session picker. Picking 2 shows "All four for ₱601 more." (3 shows how much less the Full Pass is; picking all 4 gets the Full Pass).
+
+Prices live in three places: the page copy (`index.html`), `PRICE` in `main.js` (what the picker and form show) and `PRICE` in `api/_lib.js` (what people actually pay). The server works out each sign-up's `ticket`, `sessions` and `amount` and saves them (`010_tickets.sql`), so the payment page, emails and Sign-ups page all show that person's amount. Seats are counted per session: a Full Pass takes a seat in all four, a single only in the sessions picked.
 
 ## Registration
 
@@ -65,7 +71,7 @@ The form can't be sent without ticking the consent box. Each sign-up saves when 
 
 **Data privacy (Data Privacy Act, RA 10173):** `privacy.html` tells sign-ups what we collect, why, who sees it, how long we keep it (deleted within 60 days after the last session) and how to reach us. In `/admin`, Sign-ups has the team's handling rules, only the owner can download the list, and the owner can **Erase all** when the program is over. Visitors who aren't signed in can only add a sign-up (`005_data_privacy.sql`).
 
-Payment is manual for the pilot: the team emails payment details within 24 hours, and marks each person **registered / paid / waitlist / cancelled** in `/admin`. First 20 paid get the seats.
+Payment is by GCash: each sign-up gets their own payment page with the QR and their amount, uploads a receipt, and the team marks them **paid** in `/admin` (or registered / waitlist / cancelled). Each session has `costing.max` seats (20); paying for a full session puts someone on the waitlist.
 
 ## Brand
 
@@ -112,7 +118,7 @@ After the new password, everyone gets a spotlight tour that walks through *their
 | Outreach | Your orgs as boxes by category (or by status). Each org: **Copy + open** (message filled in, their page opens) and **Sent**. Open one for the 3 steps and the reply log. |
 | Budget | The costing sheet's math: the four totals, printer prices, session costs. Print list and notes are folded. |
 | Playbook | Four doors: Guides (open in a reader), Messages (chat bubbles, one-click copy), Files (tiles) and People (contact cards). |
-| Sign-ups | Everyone who registered: mobile, how they heard about Blueprint, status (registered / paid / waitlist / cancelled). First 20 paid get seats. |
+| Sign-ups | Everyone who registered: ticket and amount, mobile, how they heard about Blueprint, status (registered / paid / waitlist / cancelled). Seats taken per session (20 each). |
 | Decks / Team | Session decks to present, people and roles (roles are labels only). |
 
 ### Slack Patrol (Keira + Renz only)

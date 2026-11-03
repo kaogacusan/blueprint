@@ -183,6 +183,43 @@
   const qas = document.querySelectorAll(".qa");
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
+  /* ---------- Tickets ----------
+     Full Pass, or Single Session with a session picker. Every Register button scrolls to the tickets;
+     a ticket button opens the sign-up form. The server works out the amount again (api/_lib.js PRICE). */
+  const PRICE = { full: 1999, single: 699 };
+  const ALL = [1, 2, 3, 4];
+  const peso = (n) => `₱${n.toLocaleString("en-PH")}`;
+  const tickets = document.getElementById("tickets");
+  const picker = document.getElementById("pickSessions");
+  const boxes = [...picker.querySelectorAll("input")];
+  const singleBtn = document.getElementById("singleBtn");
+  const upsell = document.getElementById("upsell");
+  const picked = () => boxes.filter((b) => b.checked).map((b) => Number(b.value));
+  const titleOf = (n) => boxes[n - 1].closest(".slot").querySelector(".slot__t").firstChild.textContent.trim();
+  const dateOf = (n) => boxes[n - 1].closest(".slot").querySelector("small").textContent.split(" · ")[0];
+  let ticket = { ticket: "full", sessions: ALL };
+
+  const syncSingle = () => {
+    const s = picked(), n = s.length, cost = n * PRICE.single, diff = PRICE.full - cost;
+    picker.classList.remove("is-invalid");
+    singleBtn.textContent = n === 0 ? "Get a single session"
+      : n === 4 ? `Get the Full Pass · ${peso(PRICE.full)}`
+      : n === 1 ? `Get Session ${s[0]} · ${peso(cost)}`
+      : `Get ${n} sessions · ${peso(cost)}`;
+    singleBtn.classList.toggle("btn--primary", n > 0);
+    singleBtn.classList.toggle("btn--ghost", n === 0);
+    /* two or more singles: the Full Pass is close (or cheaper) */
+    upsell.hidden = n < 2;
+    upsell.innerHTML = n === 4 ? `That’s all four, so it’s the Full Pass: <b>${peso(-diff)} less</b>.`
+      : n >= 2 ? `All four for <b>${peso(Math.abs(diff))} ${diff > 0 ? "more" : "less"}</b>. <button class="tix__switch" type="button" data-ticket="full">Get the Full Pass</button>`
+      : "";
+  };
+  picker.addEventListener("change", syncSingle);
+  syncSingle();
+
+  const scrollToTickets = () => tickets.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  document.querySelectorAll("[data-register]").forEach((b) => b.addEventListener("click", scrollToTickets));
+
   /* ---------- Registration modal ----------
      Sends the sign-up to /api/register, which emails the link to their payment page (it has the GCash QR). The team sees it in /admin. */
   const modal = document.getElementById("modal");
@@ -204,7 +241,21 @@
   };
   mobile.addEventListener("input", checkMobile);
 
+  /* "Session 2: Proof on Paper" / "Sessions 1 and 3" */
+  const sessionsLabel = (s) => (s.length === 1 ? `Session ${s[0]}: ${titleOf(s[0])}` : `Sessions ${s.slice(0, -1).join(", ")} and ${s.at(-1)}`);
+  const amountOf = (t) => (t.ticket === "full" ? PRICE.full : t.sessions.length * PRICE.single);
+  const paintTicket = () => {
+    const full = ticket.ticket === "full", s = ticket.sessions;
+    document.getElementById("mineName").textContent = full ? "Full Pass" : s.length === 1 ? "Single Session" : `${s.length} single sessions`;
+    document.getElementById("mineMeta").textContent = full ? "All four sessions, Nov 10 to 13"
+      : s.map((n) => `Session ${n}: ${titleOf(n)}, ${dateOf(n)}`).join("\n");
+    document.getElementById("minePrice").textContent = peso(amountOf(ticket));
+    document.getElementById("regFine").textContent = `No payment yet. Right after this form, you pay ${peso(amountOf(ticket))} by GCash.`;
+  };
+  document.getElementById("mineChange").addEventListener("click", () => { modal.close(); scrollToTickets(); });
+
   const openModal = () => {
+    paintTicket();
     form.hidden = false;
     done.hidden = true;
     form.reset();
@@ -214,7 +265,18 @@
     modal.showModal();
     setTimeout(() => form.querySelector("input")?.focus(), 60);
   };
-  document.querySelectorAll("[data-register]").forEach((b) => b.addEventListener("click", openModal));
+  tickets.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ticket]");
+    if (!b) return;
+    const s = picked();
+    if (b.dataset.ticket === "single" && !s.length) {
+      picker.classList.add("is-invalid");
+      boxes[0].focus();
+      return;
+    }
+    ticket = b.dataset.ticket === "full" || s.length === 4 ? { ticket: "full", sessions: ALL } : { ticket: "single", sessions: s };
+    openModal();
+  });
   modal.addEventListener("click", (e) => {
     if (e.target === modal || e.target.closest("[data-close]")) modal.close();
   });
@@ -236,7 +298,7 @@
   });
 
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
-  const PRIVACY_VERSION = "2026-10-30";
+  const PRIVACY_VERSION = "2026-11-04";
 
   /* the server saves it and emails their payment link (api/register.js). A new sign-up gets the link back. */
   const saveRegistration = async (row) => {
@@ -261,6 +323,8 @@
       consent: true,
       privacy_version: PRIVACY_VERSION,
       website: data.website || "",
+      ticket: ticket.ticket,
+      sessions: ticket.sessions,
     };
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");
@@ -287,13 +351,18 @@
     const payNow = document.getElementById("payNow");
     payNow.hidden = !out.pay;
     if (out.pay) payNow.href = out.pay;
+    /* a new sign-up: the amount the server saved. Signed up before: their first ticket stands (it's on their payment page) */
+    document.getElementById("regTicket").textContent = `Blueprint · ${out.pay ? (ticket.ticket === "full" ? "Full Pass" : sessionsLabel(ticket.sessions).replace(/:.*/, "")) : "Sign-up"}`;
+    document.getElementById("stepPay").innerHTML = out.pay
+      ? `<b>Pay ${peso(out.amount || amountOf(ticket))} by GCash</b> using the QR on your payment page.`
+      : "<b>Pay by GCash</b> using the QR on your payment page. It shows your ticket and amount.";
     document.getElementById("doneTitle").textContent = out.pay ? "You’re on the list." : "You’ve signed up before.";
     document.getElementById("doneText").textContent = out.pay
       ? "Your slot isn’t locked until you pay. Three steps:"
       : `We emailed your payment link again to ${row.email}. Open it, then:`;
     document.getElementById("doneFine").textContent = out.pay
       ? "We also emailed you this link, so you can pay later. Can’t find the email? Check spam, or register again with the same email and we’ll resend it."
-      : "Not in your inbox? Check spam. We resend it at most every 10 minutes, so wait a bit before trying again. Still nothing? Ask us with the form under the FAQ.";
+      : "Not in your inbox? Check spam. We resend it at most every 10 minutes, so wait a bit before trying again. Still nothing, or want to switch tickets? Ask us with the form under the FAQ.";
     form.hidden = true;
     done.hidden = false;
   });

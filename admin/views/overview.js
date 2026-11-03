@@ -38,7 +38,7 @@ function focusTile(id, who) {
     inquiries() {
       const r = (S.data.registrations || []).filter((x) => x.status !== "cancelled");
       const waiting = r.filter((x) => x.status === "registered").length;
-      return { n: r.length, k: `sign-ups · ${r.filter((x) => x.status === "paid").length} paid`, todo: waiting ? `${waiting} waiting to pay` : "Nobody waiting", tone: waiting ? "warn" : "", pct: r.filter((x) => x.status === "paid").length / (setting("costing").max || 20) };
+      return { n: r.length, k: `sign-ups · ${r.filter((x) => x.status === "paid").length} paid`, todo: waiting ? `${waiting} waiting to pay` : "Nobody waiting", tone: waiting ? "warn" : "", pct: Math.max(...[1, 2, 3, 4].map((n) => r.filter((x) => x.status === "paid" && (x.ticket === "single" ? x.sessions || [] : [1, 2, 3, 4]).includes(n)).length)) / (setting("costing").max || 20) };
     },
     presentations() {
       const d = (S.data.decks || []).length;

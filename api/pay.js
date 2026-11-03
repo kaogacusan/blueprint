@@ -1,16 +1,16 @@
 /* /api/pay: the private payment page (/pay?t=...) from the sign-up email.
-   GET  ?t=token          their name, sign-up number, the price and our GCash QR
+   GET  ?t=token          their name, sign-up number, their ticket and amount, and our GCash QR
    POST { t, image }      a screenshot of their GCash receipt (a JPEG data URL, shrunk in the browser)
    The token is a random UUID only they got by email, so no one can see or upload for someone else.
    The screenshot is encrypted before it's stored; the team opens it through api/signups.js ("receipt"). */
-import { send, body, db, enc, settings, readFile, saveFile, seal } from "./_lib.js";
+import { send, body, db, enc, settings, readFile, saveFile, seal, ticketLine, sessionTitles } from "./_lib.js";
 
 const TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX = 3e6; // bytes, after the browser shrinks it (usually ~300 KB)
 
 async function find(t) {
   if (!TOKEN.test(String(t || ""))) return null;
-  const [r] = await db(`registrations?select=id,name,code,status,proof_path,proof_at&pay_token=eq.${enc(t)}`);
+  const [r] = await db(`registrations?select=id,name,code,status,proof_path,proof_at,ticket,sessions,amount&pay_token=eq.${enc(t)}`);
   return r || null;
 }
 const first = (name) => name.trim().split(/\s+/)[0];
@@ -20,10 +20,10 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       const r = await find(req.query?.t);
       if (!r) return send(res, 404, { error: "nomatch" });
-      const { payment = {}, costing = {} } = await settings("payment", "costing");
+      const [{ payment = {} }, titles] = await Promise.all([settings("payment"), sessionTitles()]);
       const qr = r.status === "registered" ? await readFile(payment.qrPath) : null;
       return send(res, 200, {
-        name: first(r.name), code: r.code, status: r.status, price: costing.ticket || 1999,
+        name: first(r.name), code: r.code, status: r.status, price: r.amount, for: ticketLine(r, titles),
         gcashName: payment.gcashName || "", gcashNumber: payment.gcashNumber || "",
         qr: qr ? `data:${qr.type};base64,${qr.data.toString("base64")}` : null,
         proofAt: r.proof_path ? r.proof_at : null,
