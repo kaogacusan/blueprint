@@ -173,7 +173,7 @@ const shell = ({ preview, kicker, title, body, end, ask = true }) => `<!doctype 
   </td></tr>
 </table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px"><tr><td style="padding:18px 28px 0;color:#6b7387;font-size:12px;line-height:1.6;text-align:center">
-  Blueprint is an LAS 50 student venture at Ateneo de Manila.<br>We will never ask for your GCash MPIN or a one-time code (OTP).<br>
+  Blueprint is an LAS50 student venture at Ateneo de Manila.<br>We will never ask for your GCash MPIN or a one-time code (OTP).<br>
   <a href="${SITE}" style="color:#6b7387">ateneoblueprint.vercel.app</a> · <a href="${SITE}/privacy.html" style="color:#6b7387">Privacy notice</a>
 </td></tr></table>
 </td></tr></table></body></html>`;

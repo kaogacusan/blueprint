@@ -1054,7 +1054,8 @@ section[id] { scroll-margin-top: 72px; }
 }
 @media (max-width: 560px) { .field-row--even { grid-template-columns: 1fr; gap: 0; } }
 
-.foot__brand { display: flex; flex-direction: column; gap: 8px; }
+/* align-items: without it the column stretches the wordmark to the width of the line below */
+.foot__brand { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .foot__word { height: 22px; width: auto; filter: brightness(0) invert(1); opacity: 0.9; }
 .foot__venture { margin: 0; font-size: 0.9rem; color: rgba(225, 235, 255, 0.7); }
 .foot__contact { color: #fff; font-size: 0.9rem; font-weight: 600; text-decoration: none; }
@@ -1278,6 +1279,7 @@ section[id] { scroll-margin-top: 72px; }
   .field-row { grid-template-columns: 1fr; gap: 0; }
   .reg, .done { padding: 30px 22px 24px; }
   .foot__inner { justify-content: center; text-align: center; flex-direction: column; }
+  .foot__brand { align-items: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
