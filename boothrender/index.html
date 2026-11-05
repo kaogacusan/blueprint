@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blueprint — Booth render</title>
+  <meta name="description" content="Our half of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar. Every piece, size, and spot." />
+  <link rel="icon" href="/assets/blueprint-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/render/render.css" />
+  <script type="importmap">
+    { "imports": { "three": "/assets/vendor/three.module.js", "three/addons/": "/assets/vendor/addons/" } }
+  </script>
+</head>
+<body>
+
+  <header class="rnav">
+    <a href="/" class="rnav__brand" aria-label="Blueprint home">
+      <img src="/assets/blueprint-mark.png" alt="" />
+      <img src="/assets/blueprint-wordmark.png" alt="blueprint" />
+    </a>
+    <nav class="rnav__tabs" aria-label="Renders">
+      <a href="/venuerender/">Venue</a>
+      <a href="/boothrender/" aria-current="page">Booth</a>
+    </nav>
+    <a href="/" class="rnav__site">Main site →</a>
+  </header>
+
+  <main>
+    <section class="rhero wrap">
+      <p class="mono"><i></i>Render 02 · Booth</p>
+      <h1 class="display">The booth, <span class="blue">in 3D.</span></h1>
+      <p class="lede">Our half of a shared tent on Red Brick Road, for the LAS 50 bazaar. Drag to turn it. The numbers on the model match the list.</p>
+      <ul class="facts">
+        <li><b>1.5 × 3 m</b><span>our half of the tent</span></li>
+        <li><b>3 × 3 m</b><span>one tent, two groups</span></li>
+        <li><b>2.0 m</b><span>eave height to ask for</span></li>
+        <li><b>Nov 9–13</b><span>bazaar week</span></li>
+        <li><b>Always manned</b><span>a panel grades the booth</span></li>
+      </ul>
+    </section>
+
+    <section class="viewer wrap" aria-label="3D booth">
+      <div class="viewer__main">
+        <div class="viewtabs" id="viewTabs" role="tablist" aria-label="Camera views"></div>
+        <div class="stage" id="stage">
+          <canvas aria-label="3D model of the booth. Drag to turn."></canvas>
+          <div class="stage__overlay"></div>
+          <div class="stage__tip" aria-hidden="true"></div>
+          <div class="stage__hint">Drag to turn · tap a number</div>
+        </div>
+        <div class="controls">
+          <label class="slider">Turn <input type="range" id="turn" min="-180" max="180" step="1" /></label>
+          <label class="slider">Tilt <input type="range" id="tilt" min="2" max="90" step="1" /></label>
+          <div class="toggles" id="toggles"></div>
+        </div>
+        <p class="caption">Orthographic, in metres. Our half is on the left. The grey floor on the right is the other group. The roof and curtains are see-through so you can see inside. The eave is drawn at 2.0 m, the height we ask for. The 3.05 m peak is assumed. Print on the tarps is draft copy from the site.</p>
+      </div>
+
+      <aside class="parts">
+        <p class="parts__lead">Everything we need: <b data-count></b> pieces. What we can price so far: <b data-total></b>. Rental not included.</p>
+        <div id="partsList"></div>
+      </aside>
+    </section>
+
+    <section class="sec wrap rise" id="materials">
+      <div class="sec__head">
+        <div>
+          <h2 class="display">Materials.</h2>
+          <p class="sec__sub">What we can price so far: <b data-total></b>. Tarp prices use the rate in Gelo’s plan (₱15 to ₱20 per sq ft). Rental is not in the sum.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="mat">
+          <thead><tr><th>Piece</th><th>Size</th><th>Where</th><th>Cost</th><th>Note</th></tr></thead>
+          <tbody id="matBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="sec wrap rise">
+      <div class="sec__head"><h2 class="display">Who stands where.</h2></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Seller</h3>
+          <ul>
+            <li>At the table the whole time the booth is open.</li>
+            <li>Runs the 1-minute AAA demo. Signs people up on the QR or the sheet.</li>
+            <li>Wears the cash pouch, if we take cash.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Roamer</h3>
+          <ul>
+            <li>In the aisle and around campus with the banner, at class breaks.</li>
+            <li>Gives out flyers. Sends people to the booth.</li>
+            <li>Rolls the banner and keeps it by the back table when not out.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec wrap rise">
+      <div class="sec__head"><h2 class="display">What we know. <span class="muted">What we still check.</span></h2></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Rules we know</h3>
+          <ul>
+            <li><b>1.5 m × 3 m per group.</b> Two groups share one 3 × 3 m tent. <span class="src">Official</span></li>
+            <li><b>Bazaar week is Nov 9 to 13.</b> <span class="src">Canvas, LAS 50, week of Nov 3</span></li>
+            <li><b>Booths are manned at all times.</b> A panel grades the booth. <span class="src">Canvas, LAS 50, task 5.4</span></li>
+            <li><b>Only the tent is given.</b> No tables or chairs. <span class="src">Gelo’s plan, 20 Oct, not confirmed</span></li>
+            <li><b>Selling runs 9 am to 4 pm.</b> <span class="src">Gelo’s plan</span></li>
+            <li><b>Booths line both sides of the road.</b> An e-jeep lane runs along it since 2025. Keep the banner and the roamer out of it. <span class="src">RecWeek 2026 map · The GUIDON, 2024</span></li>
+          </ul>
+        </div>
+        <div class="card card--warn">
+          <h3>Still to check</h3>
+          <ul>
+            <li>Our stall number. Stalls are not given yet.</li>
+            <li>Which group shares our tent. Who brings the divider.</li>
+            <li>The leg setting. Ask for 2.0 m or more at the eave.</li>
+            <li>Do we take payment at the booth? If no, drop the GCash QR and the cash pouch.</li>
+            <li>Can the tarps stay in the tent overnight?</li>
+            <li>Final tarp text. The print on the model is a draft.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="caption">The workshop itself is in FA Annex 104. <a href="/venuerender/">See the venue render →</a></p>
+    </section>
+
+    <section class="sec wrap rise">
+      <div class="sec__head">
+        <div>
+          <h2 class="display">How the road looks.</h2>
+          <p class="sec__sub">Photos of past fairs on Red Brick Road. Open each link to see them.</p>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Booth map</h3><p class="sec__sub" style="margin:0 0 12px">Two rows of numbered booths, one on each side of the road. Faura Hall, De la Costa, and the SocSci Building on one side. Schmitt Hall, the MVP Building, and the Old Rizal Library on the other.</p><a class="src" href="https://ateneorecweek.org/map" target="_blank" rel="noopener">RecWeek 2026 map ↗</a></div>
+        <div class="card"><h3>White peaked tents</h3><p class="sec__sub" style="margin:0 0 12px">RecWeek 2023: white tents on both sides, banners on the front edge, cloth on the tables, pull-up banners.</p><a class="src" href="https://theguidon.com/2023/09/coa-m-lions-joint-recruitment-week-welcomes-students-to-ateneo-organizational-life/" target="_blank" rel="noopener">The GUIDON, 2023 ↗</a></div>
+        <div class="card"><h3>Blue pop-up tents</h3><p class="sec__sub" style="margin:0 0 12px">Re-Fair 2024: blue pop-up tents on brick pavers under trees, plastic tables, pull-up banners, easel signs.</p><a class="src" href="https://www.ateneo.edu/news/2024/05/29/first-community-re-fair-welcomes-diverse-partners-ateneo" target="_blank" rel="noopener">ateneo.edu, Re-Fair 2024 ↗</a></div>
+        <div class="card"><h3>E-jeep lane</h3><p class="sec__sub" style="margin:0 0 12px">A lane with removable posts runs along the road. E-jeeps should take another route during events.</p><a class="src" href="https://theguidon.com/2024/10/new-e-jeep-express-lanes-to-be-constructed-to-pass-through-som-forest-and-red-brick-road/" target="_blank" rel="noopener">The GUIDON, 2024 ↗</a></div>
+      </div>
+    </section>
+
+    <footer class="rfoot wrap">Blueprint · setup renders · sizes in metres · draft for the team. Booth sizes follow Gelo’s plan at tapthatat.vercel.app/booth.</footer>
+  </main>
+
+  <script type="module" src="/boothrender/booth.js"></script>
+</body>
+</html>
