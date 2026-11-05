@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blueprint — Venue render</title>
+  <meta name="description" content="How FA Annex 104 is set up for Blueprint on Nov 10, 5:00 to 7:30 pm. Every piece, where it goes, and who stands where." />
+  <link rel="icon" href="/assets/blueprint-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/render/render.css" />
+  <script type="importmap">
+    { "imports": { "three": "/assets/vendor/three.module.js", "three/addons/": "/assets/vendor/addons/" } }
+  </script>
+</head>
+<body>
+
+  <header class="rnav">
+    <a href="/" class="rnav__brand" aria-label="Blueprint home">
+      <img src="/assets/blueprint-mark.png" alt="" />
+      <img src="/assets/blueprint-wordmark.png" alt="blueprint" />
+    </a>
+    <nav class="rnav__tabs" aria-label="Renders">
+      <a href="/venuerender/" aria-current="page">Venue</a>
+      <a href="/boothrender/">Booth</a>
+    </nav>
+    <a href="/" class="rnav__site">Main site →</a>
+  </header>
+
+  <main>
+    <section class="rhero wrap">
+      <p class="mono"><i></i>Render 01 · Venue</p>
+      <h1 class="display">The room, <span class="blue">set up.</span></h1>
+      <p class="lede" id="venueLede">FA Annex 104, set up for Blueprint. Drag to turn it. The numbers on the model match the list.</p>
+      <ul class="facts">
+        <li><b>Tue, Nov 10</b><span>date</span></li>
+        <li><b>5:00–7:30 pm</b><span>approved time</span></li>
+        <li><b>FA Annex 104</b><span>approved room</span></li>
+        <li><b>26</b><span>participants</span></li>
+        <li><b>Projector + screen</b><span>requested from CFMO</span></li>
+      </ul>
+    </section>
+
+    <section class="viewer wrap" aria-label="3D room">
+      <div class="viewer__main">
+        <div class="viewtabs" id="viewTabs" role="tablist" aria-label="Camera views"></div>
+        <div class="stage" id="stage">
+          <canvas aria-label="3D model of the room. Drag to turn."></canvas>
+          <div class="stage__overlay"></div>
+          <div class="stage__tip" aria-hidden="true"></div>
+          <div class="stage__hint">Drag to turn · tap a number</div>
+        </div>
+        <div class="controls">
+          <label class="slider">Turn <input type="range" id="turn" min="-180" max="180" step="1" /></label>
+          <label class="slider">Tilt <input type="range" id="tilt" min="2" max="90" step="1" /></label>
+          <div class="toggles" id="toggles"></div>
+        </div>
+        <p class="caption" id="venueCaption"></p>
+      </div>
+
+      <aside class="parts">
+        <p class="parts__lead">Everything the room needs: <b data-count></b> pieces. Most come from the room, the team, or the print shop.</p>
+        <div id="partsList"></div>
+      </aside>
+    </section>
+
+    <section class="sec wrap rise">
+      <div class="sec__head">
+        <div>
+          <h2 class="display">The day. <span class="muted">Hour by hour.</span></h2>
+          <p class="sec__sub">The room is ours from 5:00 to 7:30 pm. The times before 5:00 and the 5:15 start are a suggestion. Check them with the team.</p>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card"><ol class="run" id="runSheet"></ol></div>
+        <div class="card">
+          <h3>Who stands where</h3>
+          <ol class="run run--posts" id="posts"></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec wrap rise" id="materials">
+      <div class="sec__head">
+        <div>
+          <h2 class="display">Checklist.</h2>
+          <p class="sec__sub">Every piece, its size, where it goes, and where it comes from. Nothing here is priced yet.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="mat">
+          <thead><tr><th>Piece</th><th>Size</th><th>Where</th><th>Comes from</th><th>Note</th></tr></thead>
+          <tbody id="matBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="sec wrap rise">
+      <div class="sec__head"><h2 class="display">What we know. <span class="muted">What we still check.</span></h2></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>From the approved request</h3>
+          <ul>
+            <li><b>Room:</b> FA Annex 104. <b>Date:</b> Nov 10, 2026. <b>Time:</b> 5:00 to 7:30 pm.</li>
+            <li><b>26 participants.</b> Seminar / workshop.</li>
+            <li><b>AV:</b> LCD projector and LCD screen.</li>
+            <li><b>External guests:</b> coordinate with CSMO (csmo@ateneo.edu).</li>
+            <li><b>At the gate:</b> show the screenshot of the approved request to the guard.</li>
+            <li><b>Approved by:</b> Sir Julio III S. Ingco. <b>Point person:</b> Amber Uyliapco.</li>
+          </ul>
+        </div>
+        <div class="card card--warn">
+          <h3>Still to check</h3>
+          <ul id="toCheck"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec wrap rise" id="refs">
+      <div class="sec__head">
+        <div>
+          <h2 class="display">How the place looks.</h2>
+          <p class="sec__sub" id="refsSub">What we found online about the room and the building. Open each link to see the photos.</p>
+        </div>
+      </div>
+      <div class="grid2" id="refList"></div>
+    </section>
+
+    <footer class="rfoot wrap">Blueprint · setup renders · sizes in metres · draft for the team. Room size is estimated. Measure it when you visit.</footer>
+  </main>
+
+  <script type="module" src="/venuerender/venue.js"></script>
+</body>
+</html>
