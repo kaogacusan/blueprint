@@ -13,6 +13,23 @@ Open http://localhost:5180
 
 Use the server. The 3D will not load if you double-click `index.html`.
 
+## Setup renders (for the team)
+
+Two extra pages. They are not linked from the landing page.
+
+- http://localhost:5180/venuerender/ — FA Annex 104 set up for the Nov 10 workshop (5:00–7:30 pm, 26 people): 3D room, numbered checklist, run sheet, who stands where, what to check.
+- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth, numbered parts list, costs.
+
+Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `?view=top` (or any tab id) to open a view.
+
+| File | What it is |
+|---|---|
+| `venuerender/venue.js` | The room: sizes at the top (`W`, `D`, `H`), the checklist, run sheet, posts, and the 3D model. **The room size is an estimate.** Change `W`, `D`, `H` after you measure. |
+| `boothrender/booth.js` | The booth: sizes at the top, the parts list with costs, and the 3D model. Tarp prices use ₱15–20 per sq ft (from Gelo's plan). |
+| `render/stage.js` | Shared 3D engine (camera, pins, size lines, highlight). |
+| `render/page.js` | Shared page wiring (tabs, sliders, toggles, list, table). |
+| `render/render.css` | Shared styles for both pages. |
+
 ## Files
 
 | File | What it is |
