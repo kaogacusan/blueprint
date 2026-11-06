@@ -1,0 +1,682 @@
+{
+ "page": "booth",
+ "looks": [
+  {
+   "id": "v1",
+   "label": "As rendered",
+   "about": "The design on the 3D model now. Facts fixed to match the site."
+  },
+  {
+   "id": "v2",
+   "label": "Drafting grid",
+   "about": "Light paper, blue grid lines, and the selection box from the site’s first screen."
+  },
+  {
+   "id": "v3",
+   "label": "Big type",
+   "about": "Fewer words, bigger. Built to read from far away."
+  }
+ ],
+ "assets": [
+  {
+   "id": "header",
+   "piece": "header",
+   "name": "Header tarp",
+   "size": "1.4 m × 0.6 m",
+   "mm": [
+    1400,
+    600
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same layout as the model: logo on the left, the two lines on the right.",
+     "pdf": "/assets/print/booth/header/v1.pdf",
+     "pdfKb": 22,
+     "jpg": [
+      "/assets/print/booth/header/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/header/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/header/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "White tarp with the site’s grid. The selection box sits on “paper.”, like the site. Logo is a sharp vector shape.",
+     "pdf": "/assets/print/booth/header/v2.pdf",
+     "pdfKb": 359,
+     "jpg": [
+      "/assets/print/booth/header/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/header/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/header/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "The name fills the tarp, so it reads from far down the road. Adds what it is and when.",
+     "pdf": "/assets/print/booth/header/v3.pdf",
+     "pdfKb": 353,
+     "jpg": [
+      "/assets/print/booth/header/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/header/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/header/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "backdrop",
+   "piece": "backdrop",
+   "name": "Backdrop tarp",
+   "size": "1.5 m × 1.5 m",
+   "mm": [
+    1500,
+    1500
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same layout as the model: what Blueprint is, in big words, with the date strip at the bottom.",
+     "pdf": "/assets/print/booth/backdrop/v1.pdf",
+     "pdfKb": 64,
+     "jpg": [
+      "/assets/print/booth/backdrop/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Shows all 4 sessions and their days. Logo and headline sit at the top, above the seller’s shoulders, so they stay in view.",
+     "pdf": "/assets/print/booth/backdrop/v2.pdf",
+     "pdfKb": 667,
+     "jpg": [
+      "/assets/print/booth/backdrop/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "A 37 cm QR to the sign-up page. People can scan it from the aisle, about 3 m away, without walking in.",
+     "pdf": "/assets/print/booth/backdrop/v3.pdf",
+     "pdfKb": 385,
+     "jpg": [
+      "/assets/print/booth/backdrop/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "skirt",
+   "piece": "skirt",
+   "name": "Table skirt tarp",
+   "size": "0.9 m × 0.7 m",
+   "mm": [
+    900,
+    700
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Tarp. Print at 100 dpi or more. Ask for grommets in the 4 corners for the cable ties.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model: logo and what it is. The date is now Nov 10 to 13, on its own line so the text stays 6 cm tall.",
+     "pdf": "/assets/print/booth/skirt/v1.pdf",
+     "pdfKb": 23,
+     "jpg": [
+      "/assets/print/booth/skirt/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/skirt/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/skirt/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "The deadline is the biggest thing on it. It gives people a reason to sign up today.",
+     "pdf": "/assets/print/booth/skirt/v2.pdf",
+     "pdfKb": 365,
+     "jpg": [
+      "/assets/print/booth/skirt/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/skirt/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/skirt/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Shows the price, like the site does now. People at the aisle know the cost before they ask.",
+     "pdf": "/assets/print/booth/skirt/v3.pdf",
+     "pdfKb": 375,
+     "jpg": [
+      "/assets/print/booth/skirt/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/skirt/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/skirt/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "banner",
+   "piece": "banner",
+   "name": "Roaming banner",
+   "size": "2 ft × 3 ft",
+   "mm": [
+    610,
+    914
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Tarp. Print at 100 dpi or more. Ask for pole pockets on the left and right edges.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model. Dates and time fixed. All text is now 6 cm or more, so it reads across the road.",
+     "pdf": "/assets/print/booth/banner/v1.pdf",
+     "pdfKb": 55,
+     "jpg": [
+      "/assets/print/booth/banner/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/banner/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/banner/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Says where to go: our booth on Red Brick Road. The roamer points the way; the banner backs it up.",
+     "pdf": "/assets/print/booth/banner/v2.pdf",
+     "pdfKb": 385,
+     "jpg": [
+      "/assets/print/booth/banner/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/banner/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/banner/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "A big QR, so people can sign up on the spot, even before they reach the booth.",
+     "pdf": "/assets/print/booth/banner/v3.pdf",
+     "pdfKb": 374,
+     "jpg": [
+      "/assets/print/booth/banner/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/banner/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/banner/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "regqr",
+   "piece": "regqr",
+   "name": "Sign-up QR",
+   "size": "A5, 148 × 210 mm",
+   "mm": [
+    148,
+    210
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Printed sintra board, 3 mm. Ask the shop to print to the edge.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model, with a real QR to the sign-up section of the site. Test it on 2 phones before you print.",
+     "pdf": "/assets/print/booth/regqr/v1.pdf",
+     "pdfKb": 23,
+     "jpg": [
+      "/assets/print/booth/regqr/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/regqr/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/regqr/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Adds the web address under the QR, for phones that will not scan.",
+     "pdf": "/assets/print/booth/regqr/v2.pdf",
+     "pdfKb": 292,
+     "jpg": [
+      "/assets/print/booth/regqr/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/regqr/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/regqr/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Navy board with the QR on a white tile. Four words, big enough to read from the aisle.",
+     "pdf": "/assets/print/booth/regqr/v3.pdf",
+     "pdfKb": 141,
+     "jpg": [
+      "/assets/print/booth/regqr/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/regqr/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/regqr/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card",
+   "piece": "card",
+   "name": "Workshop card",
+   "size": "A4, 210 × 297 mm",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Printed sintra board, 3 mm. Ask the shop to print to the edge.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model, with the right facts: Nov 10 to 13, 5:30 to 7:00 PM, and “Limited seats” like the site.",
+     "pdf": "/assets/print/booth/card/v1.pdf",
+     "pdfKb": 46,
+     "jpg": [
+      "/assets/print/booth/card/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/card/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/card/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Lists the 4 sessions and their days, so people can pick the ones they need.",
+     "pdf": "/assets/print/booth/card/v2.pdf",
+     "pdfKb": 433,
+     "jpg": [
+      "/assets/print/booth/card/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/card/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/card/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Shows the two tickets and the deadline. Big prices answer the first question people ask.",
+     "pdf": "/assets/print/booth/card/v3.pdf",
+     "pdfKb": 312,
+     "jpg": [
+      "/assets/print/booth/card/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/card/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/card/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gcash",
+   "piece": "gcash",
+   "name": "GCash QR",
+   "size": "A5, 148 × 210 mm",
+   "mm": [
+    148,
+    210
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Printed sintra board, 3 mm. Ask the shop to print to the edge. Put our real GCash QR and account name in first.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model. The QR is a stand-in: put the QR from our GCash app in before you print.",
+     "pdf": "/assets/print/booth/gcash/v1.pdf",
+     "pdfKb": 36,
+     "jpg": [
+      "/assets/print/booth/gcash/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/gcash/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/gcash/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Adds the two prices, so the buyer knows what to send. The QR is a stand-in.",
+     "pdf": "/assets/print/booth/gcash/v2.pdf",
+     "pdfKb": 308,
+     "jpg": [
+      "/assets/print/booth/gcash/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/gcash/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/gcash/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "One big word, then the QR on a white tile. The QR is a stand-in.",
+     "pdf": "/assets/print/booth/gcash/v3.pdf",
+     "pdfKb": 236,
+     "jpg": [
+      "/assets/print/booth/gcash/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/gcash/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/gcash/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "aaa",
+   "piece": "aaa",
+   "name": "AAA try-out card",
+   "size": "A6, 105 × 148 mm",
+   "mm": [
+    105,
+    148
+   ],
+   "pages": [
+    "Front",
+    "Back"
+   ],
+   "print": "Card stock, 2 sides. Print 4 on one A4 sheet, then cut.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model. Each A now has its prompt from the site and two lines to write on. The back says when and where.",
+     "pdf": "/assets/print/booth/aaa/v1.pdf",
+     "pdfKb": 83,
+     "jpg": [
+      "/assets/print/booth/aaa/v1-1.jpg",
+      "/assets/print/booth/aaa/v1-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/aaa/v1-1.m.jpg",
+      "/assets/print/booth/aaa/v1-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/aaa/v1-1.t.jpg",
+      "/assets/print/booth/aaa/v1-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "The grid doubles as writing lines. The back has the site’s two lines and the dates.",
+     "pdf": "/assets/print/booth/aaa/v2.pdf",
+     "pdfKb": 332,
+     "jpg": [
+      "/assets/print/booth/aaa/v2-1.jpg",
+      "/assets/print/booth/aaa/v2-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/aaa/v2-1.m.jpg",
+      "/assets/print/booth/aaa/v2-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/aaa/v2-1.t.jpg",
+      "/assets/print/booth/aaa/v2-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Bigger words to write under. The back is one big QR, so the card leads straight to sign-up.",
+     "pdf": "/assets/print/booth/aaa/v3.pdf",
+     "pdfKb": 120,
+     "jpg": [
+      "/assets/print/booth/aaa/v3-1.jpg",
+      "/assets/print/booth/aaa/v3-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/aaa/v3-1.m.jpg",
+      "/assets/print/booth/aaa/v3-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/aaa/v3-1.t.jpg",
+      "/assets/print/booth/aaa/v3-2.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "signup",
+   "piece": "signup",
+   "name": "Sign-up sheet",
+   "size": "A4, 210 × 297 mm",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”).",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model. The columns now match the site form: name, email, mobile, course and year.",
+     "pdf": "/assets/print/booth/signup/v1.pdf",
+     "pdfKb": 30,
+     "jpg": [
+      "/assets/print/booth/signup/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/signup/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/signup/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Numbered rows, so you can count sign-ups at a glance. 20 rows on one sheet.",
+     "pdf": "/assets/print/booth/signup/v2.pdf",
+     "pdfKb": 259,
+     "jpg": [
+      "/assets/print/booth/signup/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/signup/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/signup/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Bigger rows and bigger headings. Easier to write on a clipboard while standing.",
+     "pdf": "/assets/print/booth/signup/v3.pdf",
+     "pdfKb": 109,
+     "jpg": [
+      "/assets/print/booth/signup/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/signup/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/signup/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "flyer",
+   "piece": "flyers",
+   "name": "Flyer",
+   "size": "A6, 105 × 148 mm",
+   "mm": [
+    105,
+    148
+   ],
+   "pages": [
+    "Front",
+    "Back"
+   ],
+   "print": "Paper or card stock, 2 sides. Print 4 on one A4 sheet, then cut.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same front as the model, dates fixed. The back lists the 4 sessions, the prices, and a QR to sign up.",
+     "pdf": "/assets/print/booth/flyer/v1.pdf",
+     "pdfKb": 133,
+     "jpg": [
+      "/assets/print/booth/flyer/v1-1.jpg",
+      "/assets/print/booth/flyer/v1-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v1-1.m.jpg",
+      "/assets/print/booth/flyer/v1-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v1-1.t.jpg",
+      "/assets/print/booth/flyer/v1-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "The site’s two lines with the selection box on the front. Back: sessions, prices, and the web address.",
+     "pdf": "/assets/print/booth/flyer/v2.pdf",
+     "pdfKb": 385,
+     "jpg": [
+      "/assets/print/booth/flyer/v2-1.jpg",
+      "/assets/print/booth/flyer/v2-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v2-1.m.jpg",
+      "/assets/print/booth/flyer/v2-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v2-1.t.jpg",
+      "/assets/print/booth/flyer/v2-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Fewest words, biggest type. The back is a QR plus the dates, nothing else.",
+     "pdf": "/assets/print/booth/flyer/v3.pdf",
+     "pdfKb": 117,
+     "jpg": [
+      "/assets/print/booth/flyer/v3-1.jpg",
+      "/assets/print/booth/flyer/v3-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v3-1.m.jpg",
+      "/assets/print/booth/flyer/v3-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v3-1.t.jpg",
+      "/assets/print/booth/flyer/v3-2.t.jpg"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,698 @@
+{
+ "page": "venue",
+ "looks": [
+  {
+   "id": "v1",
+   "label": "As rendered",
+   "about": "The design on the 3D model now. Facts fixed to match the site."
+  },
+  {
+   "id": "v2",
+   "label": "Drafting grid",
+   "about": "Light paper, blue grid lines, and the selection box from the site’s first screen."
+  },
+  {
+   "id": "v3",
+   "label": "Big type",
+   "about": "Fewer words, bigger. Built to read from far away."
+  }
+ ],
+ "assets": [
+  {
+   "id": "signs",
+   "piece": "signs",
+   "name": "Direction signs",
+   "size": "A4 landscape, 297 × 210 mm",
+   "mm": [
+    297,
+    210
+   ],
+   "pages": [
+    "Arrow right",
+    "Arrow left",
+    "Arrow up"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”). Print 2 of each arrow.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model: a blue arrow, the name, and the room. Now with a left and an up arrow too.",
+     "pdf": "/assets/print/venue/signs/v1.pdf",
+     "pdfKb": 30,
+     "jpg": [
+      "/assets/print/venue/signs/v1-1.jpg",
+      "/assets/print/venue/signs/v1-2.jpg",
+      "/assets/print/venue/signs/v1-3.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signs/v1-1.m.jpg",
+      "/assets/print/venue/signs/v1-2.m.jpg",
+      "/assets/print/venue/signs/v1-3.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signs/v1-1.t.jpg",
+      "/assets/print/venue/signs/v1-2.t.jpg",
+      "/assets/print/venue/signs/v1-3.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "The room number is now the biggest thing, since that is what people look for. The arrow sits in a circle on the side you walk to.",
+     "pdf": "/assets/print/venue/signs/v2.pdf",
+     "pdfKb": 1230,
+     "jpg": [
+      "/assets/print/venue/signs/v2-1.jpg",
+      "/assets/print/venue/signs/v2-2.jpg",
+      "/assets/print/venue/signs/v2-3.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signs/v2-1.m.jpg",
+      "/assets/print/venue/signs/v2-2.m.jpg",
+      "/assets/print/venue/signs/v2-3.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signs/v2-1.t.jpg",
+      "/assets/print/venue/signs/v2-2.t.jpg",
+      "/assets/print/venue/signs/v2-3.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "One big white arrow and the room, nothing else. Reads from the far end of the hallway.",
+     "pdf": "/assets/print/venue/signs/v3.pdf",
+     "pdfKb": 578,
+     "jpg": [
+      "/assets/print/venue/signs/v3-1.jpg",
+      "/assets/print/venue/signs/v3-2.jpg",
+      "/assets/print/venue/signs/v3-3.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signs/v3-1.m.jpg",
+      "/assets/print/venue/signs/v3-2.m.jpg",
+      "/assets/print/venue/signs/v3-3.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signs/v3-1.t.jpg",
+      "/assets/print/venue/signs/v3-2.t.jpg",
+      "/assets/print/venue/signs/v3-3.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "banner",
+   "piece": "banner",
+   "name": "Pull-up banner",
+   "size": "0.85 m × 2 m",
+   "mm": [
+    850,
+    2000
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Pull-up banner print. 100 dpi or more. The bottom 10 cm goes into the stand.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same layout as the model. Dates and time now match the site: Nov 10 to 13, 5:30 to 7:00 PM.",
+     "pdf": "/assets/print/venue/banner/v1.pdf",
+     "pdfKb": 54,
+     "jpg": [
+      "/assets/print/venue/banner/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/banner/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/banner/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Headline sits at eye level. No “Sign in here”, so it still works when it moves inside by the screen. The four sessions fill the middle. The bottom stays clear for the stand.",
+     "pdf": "/assets/print/venue/banner/v2.pdf",
+     "pdfKb": 431,
+     "jpg": [
+      "/assets/print/venue/banner/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/banner/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/banner/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Logo at the top, above head height, so it shows in group photos at the photo spot. Fewer words, bigger type.",
+     "pdf": "/assets/print/venue/banner/v3.pdf",
+     "pdfKb": 723,
+     "jpg": [
+      "/assets/print/venue/banner/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/banner/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/banner/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "signinqr",
+   "piece": "signin",
+   "name": "Sign-in QR",
+   "size": "A5, 148 × 210 mm",
+   "mm": [
+    148,
+    210
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”). Put the real sign-in form QR in first.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model. The QR is a stand-in until we have the sign-in form link.",
+     "pdf": "/assets/print/venue/signinqr/v1.pdf",
+     "pdfKb": 35,
+     "jpg": [
+      "/assets/print/venue/signinqr/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinqr/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinqr/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Grid paper and the logo at the top, so the card matches the banner. The QR sits on a white card with a clear edge.",
+     "pdf": "/assets/print/venue/signinqr/v2.pdf",
+     "pdfKb": 287,
+     "jpg": [
+      "/assets/print/venue/signinqr/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinqr/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinqr/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Navy card with the QR on a white tile. The big “Sign in” reads from across the hallway.",
+     "pdf": "/assets/print/venue/signinqr/v3.pdf",
+     "pdfKb": 39,
+     "jpg": [
+      "/assets/print/venue/signinqr/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinqr/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinqr/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nametags",
+   "piece": "signin",
+   "name": "Name tags",
+   "size": "A4 sheet, 8 tags of 90 × 60 mm",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Sheet"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”). Card stock is best. Print 4 sheets for 30 tags, then cut.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "A plain tag in the model’s style: a blue band with the logo, a line for the name, a box for the group.",
+     "pdf": "/assets/print/venue/nametags/v1.pdf",
+     "pdfKb": 31,
+     "jpg": [
+      "/assets/print/venue/nametags/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/nametags/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/nametags/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Grid paper with the logo in the corner. The group box is bigger and blue, so the number is easy to spot.",
+     "pdf": "/assets/print/venue/nametags/v2.pdf",
+     "pdfKb": 235,
+     "jpg": [
+      "/assets/print/venue/nametags/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/nametags/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/nametags/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Most of the tag is space for the name, so it can be written big and read across a pod. Group sits in a navy strip.",
+     "pdf": "/assets/print/venue/nametags/v3.pdf",
+     "pdfKb": 37,
+     "jpg": [
+      "/assets/print/venue/nametags/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/nametags/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/nametags/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "signinsheet",
+   "piece": "signin",
+   "name": "Sign-in sheet",
+   "size": "A4, 210 × 297 mm",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Sheet"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”). Print 2.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Plain sheet like the one on the model: title, then name, email, and group on 30 lines.",
+     "pdf": "/assets/print/venue/signinsheet/v1.pdf",
+     "pdfKb": 40,
+     "jpg": [
+      "/assets/print/venue/signinsheet/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinsheet/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinsheet/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Logo and grid paper so it matches the set. Every other line is tinted, so names do not run into each other.",
+     "pdf": "/assets/print/venue/signinsheet/v2.pdf",
+     "pdfKb": 239,
+     "jpg": [
+      "/assets/print/venue/signinsheet/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinsheet/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinsheet/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Navy top band and bigger rows: 26 lines, one for each seat. Easier to write in on a clipboard.",
+     "pdf": "/assets/print/venue/signinsheet/v3.pdf",
+     "pdfKb": 61,
+     "jpg": [
+      "/assets/print/venue/signinsheet/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinsheet/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinsheet/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "doorsign",
+   "piece": "doorsign",
+   "name": "Door sign",
+   "size": "A3, 297 × 420 mm",
+   "mm": [
+    297,
+    420
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”).",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model: navy band with the logo, the room, and “Sign in here”.",
+     "pdf": "/assets/print/venue/doorsign/v1.pdf",
+     "pdfKb": 26,
+     "jpg": [
+      "/assets/print/venue/doorsign/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/doorsign/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/doorsign/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "People are already at the door, so “Sign in here.” is now the biggest line. The room number moves to the top.",
+     "pdf": "/assets/print/venue/doorsign/v2.pdf",
+     "pdfKb": 575,
+     "jpg": [
+      "/assets/print/venue/doorsign/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/doorsign/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/doorsign/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Navy, with the name and “Sign in here.” as big as the sheet allows. Reads from the end of the hallway.",
+     "pdf": "/assets/print/venue/doorsign/v3.pdf",
+     "pdfKb": 374,
+     "jpg": [
+      "/assets/print/venue/doorsign/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/doorsign/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/doorsign/v3-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "screen",
+   "piece": "screen",
+   "name": "Title slide",
+   "size": "16:9 slide, one per session",
+   "mm": [
+    338.67,
+    190.5
+   ],
+   "pages": [
+    "Session 01",
+    "Session 02",
+    "Session 03",
+    "Session 04"
+   ],
+   "print": "Not for print. Put it on the screen while people come in. The JPG is 2400 px wide.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model. The top corner now names the session and the day, so there is one slide for each of the four days.",
+     "pdf": "/assets/print/venue/screen/v1.pdf",
+     "pdfKb": 280,
+     "jpg": [
+      "/assets/print/venue/screen/v1-1.jpg",
+      "/assets/print/venue/screen/v1-2.jpg",
+      "/assets/print/venue/screen/v1-3.jpg",
+      "/assets/print/venue/screen/v1-4.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/screen/v1-1.m.jpg",
+      "/assets/print/venue/screen/v1-2.m.jpg",
+      "/assets/print/venue/screen/v1-3.m.jpg",
+      "/assets/print/venue/screen/v1-4.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/screen/v1-1.t.jpg",
+      "/assets/print/venue/screen/v1-2.t.jpg",
+      "/assets/print/venue/screen/v1-3.t.jpg",
+      "/assets/print/venue/screen/v1-4.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "The site’s first screen on the big screen: grid lines and the selection box on “paper.”. Session and day in the top corner.",
+     "pdf": "/assets/print/venue/screen/v2.pdf",
+     "pdfKb": 806,
+     "jpg": [
+      "/assets/print/venue/screen/v2-1.jpg",
+      "/assets/print/venue/screen/v2-2.jpg",
+      "/assets/print/venue/screen/v2-3.jpg",
+      "/assets/print/venue/screen/v2-4.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/screen/v2-1.m.jpg",
+      "/assets/print/venue/screen/v2-2.m.jpg",
+      "/assets/print/venue/screen/v2-3.m.jpg",
+      "/assets/print/venue/screen/v2-4.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/screen/v2-1.t.jpg",
+      "/assets/print/venue/screen/v2-2.t.jpg",
+      "/assets/print/venue/screen/v2-3.t.jpg",
+      "/assets/print/venue/screen/v2-4.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Each day shows its own session name big, so people know they are in the right room on the right day.",
+     "pdf": "/assets/print/venue/screen/v3.pdf",
+     "pdfKb": 735,
+     "jpg": [
+      "/assets/print/venue/screen/v3-1.jpg",
+      "/assets/print/venue/screen/v3-2.jpg",
+      "/assets/print/venue/screen/v3-3.jpg",
+      "/assets/print/venue/screen/v3-4.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/screen/v3-1.m.jpg",
+      "/assets/print/venue/screen/v3-2.m.jpg",
+      "/assets/print/venue/screen/v3-3.m.jpg",
+      "/assets/print/venue/screen/v3-4.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/screen/v3-1.t.jpg",
+      "/assets/print/venue/screen/v3-2.t.jpg",
+      "/assets/print/venue/screen/v3-3.t.jpg",
+      "/assets/print/venue/screen/v3-4.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "numbers",
+   "piece": "numbers",
+   "name": "Group number cards",
+   "size": "A4, folds into an A5 tent card",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Group 1",
+    "Group 2",
+    "Group 3",
+    "Group 4",
+    "Group 5",
+    "Group 6"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”). Card stock. Fold on the middle line so the number shows on both sides.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model: navy card, “GROUP”, and the number. Printed twice on one sheet so it shows on both sides of the fold.",
+     "pdf": "/assets/print/venue/numbers/v1.pdf",
+     "pdfKb": 95,
+     "jpg": [
+      "/assets/print/venue/numbers/v1-1.jpg",
+      "/assets/print/venue/numbers/v1-2.jpg",
+      "/assets/print/venue/numbers/v1-3.jpg",
+      "/assets/print/venue/numbers/v1-4.jpg",
+      "/assets/print/venue/numbers/v1-5.jpg",
+      "/assets/print/venue/numbers/v1-6.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/numbers/v1-1.m.jpg",
+      "/assets/print/venue/numbers/v1-2.m.jpg",
+      "/assets/print/venue/numbers/v1-3.m.jpg",
+      "/assets/print/venue/numbers/v1-4.m.jpg",
+      "/assets/print/venue/numbers/v1-5.m.jpg",
+      "/assets/print/venue/numbers/v1-6.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/numbers/v1-1.t.jpg",
+      "/assets/print/venue/numbers/v1-2.t.jpg",
+      "/assets/print/venue/numbers/v1-3.t.jpg",
+      "/assets/print/venue/numbers/v1-4.t.jpg",
+      "/assets/print/venue/numbers/v1-5.t.jpg",
+      "/assets/print/venue/numbers/v1-6.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Grid paper and a gradient number in the selection box. Matches the slides and the banner.",
+     "pdf": "/assets/print/venue/numbers/v2.pdf",
+     "pdfKb": 3945,
+     "jpg": [
+      "/assets/print/venue/numbers/v2-1.jpg",
+      "/assets/print/venue/numbers/v2-2.jpg",
+      "/assets/print/venue/numbers/v2-3.jpg",
+      "/assets/print/venue/numbers/v2-4.jpg",
+      "/assets/print/venue/numbers/v2-5.jpg",
+      "/assets/print/venue/numbers/v2-6.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/numbers/v2-1.m.jpg",
+      "/assets/print/venue/numbers/v2-2.m.jpg",
+      "/assets/print/venue/numbers/v2-3.m.jpg",
+      "/assets/print/venue/numbers/v2-4.m.jpg",
+      "/assets/print/venue/numbers/v2-5.m.jpg",
+      "/assets/print/venue/numbers/v2-6.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/numbers/v2-1.t.jpg",
+      "/assets/print/venue/numbers/v2-2.t.jpg",
+      "/assets/print/venue/numbers/v2-3.t.jpg",
+      "/assets/print/venue/numbers/v2-4.t.jpg",
+      "/assets/print/venue/numbers/v2-5.t.jpg",
+      "/assets/print/venue/numbers/v2-6.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "The number fills the card, so each pod is easy to find from the door.",
+     "pdf": "/assets/print/venue/numbers/v3.pdf",
+     "pdfKb": 2164,
+     "jpg": [
+      "/assets/print/venue/numbers/v3-1.jpg",
+      "/assets/print/venue/numbers/v3-2.jpg",
+      "/assets/print/venue/numbers/v3-3.jpg",
+      "/assets/print/venue/numbers/v3-4.jpg",
+      "/assets/print/venue/numbers/v3-5.jpg",
+      "/assets/print/venue/numbers/v3-6.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/numbers/v3-1.m.jpg",
+      "/assets/print/venue/numbers/v3-2.m.jpg",
+      "/assets/print/venue/numbers/v3-3.m.jpg",
+      "/assets/print/venue/numbers/v3-4.m.jpg",
+      "/assets/print/venue/numbers/v3-5.m.jpg",
+      "/assets/print/venue/numbers/v3-6.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/numbers/v3-1.t.jpg",
+      "/assets/print/venue/numbers/v3-2.t.jpg",
+      "/assets/print/venue/numbers/v3-3.t.jpg",
+      "/assets/print/venue/numbers/v3-4.t.jpg",
+      "/assets/print/venue/numbers/v3-5.t.jpg",
+      "/assets/print/venue/numbers/v3-6.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kits",
+   "piece": "kits",
+   "name": "Kit cover",
+   "size": "A4, 210 × 297 mm",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Cover"
+   ],
+   "print": "Paper. Print at 100% (no “fit to page”). Print 30. It goes on top of each worksheet kit.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Same as the model: blue band with the logo on a white sheet. Adds the two lines and a place for the name and group.",
+     "pdf": "/assets/print/venue/kits/v1.pdf",
+     "pdfKb": 36,
+     "jpg": [
+      "/assets/print/venue/kits/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/kits/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/kits/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Grid paper with the selection box on “paper.”, like the site. Name and group sit at the bottom in a clear row.",
+     "pdf": "/assets/print/venue/kits/v2.pdf",
+     "pdfKb": 354,
+     "jpg": [
+      "/assets/print/venue/kits/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/kits/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/kits/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Navy cover, so every seat looks the same when people walk in. Name and group go in a white box that is easy to write on.",
+     "pdf": "/assets/print/venue/kits/v3.pdf",
+     "pdfKb": 346,
+     "jpg": [
+      "/assets/print/venue/kits/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/kits/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/kits/v3-1.t.jpg"
+     ]
+    }
+   ]
+  }
+ ]
+}
