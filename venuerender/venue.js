@@ -1,8 +1,9 @@
 // /venuerender — FA Annex 104 (Fine Arts Annex, the old Communications Building, Seminary Road), set up for Blueprint.
 // Metres. X = across the room (0 = window wall, W = hallway wall). Z = depth (-D = screen wall, 0 = back wall). Y = up.
 // The room size is an ESTIMATE for a 30-seat classroom. Change W, D, H when the team measures it.
-import { THREE, canvasTexture, loadImage, tint, FONT, FONT_TEXT, mockQR } from '/render/stage.js';
+import { THREE, canvasTexture } from '/render/stage.js';
 import { mountPage } from '/render/page.js';
+import { loadArt, mountAssets } from '/render/assets.js';
 
 const W = 7.5;            // room width, estimated
 const D = 8;              // room depth, estimated
@@ -10,8 +11,6 @@ const H = 3.0;            // ceiling, estimated
 const HALL = 2.5;         // hallway width, estimated
 const DOOR_F = [-7.75, -6.85];  // front door (z range) on the hallway wall
 const DOOR_B = [-1.55, -0.65];  // back door, used for sign-in
-
-const NAVY = '#061a4d', CORE = '#0646c8', ELEC = '#006dff';
 
 // ---------- the list ----------
 const groups = [
@@ -143,83 +142,24 @@ const refs = [
 ];
 
 // ---------- textures ----------
-function brandGrad(g, w, h) {
-  const gr = g.createLinearGradient(0, 0, w, h * 0.4);
-  gr.addColorStop(0, CORE); gr.addColorStop(0.55, ELEC); gr.addColorStop(1, '#2bb8f0');
-  g.fillStyle = gr; g.fillRect(0, 0, w, h);
-}
-function drawImg(g, img, x, y, h) { const w = (img.width / img.height) * h; g.drawImage(img, x, y, w, h); return w; }
+// The print on each piece comes from the print files (/assets/print/venue, made by `npm run print`).
+// Pick a version in the list below the model and the texture changes.
+const art = await loadArt('venue');
 
-function makeTextures({ mark, word, markW, wordW }) {
+function makeTextures() {
   const t = {};
-  // title slide on the screen (2.4 × 1.8 m screen, 16:9 slide)
-  t.screen = canvasTexture(1200, 900, (g, w, h) => {
-    g.fillStyle = '#e9edf3'; g.fillRect(0, 0, w, h);
-    const sh = 675, sy = (h - sh) / 2;
-    const gr = g.createLinearGradient(0, sy, w, sy + sh);
-    gr.addColorStop(0, '#f4f8ff'); gr.addColorStop(1, '#d6e6ff');
-    g.fillStyle = gr; g.fillRect(0, sy, w, sh);
-    drawImg(g, mark, 60, sy + 50, 56);
-    drawImg(g, word, 112, sy + 64, 30);
-    g.fillStyle = CORE; g.font = `700 22px ${FONT}`; g.textAlign = 'right';
-    g.fillText('NOV 10 · FA ANNEX 104', w - 60, sy + 86);
-    g.textAlign = 'left';
-    g.fillStyle = '#101114'; g.font = `700 100px ${FONT}`;
-    g.fillText('Stand out on paper.', 60, sy + 330);
-    g.fillStyle = CORE;
-    g.fillText('Stand out in person.', 60, sy + 450);
-    g.fillStyle = '#3b4255'; g.font = `600 30px ${FONT}`;
-    g.fillText('Welcome to Blueprint. Find your group number on your name tag.', 60, sy + 560);
+  // title slide (16:9) on the 4:3 screen
+  t.screen = art.tex('screen', {
+    w: 1200, h: 900,
+    draw: (g, im, w, h) => { g.fillStyle = '#e9edf3'; g.fillRect(0, 0, w, h); const sh = (w * 9) / 16; g.drawImage(im, 0, (h - sh) / 2, w, sh); },
   });
-  // pull-up banner: 0.85 × 2.0 m → 425 × 1000
-  t.banner = canvasTexture(425, 1000, (g, w, h) => {
-    brandGrad(g, w, h);
-    drawImg(g, markW, 44, 60, 110);
-    drawImg(g, wordW, 44, 210, 64);
-    g.fillStyle = '#fff'; g.font = `700 58px ${FONT}`;
-    ['Stand out', 'on paper.', 'Stand out', 'in person.'].forEach((l, i) => g.fillText(l, 44, 400 + i * 64));
-    g.font = `600 28px ${FONT}`; g.fillStyle = '#e6f4ff';
-    ['Career workshop', 'Nov 10 · 5:00–7:30 pm', 'FA Annex 104'].forEach((l, i) => g.fillText(l, 44, 720 + i * 40));
-    g.fillStyle = '#fff'; g.fillRect(44, 870, w - 88, 70);
-    g.fillStyle = CORE; g.font = `700 28px ${FONT}`; g.fillText('Sign in here →', 66, 915);
-  });
-  // door sign A3
-  t.door = canvasTexture(297, 420, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = NAVY; g.fillRect(0, 0, w, 120);
-    drawImg(g, wordW, 26, 42, 40);
-    g.fillStyle = NAVY; g.font = `700 40px ${FONT}`;
-    g.fillText('FA Annex', 26, 200); g.fillText('104', 26, 246);
-    g.fillStyle = CORE; g.font = `700 26px ${FONT}`; g.fillText('Sign in here ↓', 26, 330);
-  });
-  // direction sign A4 landscape
-  t.sign = canvasTexture(420, 297, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = CORE; g.font = `700 120px ${FONT}`; g.fillText('→', 24, 130);
-    drawImg(g, word, 24, 170, 36);
-    g.fillStyle = NAVY; g.font = `700 34px ${FONT}`; g.fillText('FA Annex 104', 24, 260);
-  });
-  // attendance QR A5
-  t.qr = canvasTexture(296, 420, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = NAVY; g.font = `700 38px ${FONT}`; g.textAlign = 'center'; g.fillText('Sign in', w / 2, 66);
-    mockQR(g, 48, 100, 200, 5);
-    g.fillStyle = CORE; g.font = `600 20px ${FONT_TEXT}`; g.fillText('Scan, then get your kit', w / 2, 380);
-  });
-  // group number tent cards 1..6
-  t.nums = [1, 2, 3, 4, 5, 6].map((n) => canvasTexture(210, 148, (g, w, h) => {
-    g.fillStyle = NAVY; g.fillRect(0, 0, w, h);
-    g.fillStyle = '#b9eeff'; g.font = `600 22px ${FONT}`; g.fillText('GROUP', 20, 40);
-    g.fillStyle = '#fff'; g.font = `700 92px ${FONT}`; g.fillText(String(n), 20, 130);
-  }));
-  // kit (folder) on a seat
-  t.kit = canvasTexture(220, 310, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = CORE; g.fillRect(0, 0, w, 56);
-    drawImg(g, wordW, 16, 16, 24);
-    g.strokeStyle = 'rgba(6,26,77,0.25)'; g.lineWidth = 3;
-    for (let y = 100; y < h - 30; y += 34) { g.beginPath(); g.moveTo(16, y); g.lineTo(w - 16, y); g.stroke(); }
-  });
+  t.banner = art.tex('banner');
+  t.door = art.tex('doorsign');
+  t.sign = art.tex('signs');
+  t.qr = art.tex('signinqr', { w: 512 });
+  // the tent card's front face is the bottom half of each A4 page
+  t.nums = [0, 1, 2, 3, 4, 5].map((page) => art.tex('numbers', { page, crop: [0, 0.5, 1, 0.5], w: 512 }));
+  t.kit = art.tex('kits', { w: 512 });
   // vinyl tile floor (cream in rooms), 0.3 m tiles, texture covers 1.2 m
   t.floor = canvasTexture(512, 512, (g, w, h) => {
     g.fillStyle = '#e9e1cf'; g.fillRect(0, 0, w, h);
@@ -307,13 +247,8 @@ function simpleTable(S, mats, x0, z0, x1, z1, h = 0.75, top = mats.tableTop) {
 
 // ---------- the model ----------
 async function build(S) {
-  await Promise.all([
-    document.fonts.load(`700 40px ${FONT}`).catch(() => {}),
-    document.fonts.load(`600 40px ${FONT}`).catch(() => {}),
-    document.fonts.ready,
-  ]);
-  const [mark, word] = await Promise.all([loadImage('/assets/blueprint-mark.png'), loadImage('/assets/blueprint-wordmark.png')]);
-  const tx = makeTextures({ mark, word, markW: tint(mark, '#ffffff'), wordW: tint(word, '#ffffff') });
+  const tx = makeTextures();
+  await art.ready();
 
   const L = { dims: S.layer('dims'), walls: S.layer('walls'), people: S.layer('people'), pods: S.layer('pods'), rows: S.layer('rows') };
   const mats = {
@@ -564,4 +499,7 @@ document.getElementById('toCheck').innerHTML = toCheck.map((x) => `<li>${x}</li>
 document.getElementById('refList').innerHTML = refs.map(([title, text, src, url]) => `
   <div class="card"><h3>${title}</h3><p class="sec__sub" style="margin:0 0 12px">${text}</p><a class="src" href="${url}" target="_blank" rel="noopener">${src} ↗</a></div>`).join('');
 
-mountPage({ pieces, groups, views, layers, build, shadowBox: 9 });
+mountPage({ pieces, groups, views, layers, build, shadowBox: 9 }).then((stage) => {
+  if (stage) art.onChange(() => { stage.dirty = true; });
+  mountAssets(art, { pieces, stage });
+});

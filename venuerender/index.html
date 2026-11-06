@@ -40,6 +40,7 @@
         <li><b>26</b><span>participants</span></li>
         <li><b>Projector + screen</b><span>requested from CFMO</span></li>
       </ul>
+      <a class="btn rhero__go" href="#assets">Print files, 3 versions each ↓</a>
     </section>
 
     <section class="viewer wrap" aria-label="3D room">
@@ -54,6 +55,7 @@
         <div class="controls">
           <label class="slider">Turn <input type="range" id="turn" min="-180" max="180" step="1" /></label>
           <label class="slider">Tilt <input type="range" id="tilt" min="2" max="90" step="1" /></label>
+          <div class="lookpick">Print <div class="seg seg--sm" data-looks role="group" aria-label="Print look on the model"></div></div>
           <div class="toggles" id="toggles"></div>
         </div>
         <p class="caption" id="venueCaption"></p>
@@ -63,6 +65,21 @@
         <p class="parts__lead">Everything the room needs: <b data-count></b> pieces. Most come from the room, the team, or the print shop.</p>
         <div id="partsList"></div>
       </aside>
+    </section>
+
+    <section class="sec wrap rise" id="assets">
+      <div class="sec__head">
+        <div>
+          <h2 class="display">Print files. <span class="muted">Three versions each.</span></h2>
+          <p class="sec__sub">Every printed piece in the room and the hallway. Pick a version and the model above changes. Download the PDF for the print shop, or the JPG to share.</p>
+        </div>
+      </div>
+      <div class="looks">
+        <span class="looks__k">One look for all:</span>
+        <div class="seg" data-looks role="group" aria-label="Pick one look for every piece"></div>
+        <p class="looks__about" id="lookAbout"></p>
+      </div>
+      <div class="assets" id="assetList"></div>
     </section>
 
     <section class="sec wrap rise">

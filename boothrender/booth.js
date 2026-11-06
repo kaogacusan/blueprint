@@ -1,7 +1,8 @@
 // /boothrender — our half of a shared 3 × 3 m tent on Red Brick Road (LAS 50 bazaar).
 // Metres. X = across the tent (our half is x 0 to 1.5, on the left). Z = depth (0 = aisle side, -3 = back). Y = up.
-import { THREE, COL, canvasTexture, loadImage, tint, FONT, FONT_TEXT, mockQR, wrap } from '/render/stage.js';
+import { THREE, canvasTexture } from '/render/stage.js';
 import { mountPage } from '/render/page.js';
+import { loadArt, mountAssets } from '/render/assets.js';
 
 // ---------- sizes ----------
 const HALF = 1.5;          // our width (official)
@@ -122,141 +123,23 @@ const layers = [
 ];
 
 // ---------- textures (the print on each piece) ----------
-const NAVY = '#061a4d', CORE = '#0646c8', ELEC = '#006dff';
+// The print comes from the print files (/assets/print/booth, made by `npm run print`).
+// Pick a version in the list below the model and the texture changes.
+const art = await loadArt('booth');
 
-function brandGrad(g, w, h) {
-  const gr = g.createLinearGradient(0, 0, w, h * 0.4);
-  gr.addColorStop(0, CORE); gr.addColorStop(0.55, ELEC); gr.addColorStop(1, '#2bb8f0');
-  g.fillStyle = gr; g.fillRect(0, 0, w, h);
-}
-
-function gridLines(g, w, h, step, color) {
-  g.strokeStyle = color; g.lineWidth = 1.5;
-  for (let x = step; x < w; x += step) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
-  for (let y = step; y < h; y += step) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
-}
-
-function drawImg(g, img, x, y, h) { const w = (img.width / img.height) * h; g.drawImage(img, x, y, w, h); return w; }
-
-function makeTextures({ mark, markW, word, wordW }) {
-  const t = {};
-  // 1 header: 1.4 × 0.6 m → 1400 × 600 (1 px = 1 mm)
-  t.header = canvasTexture(1400, 600, (g, w, h) => {
-    brandGrad(g, w, h);
-    const mw = drawImg(g, markW, 90, 130, 340);
-    const x = 90 + mw + 70;
-    drawImg(g, wordW, x, 120, 170);
-    g.fillStyle = '#fff';
-    g.font = `600 72px ${FONT}`;
-    g.fillText('Stand out on paper.', x, 385);
-    g.fillText('Stand out in person.', x, 470);
-  });
-  // 2 backdrop: 1.5 × 1.5 m → 1200 × 1200 (1 px = 1.25 mm)
-  t.backdrop = canvasTexture(1200, 1200, (g, w, h) => {
-    g.fillStyle = '#f8fafc'; g.fillRect(0, 0, w, h);
-    gridLines(g, w, h, 80, 'rgba(6,70,200,0.10)');
-    drawImg(g, mark, 90, 80, 120);
-    drawImg(g, word, 190, 118, 60);
-    g.fillStyle = NAVY;
-    g.font = `700 112px ${FONT}`;
-    g.fillText('A hands-on', 90, 360);
-    g.fillStyle = CORE;
-    g.fillText('career workshop.', 90, 470);
-    g.font = `600 58px ${FONT}`;
-    g.fillStyle = NAVY;
-    const lines = ['Bring what you’ve already done.', 'Leave with a resume, LinkedIn,', 'and intro that show it.'];
-    lines.forEach((l, i) => g.fillText(l, 90, 620 + i * 78));
-    // date strip
-    g.fillStyle = NAVY; g.fillRect(90, 930, 1020, 150);
-    g.fillStyle = '#fff'; g.font = `700 62px ${FONT}`;
-    g.fillText('Nov 10 · 5:00–7:30 pm · FA Annex 104', 130, 1028);
-  });
-  // 3 skirt: 0.9 × 0.7 → 900 × 700
-  t.skirt = canvasTexture(900, 700, (g, w, h) => {
-    g.fillStyle = NAVY; g.fillRect(0, 0, w, h);
-    gridLines(g, w, h, 70, 'rgba(185,238,255,0.08)');
-    const ww = (wordW.width / wordW.height) * 150;
-    drawImg(g, wordW, (w - ww) / 2, 200, 150);
-    g.fillStyle = '#b9eeff'; g.font = `600 54px ${FONT}`; g.textAlign = 'center';
-    g.fillText('Career workshop · Nov 10', w / 2, 470);
-  });
-  // 4 banner: 2 × 3 ft → 610 × 914
-  t.banner = canvasTexture(610, 914, (g, w, h) => {
-    brandGrad(g, w, h);
-    drawImg(g, markW, 60, 60, 120);
-    drawImg(g, wordW, 60, 230, 86);
-    g.fillStyle = '#fff';
-    g.font = `700 64px ${FONT}`;
-    ['Career', 'workshop.'].forEach((l, i) => g.fillText(l, 60, 420 + i * 70));
-    g.font = `600 38px ${FONT}`;
-    ['Nov 10 · 5–7:30 pm', 'FA Annex 104'].forEach((l, i) => g.fillText(l, 60, 620 + i * 50));
-    g.fillStyle = '#fff'; g.fillRect(60, 760, w - 120, 90);
-    g.fillStyle = CORE; g.font = `700 38px ${FONT}`;
-    g.fillText('Sign up at our booth →', 84, 818);
-  });
-  // 5 sign-up QR: A5 → 444 × 630
-  t.regqr = canvasTexture(444, 630, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = NAVY; g.font = `700 62px ${FONT}`; g.textAlign = 'center';
-    g.fillText('Sign up', w / 2, 100);
-    mockQR(g, 72, 150, 300, 11);
-    g.fillStyle = CORE; g.font = `600 30px ${FONT_TEXT}`;
-    g.fillText('It takes a minute.', w / 2, 540);
-  });
-  // 6 workshop card: A4 → 630 × 891
-  t.card = canvasTexture(630, 891, (g, w, h) => {
-    g.fillStyle = NAVY; g.fillRect(0, 0, w, h);
-    drawImg(g, markW, 56, 56, 90);
-    g.fillStyle = '#b9eeff'; g.font = `600 30px ${FONT}`;
-    g.fillText('CAREER WORKSHOP', 56, 230);
-    g.fillStyle = '#fff'; g.font = `700 150px ${FONT}`;
-    g.fillText('Nov 10', 50, 390);
-    g.font = `600 44px ${FONT}`;
-    ['Tuesday', '5:00–7:30 pm', 'FA Annex 104'].forEach((l, i) => g.fillText(l, 56, 480 + i * 62));
-    g.fillStyle = ELEC; g.fillRect(56, 720, 300, 84);
-    g.fillStyle = '#fff'; g.font = `700 42px ${FONT}`;
-    g.fillText('26 seats', 84, 776);
-  });
-  // 7 GCash QR: A5
-  t.gcash = canvasTexture(444, 630, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = NAVY; g.font = `700 54px ${FONT}`; g.textAlign = 'center';
-    g.fillText('Pay with GCash', w / 2, 96);
-    mockQR(g, 72, 150, 300, 29);
-    g.fillStyle = '#6b7387'; g.font = `600 28px ${FONT_TEXT}`;
-    g.fillText('Account name here', w / 2, 540);
-  });
-  // 9 AAA card: A6 lying flat
-  t.aaa = canvasTexture(315, 444, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = CORE; g.fillRect(0, 0, w, 70);
-    g.fillStyle = '#fff'; g.font = `700 34px ${FONT}`; g.fillText('AAA Card', 24, 48);
-    g.fillStyle = NAVY; g.font = `700 26px ${FONT}`;
-    ['Attention', 'Approach', 'Arrival'].forEach((l, i) => {
-      g.fillText(l, 24, 130 + i * 110);
-      g.strokeStyle = 'rgba(6,26,77,0.25)'; g.lineWidth = 2;
-      g.beginPath(); g.moveTo(24, 165 + i * 110); g.lineTo(w - 24, 165 + i * 110); g.stroke();
-    });
-  });
-  // 10 sign-up sheet
-  t.signup = canvasTexture(420, 594, (g, w, h) => {
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    g.fillStyle = NAVY; g.font = `700 30px ${FONT}`; g.fillText('Sign-up sheet', 28, 92);
-    g.font = `600 15px ${FONT_TEXT}`; g.fillStyle = '#6b7387';
-    ['Name', 'Email', 'Course', 'Year'].forEach((l, i) => g.fillText(l, 28 + i * 98, 140));
-    g.strokeStyle = 'rgba(6,26,77,0.2)'; g.lineWidth = 2;
-    for (let y = 170; y < h - 30; y += 36) { g.beginPath(); g.moveTo(28, y); g.lineTo(w - 28, y); g.stroke(); }
-  });
-  // 11 flyer
-  t.flyer = canvasTexture(315, 444, (g, w, h) => {
-    brandGrad(g, w, h);
-    drawImg(g, wordW, 26, 40, 46);
-    g.fillStyle = '#fff'; g.font = `700 40px ${FONT}`;
-    wrap(g, 'A hands-on career workshop.', w - 52).forEach((l, i) => g.fillText(l, 26, 190 + i * 46));
-    g.font = `600 22px ${FONT}`;
-    g.fillText('Nov 10 · FA Annex 104', 26, 400);
-  });
-  return t;
+function makeTextures() {
+  return {
+    header: art.tex('header'),
+    backdrop: art.tex('backdrop'),
+    skirt: art.tex('skirt'),
+    banner: art.tex('banner', { w: 768 }),
+    regqr: art.tex('regqr', { w: 512 }),
+    card: art.tex('card', { w: 512 }),
+    gcash: art.tex('gcash', { w: 512 }),
+    aaa: art.tex('aaa', { w: 384 }),          // front of the card
+    signup: art.tex('signup', { w: 512 }),
+    flyer: art.tex('flyer', { w: 384 }),      // front of the flyer
+  };
 }
 
 function brickTexture() {
@@ -282,14 +165,8 @@ function brickTexture() {
 
 // ---------- the model ----------
 async function build(S) {
-  await Promise.all([
-    document.fonts.load(`700 40px ${FONT}`).catch(() => {}),
-    document.fonts.load(`600 40px ${FONT}`).catch(() => {}),
-    document.fonts.ready,
-  ]);
-  const [mark, word] = await Promise.all([loadImage('/assets/blueprint-mark.png'), loadImage('/assets/blueprint-wordmark.png')]);
-  const art = { mark, word, markW: tint(mark, '#ffffff'), wordW: tint(word, '#ffffff') };
-  const tx = makeTextures(art);
+  const tx = makeTextures();
+  await art.ready();
 
   const L = { dims: S.layer('dims'), roof: S.layer('roof'), curtains: S.layer('curtains'), people: S.layer('people') };
 
@@ -517,4 +394,7 @@ async function build(S) {
   });
 }
 
-mountPage({ pieces, groups, views, layers, build, shadowBox: 6 });
+mountPage({ pieces, groups, views, layers, build, shadowBox: 6 }).then((stage) => {
+  if (stage) art.onChange(() => { stage.dirty = true; });
+  mountAssets(art, { pieces, stage });
+});

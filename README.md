@@ -29,6 +29,28 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 | `render/stage.js` | Shared 3D engine (camera, pins, size lines, highlight). |
 | `render/page.js` | Shared page wiring (tabs, sliders, toggles, list, table). |
 | `render/render.css` | Shared styles for both pages. |
+| `render/assets.js` | The print files list on both pages, and the print on the 3D model. Pick a version and the model changes. Picks are saved in your browser only. |
+
+### Print files
+
+Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in three versions:
+
+- **V1 As rendered**: the design on the model, with the facts fixed to match the site.
+- **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
+- **V3 Big type**: fewer words, bigger. Reads from far away.
+
+Each version has a print **PDF** (vector, for the print shop) and a **JPG** (to share). They are in `assets/print/venue/` and `assets/print/booth/`, and the pages list them in the "Print files" section.
+
+To change a design, edit `scripts/print/venue.mjs` or `scripts/print/booth.mjs` (one entry per piece) and rebuild. The facts (dates, time, room, prices) are in `F` in `scripts/print/kit.mjs`. Change them there once.
+
+```bash
+npm install
+npx playwright-core install chromium   # once
+npm run print                     # both pages
+npm run print -- booth header     # one piece
+```
+
+QR codes marked "Sample QR" (sign-in form, GCash) are stand-ins. Put the real QR in before you print. The sign-up QR on the booth pieces is real: it opens the register section of the site.
 
 ## Files
 
