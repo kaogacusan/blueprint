@@ -4,5 +4,12 @@
   "type": "module",
   "dependencies": {
     "nodemailer": "6.9.16"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.62.0",
+    "qrcode": "^1.5.4"
+  },
+  "scripts": {
+    "print": "node scripts/print/build.mjs"
   }
 }
