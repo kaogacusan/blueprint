@@ -78,7 +78,7 @@ export async function mountPage({ pieces, groups, views, layers = [], build, sha
   }
 
   // ----- reveal -----
-  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { threshold: 0.12 });
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { threshold: 0, rootMargin: '0px 0px -12% 0px' });
   document.querySelectorAll('.rise').forEach((el) => io.observe(el));
 
   // ----- 3D -----
