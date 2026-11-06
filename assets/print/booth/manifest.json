@@ -15,6 +15,21 @@
    "id": "v3",
    "label": "Big type",
    "about": "Fewer words, bigger. Built to read from far away."
+  },
+  {
+   "id": "v4",
+   "label": "Clean white",
+   "about": "V1, cleaned up. White paper, navy type, one blue. No grid, no box."
+  },
+  {
+   "id": "v5",
+   "label": "Solid blue",
+   "about": "V2, cleaned up. Solid brand blue and white type. No grid, no box."
+  },
+  {
+   "id": "v6",
+   "label": "Plain navy",
+   "about": "V3, cleaned up. Navy, fewest words, one light-blue word."
   }
  ],
  "assets": [
@@ -78,6 +93,54 @@
      ],
      "t": [
       "/assets/print/booth/header/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on a white tarp. The logo and the two lines sit in one clean row, and nothing else.",
+     "pdf": "/assets/print/booth/header/v4.pdf",
+     "pdfKb": 22,
+     "jpg": [
+      "/assets/print/booth/header/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/header/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/header/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue. No grid and no box: just the logo and the two lines, big.",
+     "pdf": "/assets/print/booth/header/v5.pdf",
+     "pdfKb": 21,
+     "jpg": [
+      "/assets/print/booth/header/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/header/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/header/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. The name is even bigger, and the date is the one light-blue word.",
+     "pdf": "/assets/print/booth/header/v6.pdf",
+     "pdfKb": 23,
+     "jpg": [
+      "/assets/print/booth/header/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/header/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/header/v6-1.t.jpg"
      ]
     }
    ]
@@ -143,6 +206,54 @@
      "t": [
       "/assets/print/booth/backdrop/v3-1.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white. The navy date strip is now a plain line of text under a thin rule.",
+     "pdf": "/assets/print/booth/backdrop/v4.pdf",
+     "pdfKb": 64,
+     "jpg": [
+      "/assets/print/booth/backdrop/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue. Same 4 sessions, but no grid and no box, and every line starts on one edge.",
+     "pdf": "/assets/print/booth/backdrop/v5.pdf",
+     "pdfKb": 62,
+     "jpg": [
+      "/assets/print/booth/backdrop/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid and the pill. The QR is still 37 cm, so people can scan it from the aisle.",
+     "pdf": "/assets/print/booth/backdrop/v6.pdf",
+     "pdfKb": 48,
+     "jpg": [
+      "/assets/print/booth/backdrop/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v6-1.t.jpg"
+     ]
     }
    ]
   },
@@ -206,6 +317,54 @@
      ],
      "t": [
       "/assets/print/booth/skirt/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white, with the logo in the corner and the words at the bottom, so it is easy to read below the table edge.",
+     "pdf": "/assets/print/booth/skirt/v4.pdf",
+     "pdfKb": 29,
+     "jpg": [
+      "/assets/print/booth/skirt/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/skirt/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/skirt/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue. The deadline is still the biggest thing, now with no grid and no box.",
+     "pdf": "/assets/print/booth/skirt/v5.pdf",
+     "pdfKb": 27,
+     "jpg": [
+      "/assets/print/booth/skirt/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/skirt/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/skirt/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. One big price in light blue, and one plain line under it.",
+     "pdf": "/assets/print/booth/skirt/v6.pdf",
+     "pdfKb": 29,
+     "jpg": [
+      "/assets/print/booth/skirt/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/skirt/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/skirt/v6-1.t.jpg"
      ]
     }
    ]
@@ -271,6 +430,54 @@
      "t": [
       "/assets/print/booth/banner/v3-1.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white. The white box around “Sign up at our booth” is gone; it is now the one blue line.",
+     "pdf": "/assets/print/booth/banner/v4.pdf",
+     "pdfKb": 54,
+     "jpg": [
+      "/assets/print/booth/banner/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/banner/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/banner/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue, so it stands out in a crowd. No grid and no box.",
+     "pdf": "/assets/print/booth/banner/v5.pdf",
+     "pdfKb": 48,
+     "jpg": [
+      "/assets/print/booth/banner/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/banner/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/banner/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. The QR tile now spans the full width, edge to edge with the words.",
+     "pdf": "/assets/print/booth/banner/v6.pdf",
+     "pdfKb": 24,
+     "jpg": [
+      "/assets/print/booth/banner/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/banner/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/banner/v6-1.t.jpg"
+     ]
     }
    ]
   },
@@ -334,6 +541,54 @@
      ],
      "t": [
       "/assets/print/booth/regqr/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 with everything on one left edge. The QR is as wide as the card allows, so it scans faster.",
+     "pdf": "/assets/print/booth/regqr/v4.pdf",
+     "pdfKb": 29,
+     "jpg": [
+      "/assets/print/booth/regqr/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/regqr/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/regqr/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue. The web address is plain text now, not small code letters.",
+     "pdf": "/assets/print/booth/regqr/v5.pdf",
+     "pdfKb": 40,
+     "jpg": [
+      "/assets/print/booth/regqr/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/regqr/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/regqr/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. The white tile lines up with the words on both sides.",
+     "pdf": "/assets/print/booth/regqr/v6.pdf",
+     "pdfKb": 31,
+     "jpg": [
+      "/assets/print/booth/regqr/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/regqr/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/regqr/v6-1.t.jpg"
      ]
     }
    ]
@@ -399,6 +654,54 @@
      "t": [
       "/assets/print/booth/card/v3-1.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white. “Limited seats” is the one blue line now, not a blue box.",
+     "pdf": "/assets/print/booth/card/v4.pdf",
+     "pdfKb": 48,
+     "jpg": [
+      "/assets/print/booth/card/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/card/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/card/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue. Same 4 sessions, in plain type with no code letters.",
+     "pdf": "/assets/print/booth/card/v5.pdf",
+     "pdfKb": 66,
+     "jpg": [
+      "/assets/print/booth/card/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/card/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/card/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid and the pill. Two big prices, and the deadline as plain text.",
+     "pdf": "/assets/print/booth/card/v6.pdf",
+     "pdfKb": 54,
+     "jpg": [
+      "/assets/print/booth/card/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/card/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/card/v6-1.t.jpg"
+     ]
     }
    ]
   },
@@ -462,6 +765,54 @@
      ],
      "t": [
       "/assets/print/booth/gcash/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 with everything on one left edge and a small logo. The QR is a stand-in.",
+     "pdf": "/assets/print/booth/gcash/v4.pdf",
+     "pdfKb": 43,
+     "jpg": [
+      "/assets/print/booth/gcash/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/gcash/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/gcash/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue, with the two prices in plain type. The QR is a stand-in.",
+     "pdf": "/assets/print/booth/gcash/v5.pdf",
+     "pdfKb": 55,
+     "jpg": [
+      "/assets/print/booth/gcash/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/gcash/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/gcash/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. One big word, then the QR on a full-width white tile. The QR is a stand-in.",
+     "pdf": "/assets/print/booth/gcash/v6.pdf",
+     "pdfKb": 32,
+     "jpg": [
+      "/assets/print/booth/gcash/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/gcash/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/gcash/v6-1.t.jpg"
      ]
     }
    ]
@@ -537,6 +888,63 @@
       "/assets/print/booth/aaa/v3-1.t.jpg",
       "/assets/print/booth/aaa/v3-2.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white with no blue band. The back is white too, with one blue line.",
+     "pdf": "/assets/print/booth/aaa/v4.pdf",
+     "pdfKb": 89,
+     "jpg": [
+      "/assets/print/booth/aaa/v4-1.jpg",
+      "/assets/print/booth/aaa/v4-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/aaa/v4-1.m.jpg",
+      "/assets/print/booth/aaa/v4-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/aaa/v4-1.t.jpg",
+      "/assets/print/booth/aaa/v4-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 with a solid blue band and white lines to write on. The back is solid blue.",
+     "pdf": "/assets/print/booth/aaa/v5.pdf",
+     "pdfKb": 95,
+     "jpg": [
+      "/assets/print/booth/aaa/v5-1.jpg",
+      "/assets/print/booth/aaa/v5-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/aaa/v5-1.m.jpg",
+      "/assets/print/booth/aaa/v5-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/aaa/v5-1.t.jpg",
+      "/assets/print/booth/aaa/v5-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. A navy band on top, white lines to write on, and a QR back.",
+     "pdf": "/assets/print/booth/aaa/v6.pdf",
+     "pdfKb": 79,
+     "jpg": [
+      "/assets/print/booth/aaa/v6-1.jpg",
+      "/assets/print/booth/aaa/v6-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/aaa/v6-1.m.jpg",
+      "/assets/print/booth/aaa/v6-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/aaa/v6-1.t.jpg",
+      "/assets/print/booth/aaa/v6-2.t.jpg"
+     ]
     }
    ]
   },
@@ -600,6 +1008,54 @@
      ],
      "t": [
       "/assets/print/booth/signup/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 with the title and table on one left edge and a small logo. 16 big rows.",
+     "pdf": "/assets/print/booth/signup/v4.pdf",
+     "pdfKb": 36,
+     "jpg": [
+      "/assets/print/booth/signup/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/signup/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/signup/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 with a solid blue band on top. Plain numbers and headings, no code letters, no grid. 20 rows.",
+     "pdf": "/assets/print/booth/signup/v5.pdf",
+     "pdfKb": 72,
+     "jpg": [
+      "/assets/print/booth/signup/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/signup/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/signup/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the gradient. Navy band on top and 12 tall rows, easy to write in while standing.",
+     "pdf": "/assets/print/booth/signup/v6.pdf",
+     "pdfKb": 46,
+     "jpg": [
+      "/assets/print/booth/signup/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/signup/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/signup/v6-1.t.jpg"
      ]
     }
    ]
@@ -674,6 +1130,63 @@
      "t": [
       "/assets/print/booth/flyer/v3-1.t.jpg",
       "/assets/print/booth/flyer/v3-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white. The back keeps the sessions, prices, and QR, with plain numbers and one left edge.",
+     "pdf": "/assets/print/booth/flyer/v4.pdf",
+     "pdfKb": 103,
+     "jpg": [
+      "/assets/print/booth/flyer/v4-1.jpg",
+      "/assets/print/booth/flyer/v4-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v4-1.m.jpg",
+      "/assets/print/booth/flyer/v4-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v4-1.t.jpg",
+      "/assets/print/booth/flyer/v4-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue, both sides. No grid and no box; the web address is plain text.",
+     "pdf": "/assets/print/booth/flyer/v5.pdf",
+     "pdfKb": 104,
+     "jpg": [
+      "/assets/print/booth/flyer/v5-1.jpg",
+      "/assets/print/booth/flyer/v5-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v5-1.m.jpg",
+      "/assets/print/booth/flyer/v5-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v5-1.t.jpg",
+      "/assets/print/booth/flyer/v5-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. One light-blue line on the front; the back is a QR and the dates.",
+     "pdf": "/assets/print/booth/flyer/v6.pdf",
+     "pdfKb": 69,
+     "jpg": [
+      "/assets/print/booth/flyer/v6-1.jpg",
+      "/assets/print/booth/flyer/v6-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v6-1.m.jpg",
+      "/assets/print/booth/flyer/v6-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v6-1.t.jpg",
+      "/assets/print/booth/flyer/v6-2.t.jpg"
      ]
     }
    ]

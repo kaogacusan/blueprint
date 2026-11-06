@@ -15,6 +15,21 @@
    "id": "v3",
    "label": "Big type",
    "about": "Fewer words, bigger. Built to read from far away."
+  },
+  {
+   "id": "v4",
+   "label": "Clean white",
+   "about": "V1, cleaned up. White paper, navy type, one blue. No grid, no box."
+  },
+  {
+   "id": "v5",
+   "label": "Solid blue",
+   "about": "V2, cleaned up. Solid brand blue and white type. No grid, no box."
+  },
+  {
+   "id": "v6",
+   "label": "Plain navy",
+   "about": "V3, cleaned up. Navy, fewest words, one light-blue word."
   }
  ],
  "assets": [
@@ -99,6 +114,72 @@
       "/assets/print/venue/signs/v3-2.t.jpg",
       "/assets/print/venue/signs/v3-3.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: the arrow sits on the side you walk to, and the room starts on the same edge every time.",
+     "pdf": "/assets/print/venue/signs/v4.pdf",
+     "pdfKb": 32,
+     "jpg": [
+      "/assets/print/venue/signs/v4-1.jpg",
+      "/assets/print/venue/signs/v4-2.jpg",
+      "/assets/print/venue/signs/v4-3.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signs/v4-1.m.jpg",
+      "/assets/print/venue/signs/v4-2.m.jpg",
+      "/assets/print/venue/signs/v4-3.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signs/v4-1.t.jpg",
+      "/assets/print/venue/signs/v4-2.t.jpg",
+      "/assets/print/venue/signs/v4-3.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: solid blue, no grid, no box. The room number is still the biggest thing.",
+     "pdf": "/assets/print/venue/signs/v5.pdf",
+     "pdfKb": 32,
+     "jpg": [
+      "/assets/print/venue/signs/v5-1.jpg",
+      "/assets/print/venue/signs/v5-2.jpg",
+      "/assets/print/venue/signs/v5-3.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signs/v5-1.m.jpg",
+      "/assets/print/venue/signs/v5-2.m.jpg",
+      "/assets/print/venue/signs/v5-3.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signs/v5-1.t.jpg",
+      "/assets/print/venue/signs/v5-2.t.jpg",
+      "/assets/print/venue/signs/v5-3.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid lines. One big arrow and the room, nothing else.",
+     "pdf": "/assets/print/venue/signs/v6.pdf",
+     "pdfKb": 30,
+     "jpg": [
+      "/assets/print/venue/signs/v6-1.jpg",
+      "/assets/print/venue/signs/v6-2.jpg",
+      "/assets/print/venue/signs/v6-3.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signs/v6-1.m.jpg",
+      "/assets/print/venue/signs/v6-2.m.jpg",
+      "/assets/print/venue/signs/v6-3.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signs/v6-1.t.jpg",
+      "/assets/print/venue/signs/v6-2.t.jpg",
+      "/assets/print/venue/signs/v6-3.t.jpg"
+     ]
     }
    ]
   },
@@ -162,6 +243,54 @@
      ],
      "t": [
       "/assets/print/venue/banner/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: white, one blue line for “Sign in here”, and no box around it.",
+     "pdf": "/assets/print/venue/banner/v4.pdf",
+     "pdfKb": 53,
+     "jpg": [
+      "/assets/print/venue/banner/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/banner/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/banner/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: solid blue, no grid, no box. Headline at eye level, the four sessions below.",
+     "pdf": "/assets/print/venue/banner/v5.pdf",
+     "pdfKb": 62,
+     "jpg": [
+      "/assets/print/venue/banner/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/banner/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/banner/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid, one light-blue line. Logo stays at the top for photos.",
+     "pdf": "/assets/print/venue/banner/v6.pdf",
+     "pdfKb": 45,
+     "jpg": [
+      "/assets/print/venue/banner/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/banner/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/banner/v6-1.t.jpg"
      ]
     }
    ]
@@ -227,6 +356,54 @@
      "t": [
       "/assets/print/venue/signinqr/v3-1.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: everything starts on one edge, and the QR is as wide as the text.",
+     "pdf": "/assets/print/venue/signinqr/v4.pdf",
+     "pdfKb": 35,
+     "jpg": [
+      "/assets/print/venue/signinqr/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinqr/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinqr/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: solid blue, no grid. The QR sits on a plain white tile.",
+     "pdf": "/assets/print/venue/signinqr/v5.pdf",
+     "pdfKb": 42,
+     "jpg": [
+      "/assets/print/venue/signinqr/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinqr/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinqr/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid, and the white tile lines up with the words.",
+     "pdf": "/assets/print/venue/signinqr/v6.pdf",
+     "pdfKb": 36,
+     "jpg": [
+      "/assets/print/venue/signinqr/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinqr/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinqr/v6-1.t.jpg"
+     ]
     }
    ]
   },
@@ -290,6 +467,54 @@
      ],
      "t": [
       "/assets/print/venue/nametags/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: no blue band, so there is more room to write the name.",
+     "pdf": "/assets/print/venue/nametags/v4.pdf",
+     "pdfKb": 40,
+     "jpg": [
+      "/assets/print/venue/nametags/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/nametags/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/nametags/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: a blue tag with two plain white boxes, one for the name and one for the group.",
+     "pdf": "/assets/print/venue/nametags/v5.pdf",
+     "pdfKb": 42,
+     "jpg": [
+      "/assets/print/venue/nametags/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/nametags/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/nametags/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: the logo moves into the navy strip, so the top is only space for the name.",
+     "pdf": "/assets/print/venue/nametags/v6.pdf",
+     "pdfKb": 37,
+     "jpg": [
+      "/assets/print/venue/nametags/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/nametags/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/nametags/v6-1.t.jpg"
      ]
     }
    ]
@@ -355,6 +580,54 @@
      "t": [
       "/assets/print/venue/signinsheet/v3-1.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: the logo goes top right, and the table lines up with the title.",
+     "pdf": "/assets/print/venue/signinsheet/v4.pdf",
+     "pdfKb": 53,
+     "jpg": [
+      "/assets/print/venue/signinsheet/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinsheet/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinsheet/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: a solid blue top, no grid. Every other line is still tinted so names do not run together.",
+     "pdf": "/assets/print/venue/signinsheet/v5.pdf",
+     "pdfKb": 49,
+     "jpg": [
+      "/assets/print/venue/signinsheet/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinsheet/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinsheet/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid in the navy top. Still 26 big lines, one for each seat.",
+     "pdf": "/assets/print/venue/signinsheet/v6.pdf",
+     "pdfKb": 45,
+     "jpg": [
+      "/assets/print/venue/signinsheet/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/signinsheet/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/signinsheet/v6-1.t.jpg"
+     ]
     }
    ]
   },
@@ -418,6 +691,54 @@
      ],
      "t": [
       "/assets/print/venue/doorsign/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: no navy band. The room number is the biggest thing, and “Sign in here” is the one blue line.",
+     "pdf": "/assets/print/venue/doorsign/v4.pdf",
+     "pdfKb": 28,
+     "jpg": [
+      "/assets/print/venue/doorsign/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/doorsign/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/doorsign/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: solid blue, no grid, no box. “Sign in here.” is still the biggest line.",
+     "pdf": "/assets/print/venue/doorsign/v5.pdf",
+     "pdfKb": 43,
+     "jpg": [
+      "/assets/print/venue/doorsign/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/doorsign/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/doorsign/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid, and the room and arrow line up with the words above.",
+     "pdf": "/assets/print/venue/doorsign/v6.pdf",
+     "pdfKb": 26,
+     "jpg": [
+      "/assets/print/venue/doorsign/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/doorsign/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/doorsign/v6-1.t.jpg"
      ]
     }
    ]
@@ -512,6 +833,81 @@
       "/assets/print/venue/screen/v3-2.t.jpg",
       "/assets/print/venue/screen/v3-3.t.jpg",
       "/assets/print/venue/screen/v3-4.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: plain white, no fade. The session line is calm, not in capitals.",
+     "pdf": "/assets/print/venue/screen/v4.pdf",
+     "pdfKb": 74,
+     "jpg": [
+      "/assets/print/venue/screen/v4-1.jpg",
+      "/assets/print/venue/screen/v4-2.jpg",
+      "/assets/print/venue/screen/v4-3.jpg",
+      "/assets/print/venue/screen/v4-4.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/screen/v4-1.m.jpg",
+      "/assets/print/venue/screen/v4-2.m.jpg",
+      "/assets/print/venue/screen/v4-3.m.jpg",
+      "/assets/print/venue/screen/v4-4.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/screen/v4-1.t.jpg",
+      "/assets/print/venue/screen/v4-2.t.jpg",
+      "/assets/print/venue/screen/v4-3.t.jpg",
+      "/assets/print/venue/screen/v4-4.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: solid blue, no grid, no box. Lines start on the left edge, like the other pieces.",
+     "pdf": "/assets/print/venue/screen/v5.pdf",
+     "pdfKb": 74,
+     "jpg": [
+      "/assets/print/venue/screen/v5-1.jpg",
+      "/assets/print/venue/screen/v5-2.jpg",
+      "/assets/print/venue/screen/v5-3.jpg",
+      "/assets/print/venue/screen/v5-4.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/screen/v5-1.m.jpg",
+      "/assets/print/venue/screen/v5-2.m.jpg",
+      "/assets/print/venue/screen/v5-3.m.jpg",
+      "/assets/print/venue/screen/v5-4.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/screen/v5-1.t.jpg",
+      "/assets/print/venue/screen/v5-2.t.jpg",
+      "/assets/print/venue/screen/v5-3.t.jpg",
+      "/assets/print/venue/screen/v5-4.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid, and the session name is one flat light blue.",
+     "pdf": "/assets/print/venue/screen/v6.pdf",
+     "pdfKb": 121,
+     "jpg": [
+      "/assets/print/venue/screen/v6-1.jpg",
+      "/assets/print/venue/screen/v6-2.jpg",
+      "/assets/print/venue/screen/v6-3.jpg",
+      "/assets/print/venue/screen/v6-4.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/screen/v6-1.m.jpg",
+      "/assets/print/venue/screen/v6-2.m.jpg",
+      "/assets/print/venue/screen/v6-3.m.jpg",
+      "/assets/print/venue/screen/v6-4.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/screen/v6-1.t.jpg",
+      "/assets/print/venue/screen/v6-2.t.jpg",
+      "/assets/print/venue/screen/v6-3.t.jpg",
+      "/assets/print/venue/screen/v6-4.t.jpg"
      ]
     }
    ]
@@ -627,6 +1023,99 @@
       "/assets/print/venue/numbers/v3-5.t.jpg",
       "/assets/print/venue/numbers/v3-6.t.jpg"
      ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: white card, a big blue number, and the logo in the corner.",
+     "pdf": "/assets/print/venue/numbers/v4.pdf",
+     "pdfKb": 103,
+     "jpg": [
+      "/assets/print/venue/numbers/v4-1.jpg",
+      "/assets/print/venue/numbers/v4-2.jpg",
+      "/assets/print/venue/numbers/v4-3.jpg",
+      "/assets/print/venue/numbers/v4-4.jpg",
+      "/assets/print/venue/numbers/v4-5.jpg",
+      "/assets/print/venue/numbers/v4-6.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/numbers/v4-1.m.jpg",
+      "/assets/print/venue/numbers/v4-2.m.jpg",
+      "/assets/print/venue/numbers/v4-3.m.jpg",
+      "/assets/print/venue/numbers/v4-4.m.jpg",
+      "/assets/print/venue/numbers/v4-5.m.jpg",
+      "/assets/print/venue/numbers/v4-6.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/numbers/v4-1.t.jpg",
+      "/assets/print/venue/numbers/v4-2.t.jpg",
+      "/assets/print/venue/numbers/v4-3.t.jpg",
+      "/assets/print/venue/numbers/v4-4.t.jpg",
+      "/assets/print/venue/numbers/v4-5.t.jpg",
+      "/assets/print/venue/numbers/v4-6.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: solid blue, no grid, no box. A big white number on the right.",
+     "pdf": "/assets/print/venue/numbers/v5.pdf",
+     "pdfKb": 100,
+     "jpg": [
+      "/assets/print/venue/numbers/v5-1.jpg",
+      "/assets/print/venue/numbers/v5-2.jpg",
+      "/assets/print/venue/numbers/v5-3.jpg",
+      "/assets/print/venue/numbers/v5-4.jpg",
+      "/assets/print/venue/numbers/v5-5.jpg",
+      "/assets/print/venue/numbers/v5-6.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/numbers/v5-1.m.jpg",
+      "/assets/print/venue/numbers/v5-2.m.jpg",
+      "/assets/print/venue/numbers/v5-3.m.jpg",
+      "/assets/print/venue/numbers/v5-4.m.jpg",
+      "/assets/print/venue/numbers/v5-5.m.jpg",
+      "/assets/print/venue/numbers/v5-6.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/numbers/v5-1.t.jpg",
+      "/assets/print/venue/numbers/v5-2.t.jpg",
+      "/assets/print/venue/numbers/v5-3.t.jpg",
+      "/assets/print/venue/numbers/v5-4.t.jpg",
+      "/assets/print/venue/numbers/v5-5.t.jpg",
+      "/assets/print/venue/numbers/v5-6.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid. The number still fills the card, in one flat light blue.",
+     "pdf": "/assets/print/venue/numbers/v6.pdf",
+     "pdfKb": 96,
+     "jpg": [
+      "/assets/print/venue/numbers/v6-1.jpg",
+      "/assets/print/venue/numbers/v6-2.jpg",
+      "/assets/print/venue/numbers/v6-3.jpg",
+      "/assets/print/venue/numbers/v6-4.jpg",
+      "/assets/print/venue/numbers/v6-5.jpg",
+      "/assets/print/venue/numbers/v6-6.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/numbers/v6-1.m.jpg",
+      "/assets/print/venue/numbers/v6-2.m.jpg",
+      "/assets/print/venue/numbers/v6-3.m.jpg",
+      "/assets/print/venue/numbers/v6-4.m.jpg",
+      "/assets/print/venue/numbers/v6-5.m.jpg",
+      "/assets/print/venue/numbers/v6-6.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/numbers/v6-1.t.jpg",
+      "/assets/print/venue/numbers/v6-2.t.jpg",
+      "/assets/print/venue/numbers/v6-3.t.jpg",
+      "/assets/print/venue/numbers/v6-4.t.jpg",
+      "/assets/print/venue/numbers/v6-5.t.jpg",
+      "/assets/print/venue/numbers/v6-6.t.jpg"
+     ]
     }
    ]
   },
@@ -690,6 +1179,54 @@
      ],
      "t": [
       "/assets/print/venue/kits/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 cleaned up: no blue band. Logo, two lines, a place for the name, all on one edge.",
+     "pdf": "/assets/print/venue/kits/v4.pdf",
+     "pdfKb": 41,
+     "jpg": [
+      "/assets/print/venue/kits/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/kits/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/kits/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 cleaned up: solid blue on top, plain white at the bottom to write the name on.",
+     "pdf": "/assets/print/venue/kits/v5.pdf",
+     "pdfKb": 70,
+     "jpg": [
+      "/assets/print/venue/kits/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/kits/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/kits/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 cleaned up: no grid, one light-blue line. The white box lines up with the words.",
+     "pdf": "/assets/print/venue/kits/v6.pdf",
+     "pdfKb": 31,
+     "jpg": [
+      "/assets/print/venue/kits/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/venue/kits/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/venue/kits/v6-1.t.jpg"
      ]
     }
    ]
