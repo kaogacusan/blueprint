@@ -1,7 +1,8 @@
-// Print files for /venuerender: every printed piece in FA Annex 104 and the hallway, in three looks.
+// Print files for /venuerender: every printed piece in FA Annex 104 and the hallway, in six looks.
+// V4 to V6 (at the bottom) are V1 to V3 cleaned up: same words, no grid, no box, one margin.
 // Sizes in mm. `piece` is the id in venuerender/venue.js, so the list and the 3D model can find it.
 // A version's html(i) returns page i. Keep the words from the live site (F in kit.mjs).
-import { C, F, grid, word, mark, lockup, sampleQR, sel } from './kit.mjs';
+import { C, F, CLEAN, margin, grid, word, mark, lockup, sampleQR, sel } from './kit.mjs';
 
 const PAPER = 'Paper. Print at 100% (no “fit to page”).';
 const WELCOME = 'Welcome to Blueprint. Find your group number on your name tag.';
@@ -241,14 +242,16 @@ const nametags = {
 };
 
 // ---------- 5 sign-in sheet (A4) ----------
-function table(rows, { top, rowH, head = C.ink3, line = 'rgba(6,26,77,0.18)', zebra = '' }) {
-  const cols = [['#', 12], ['Name', 70], ['Email', 76], ['Group', 28]];
+// x = left and right margin; the columns stretch to fit. mono: false = plain Inter heads and numbers.
+function table(rows, { top, rowH, head = C.ink3, line = 'rgba(6,26,77,0.18)', zebra = '', x = 12, mono = true, rule = C.navy, num = C.ink3 }) {
+  const s = (210 - 2 * x) / 186;
+  const cols = [['#', 12], ['Name', 70], ['Email', 76], ['Group', 28]].map(([t, w]) => [t, +(w * s).toFixed(2)]);
   const cell = (w, txt, extra = '') => `<span style="width:${w}mm;flex:none;padding-left:2.5mm;${extra}">${txt}</span>`;
-  let h = `<div class="abs" style="left:12mm;right:12mm;top:${top}mm">`;
-  h += `<div class="m" style="display:flex;font-size:2.8mm;color:${head};padding-bottom:2.5mm;border-bottom:0.45mm solid ${C.navy}">${cols.map(([t, w]) => cell(w, t)).join('')}</div>`;
+  let h = `<div class="abs" style="left:${x}mm;right:${x}mm;top:${top}mm">`;
+  h += `<div class="${mono ? 'm' : 't'}" style="display:flex;font-size:${mono ? 2.8 : 3.2}mm;${mono ? '' : 'font-weight:600;'}color:${head};padding-bottom:2.5mm;border-bottom:0.45mm solid ${rule}">${cols.map(([t, w]) => cell(w, t)).join('')}</div>`;
   for (let r = 1; r <= rows; r++) {
     h += `<div style="display:flex;align-items:center;height:${rowH}mm;border-bottom:0.25mm solid ${line};${zebra && r % 2 === 0 ? `background:${zebra};` : ''}">
-      ${cell(12, r, `font-family:'JetBrains Mono',monospace;font-size:2.8mm;color:${C.ink3}`)}
+      ${cell(cols[0][1], r, mono ? `font-family:'JetBrains Mono',monospace;font-size:2.8mm;color:${C.ink3}` : `font-size:3mm;font-weight:500;color:${num}`)}
       ${cols.slice(1).map(([, w], i) => cell(w, '', i < 2 ? `height:100%;border-right:0.25mm solid ${line}` : '')).join('')}</div>`;
   }
   return `${h}</div>`;
@@ -448,8 +451,8 @@ const numbers = {
 };
 
 // ---------- 9 kit cover (A4) ----------
-const field = (label, w, { color = C.navy, line = 'rgba(6,26,77,0.4)', size = 3.4 } = {}) =>
-  `<div style="width:${w}mm"><div class="m" style="font-size:${size}mm;color:${color}">${label}</div><div style="height:14mm;border-bottom:0.4mm solid ${line}"></div></div>`;
+const field = (label, w, { color = C.navy, line = 'rgba(6,26,77,0.4)', size = 3.4, mono = true } = {}) =>
+  `<div style="width:${w}mm"><div class="${mono ? 'm' : 't'}" style="font-size:${size}mm;color:${color}${mono ? '' : ';font-weight:600'}">${label}</div><div style="height:14mm;border-bottom:0.4mm solid ${line}"></div></div>`;
 const kits = {
   id: 'kits', piece: 'kits', name: 'Kit cover', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Cover'],
   print: `${PAPER} Print 30. It goes on top of each worksheet kit.`,
@@ -500,6 +503,359 @@ const kits = {
     },
   ],
 };
+
+// ---------- V4 to V6: V1 to V3 cleaned up ----------
+// Same words and job as the old version. Flat color, no grid, no selection box, no gradient text,
+// one margin (8% of the short edge) that every line starts on. Colors from CLEAN in kit.mjs.
+const [K4, K5, K6] = [CLEAN.v4, CLEAN.v5, CLEAN.v6];
+const flat = (k) => `<div class="fill" style="background:${k.bg}"></div>`;
+const logo = (k, h) => lockup(h, { markColor: k.mark, wordColor: k.word });
+const LINE = CLEAN.v4.rule;            // thin lines on white
+const WRITE = 'rgba(6,26,77,0.4)';     // lines people write on
+
+signs.versions.push(
+  {
+    id: 'v4',
+    note: 'V1 cleaned up: the arrow sits on the side you walk to, and the room starts on the same edge every time.',
+    html: (i) => {
+      const d = DIRS[i], m = margin(297, 210), k = K4, aSide = d === 'right' ? 'right' : 'left';
+      return `${flat(k)}
+        <div class="abs" style="${aSide}:${m}mm;top:${m}mm">${d === 'up' ? arrow('up', 72, 96, k.arrow) : arrow(d, 120, 80, k.arrow)}</div>
+        <div class="abs" style="${aSide === 'right' ? 'left' : 'right'}:${m}mm;top:${m}mm">${logo(k, 14)}</div>
+        <div class="abs d nw" style="left:${m}mm;bottom:${m}mm;font-size:40mm;color:${k.ink};letter-spacing:-0.035em">FA Annex <span style="color:${k.hi}">104</span></div>`;
+    },
+  },
+  {
+    id: 'v5',
+    note: 'V2 cleaned up: solid blue, no grid, no box. The room number is still the biggest thing.',
+    html: (i) => {
+      const d = DIRS[i], m = margin(297, 210), k = K5, left = d === 'left';
+      return `${flat(k)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(k, 14)}</div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;bottom:${m}mm;display:flex;align-items:flex-end;justify-content:space-between;flex-direction:${left ? 'row-reverse' : 'row'}">
+          <div style="display:flex;flex-direction:column;align-items:${left ? 'flex-end' : 'flex-start'}">
+            <div class="d nw" style="font-size:30mm;color:${k.sub};letter-spacing:-0.035em">FA Annex</div>
+            <div class="d nw" style="font-size:88mm;line-height:0.86;margin-top:5mm;color:${k.ink}">104</div>
+          </div>
+          <div style="padding-bottom:4mm">${d === 'up' ? arrow('up', 70, 96, k.arrow) : arrow(d, 104, 72, k.arrow)}</div>
+        </div>`;
+    },
+  },
+  {
+    id: 'v6',
+    note: 'V3 cleaned up: no grid lines. One big arrow and the room, nothing else.',
+    html: (i) => {
+      const d = DIRS[i], m = margin(297, 210), k = K6, aSide = d === 'right' ? 'right' : 'left';
+      return `${flat(k)}
+        <div class="abs" style="${aSide}:${m}mm;top:${m}mm">${d === 'up' ? arrow('up', 88, 108, k.arrow) : arrow(d, 190, 100, k.arrow)}</div>
+        <div class="abs" style="${aSide === 'right' ? 'left' : 'right'}:${m}mm;top:${m}mm">${word(12, k.word)}</div>
+        <div class="abs d nw" style="left:${m}mm;bottom:${m}mm;font-size:44mm;color:${k.ink};letter-spacing:-0.04em">FA Annex <span style="color:${k.hi}">104</span></div>`;
+    },
+  },
+);
+
+{
+  const m = margin(850, 2000), low = 100 + m;   // the bottom 10 cm goes into the stand
+  banner.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: white, one blue line for “Sign in here”, and no box around it.',
+      html: () => `${flat(K4)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K4, 160)}</div>
+        <div class="abs d" style="left:${m}mm;top:420mm;font-size:140mm;color:${K4.ink};line-height:1.02">
+          <div class="nw">Stand out</div><div class="nw">on paper.</div><div class="nw">Stand out</div><div class="nw">in person.</div></div>
+        <div class="abs t" style="left:${m}mm;top:1240mm;font-size:54mm;font-weight:600;line-height:1.3;letter-spacing:-0.025em;color:${K4.sub}">Career workshop<br>${F.dates}<br>${F.time}<br>${F.room}</div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;bottom:${low}mm;padding-top:44mm;border-top:0.8mm solid ${K4.rule};display:flex;align-items:center;gap:22mm">
+          <span class="d nw" style="font-size:54mm;color:${K4.hi};letter-spacing:-0.035em">Sign in here</span>${arrow('right', 64, 46, K4.arrow)}</div>`,
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: solid blue, no grid, no box. Headline at eye level, the four sessions below.',
+      html: () => `${flat(K5)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K5, 150)}</div>
+        <div class="abs d" style="left:${m}mm;top:330mm;font-size:150mm;color:${K5.ink};line-height:1">
+          <div class="nw">Stand out</div><div class="nw">on paper.</div>
+          <div class="nw" style="margin-top:34mm">Stand out</div><div class="nw">in person.</div></div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;top:1060mm;font-weight:600;letter-spacing:-0.03em">
+          <div class="d nw" style="font-size:52mm;color:${K5.ink}">${F.dates}</div>
+          <div class="nw" style="font-size:36mm;margin-top:14mm;color:${K5.sub}">${F.room} · ${F.time}</div></div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;bottom:${low}mm">
+          ${F.sessions.map((s) => `<div style="display:flex;align-items:baseline;gap:30mm;padding:22mm 0;border-top:0.8mm solid ${K5.rule}">
+            <span class="nw" style="width:50mm;font-size:36mm;font-weight:600;color:${K5.sub}">${s.n}</span>
+            <span class="d nw" style="flex:1;font-size:52mm;color:${K5.ink};letter-spacing:-0.035em">${s.title}</span>
+            <span class="nw" style="font-size:36mm;font-weight:600;letter-spacing:-0.02em;color:${K5.sub}">${s.day}</span></div>`).join('')}
+        </div>`,
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: no grid, one light-blue line. Logo stays at the top for photos.',
+      html: () => `${flat(K6)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K6, 190)}</div>
+        <div class="abs d" style="left:${m}mm;top:440mm;font-size:160mm;color:${K6.ink};line-height:1.02">
+          <div class="nw">Stand out</div><div class="nw">on paper.</div>
+          <div class="nw" style="margin-top:16mm">Stand out</div><div class="nw" style="color:${K6.hi}">in person.</div></div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;bottom:${low}mm;border-top:0.8mm solid ${K6.rule};padding-top:56mm">
+          <div class="d nw" style="font-size:116mm;color:${K6.ink};letter-spacing:-0.04em">${F.dates}</div>
+          <div class="nw" style="margin-top:30mm;font-size:56mm;font-weight:600;line-height:1.3;letter-spacing:-0.03em;color:${K6.sub}">${F.room}<br>${F.time}</div>
+        </div>`,
+    },
+  );
+}
+
+{
+  const m = margin(148, 210);
+  const tileQR = (k, top, h) => `<div class="abs" style="left:${m}mm;right:${m}mm;top:${top}mm;height:${h}mm;background:${k.tile};border-radius:3mm;display:flex;justify-content:center;padding-top:12mm">${sampleQR(h - 30, { seed: 5 })}</div>`;
+  signinqr.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: everything starts on one edge, and the QR is as wide as the text.',
+      html: () => `${flat(K4)}
+        <div class="abs d nw" style="left:${m}mm;top:${m}mm;font-size:22mm;color:${K4.ink}">Sign in</div>
+        <div class="abs" style="left:${m}mm;top:37mm">${sampleQR(124, { seed: 5 })}</div>
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:8mm;font-weight:600;color:${K4.hi}">Scan, then get your kit.</div>`,
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: solid blue, no grid. The QR sits on a plain white tile.',
+      html: () => `${flat(K5)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K5, 10)}</div>
+        <div class="abs d nw" style="left:${m}mm;top:28mm;font-size:22mm;color:${K5.ink}">Sign in</div>
+        ${tileQR(K5, 56, 122)}
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:8mm;font-weight:600;color:${K5.sub}">Scan, then get your kit.</div>`,
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: no grid, and the white tile lines up with the words.',
+      html: () => `${flat(K6)}
+        <div class="abs d nw" style="left:${m}mm;top:${m}mm;font-size:38mm;color:${K6.ink}">Sign <span style="color:${K6.hi}">in</span></div>
+        ${tileQR(K6, 58, 120)}
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:8mm;font-weight:600;color:${K6.sub}">Scan, then get your kit.</div>`,
+    },
+  );
+}
+
+{
+  const m = margin(TAG.w, TAG.h);
+  const label = (txt, color, style = '') => `<div class="abs t" style="font-size:3mm;font-weight:600;color:${color};${style}">${txt}</div>`;
+  nametags.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: no blue band, so there is more room to write the name.',
+      html: () => tagSheet(`${flat(K4)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K4, 7)}</div>
+        ${label('Name', K4.sub, `left:${m}mm;top:18mm`)}
+        <div class="abs" style="left:${m}mm;right:${m}mm;top:40mm;border-top:0.35mm solid ${WRITE}"></div>
+        <div class="abs t" style="left:${m}mm;bottom:${m}mm;font-size:3mm;font-weight:600;color:${K4.sub};display:flex;align-items:center;gap:3mm">Group
+          <span style="display:inline-block;width:14mm;height:9mm;border:0.35mm solid ${WRITE};border-radius:1mm"></span></div>`),
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: a blue tag with two plain white boxes, one for the name and one for the group.',
+      html: () => tagSheet(`${flat(K5)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K5, 6)}</div>
+        <div class="abs" style="left:${m}mm;top:15mm;width:56mm;height:40mm;background:${K5.tile};border-radius:1.5mm"></div>
+        ${label('Name', K5.bg, `left:${m + 3}mm;top:17.5mm`)}
+        <div class="abs" style="right:${m}mm;top:15mm;width:21mm;height:40mm;background:${K5.tile};border-radius:1.5mm"></div>
+        ${label('Group', K5.bg, `right:${m}mm;width:21mm;top:17.5mm;text-align:center`)}`, { cut: 'rgba(6,26,77,0.35)' }),
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: the logo moves into the navy strip, so the top is only space for the name.',
+      html: () => tagSheet(`<div class="fill" style="background:${K6.tile}"></div>
+        ${label('Name', K6.bg, `left:${m}mm;top:${m}mm`)}
+        <div class="abs" style="left:0;right:0;bottom:0;height:16mm;background:${K6.bg};display:flex;align-items:center;justify-content:space-between;padding:0 ${m}mm">
+          ${word(4.2, K6.word)}
+          <span style="display:flex;align-items:center;gap:3mm"><span class="d" style="font-size:5mm;color:${K6.ink}">Group</span><span style="width:18mm;height:10mm;background:${K6.tile};border-radius:1mm"></span></span>
+        </div>`, { cut: 'rgba(6,26,77,0.35)' }),
+    },
+  );
+}
+
+{
+  const m = margin(210, 297);
+  signinsheet.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: the logo goes top right, and the table lines up with the title.',
+      html: () => `${flat(K4)}
+        <div class="abs d nw" style="left:${m}mm;top:${m}mm;font-size:12mm;color:${K4.ink}">Sign-in sheet</div>
+        <div class="abs" style="right:${m}mm;top:${m + 1}mm">${logo(K4, 9)}</div>
+        <div class="abs t nw" style="left:${m}mm;top:${m + 15}mm;font-size:3.6mm;font-weight:500;color:${K4.sub}">${F.room} · Date: ________________</div>
+        ${table(30, { top: 44, rowH: 7.5, x: m, mono: false, head: K4.sub, num: K4.sub, line: LINE, rule: K4.ink })}`,
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: a solid blue top, no grid. Every other line is still tinted so names do not run together.',
+      html: () => `<div class="fill" style="background:${K5.tile}"></div>
+        <div class="abs" style="left:0;right:0;top:0;height:44mm;background:${K5.bg}"></div>
+        <div class="abs d nw" style="left:${m}mm;top:15mm;font-size:14mm;color:${K5.ink}">Sign in</div>
+        <div class="abs" style="right:${m}mm;top:15mm">${logo(K5, 9)}</div>
+        <div class="abs t nw" style="right:${m}mm;top:29mm;font-size:3.4mm;font-weight:500;color:${K5.sub}">${F.room} · Date: __________</div>
+        ${table(30, { top: 54, rowH: 7.3, x: m, mono: false, head: K5.bg, num: K5.bg, line: LINE, rule: K5.bg, zebra: 'rgba(6,70,200,0.05)' })}`,
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: no grid in the navy top. Still 26 big lines, one for each seat.',
+      html: () => `<div class="fill" style="background:${K6.tile}"></div>
+        <div class="abs" style="left:0;right:0;top:0;height:46mm;background:${K6.bg}"></div>
+        <div class="abs d nw" style="left:${m}mm;top:13mm;font-size:20mm;color:${K6.ink}">Sign <span style="color:${K6.hi}">in</span></div>
+        <div class="abs" style="right:${m}mm;top:15mm">${word(7, K6.word)}</div>
+        <div class="abs t nw" style="right:${m}mm;top:27mm;font-size:3.4mm;font-weight:500;color:${K6.sub}">Date: __________</div>
+        ${table(26, { top: 56, rowH: 8.3, x: m, mono: false, head: K6.bg, num: C.ink3, line: LINE, rule: K6.bg })}`,
+    },
+  );
+}
+
+{
+  const m = margin(297, 420);
+  doorsign.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: no navy band. The room number is the biggest thing, and “Sign in here” is the one blue line.',
+      html: () => `${flat(K4)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K4, 30)}</div>
+        <div class="abs d" style="left:${m}mm;top:128mm;color:${K4.ink}">
+          <div class="nw" style="font-size:58mm;letter-spacing:-0.035em">FA Annex</div>
+          <div class="nw" style="font-size:124mm;line-height:0.86;margin-top:6mm">104</div></div>
+        <div class="abs" style="left:${m}mm;bottom:${m}mm;display:flex;align-items:center;gap:8mm">
+          <span class="d nw" style="font-size:30mm;color:${K4.hi};letter-spacing:-0.035em">Sign in here</span>${arrow('down', 22, 30, K4.arrow)}</div>`,
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: solid blue, no grid, no box. “Sign in here.” is still the biggest line.',
+      html: () => `${flat(K5)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K5, 30)}</div>
+        <div class="abs d nw" style="right:${m}mm;top:${m + 9}mm;font-size:12mm;letter-spacing:-0.03em;color:${K5.ink}">${F.room}</div>
+        <div class="abs d" style="left:${m}mm;top:120mm;font-size:84mm;color:${K5.ink};line-height:1.02"><div class="nw">Sign in</div><div class="nw">here.</div></div>
+        <div class="abs" style="left:${m}mm;bottom:${m}mm;display:flex;align-items:center;gap:8mm">${arrow('down', 18, 26, K5.arrow)}
+          <span class="t nw" style="font-size:12mm;font-weight:600;letter-spacing:-0.02em;color:${K5.sub}">Career workshop · ${F.dates}</span></div>`,
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: no grid, and the room and arrow line up with the words above.',
+      html: () => `${flat(K6)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${word(44, K6.word)}</div>
+        <div class="abs d" style="left:${m}mm;top:140mm;font-size:84mm;color:${K6.ink};line-height:1.02"><div class="nw">Sign in</div><div class="nw" style="color:${K6.hi}">here.</div></div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;bottom:${m}mm;border-top:0.8mm solid ${K6.rule};padding-top:14mm;display:flex;align-items:center;justify-content:space-between">
+          <span class="d nw" style="font-size:30mm;color:${K6.sub};letter-spacing:-0.035em">${F.room}</span>${arrow('down', 22, 32, K6.arrow)}</div>`,
+    },
+  );
+}
+
+{
+  const m = margin(338.67, 190.5);
+  screen.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: plain white, no fade. The session line is calm, not in capitals.',
+      html: (i) => {
+        const s = F.sessions[i];
+        return `${flat(K4)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K4, 14)}</div>
+        <div class="abs t nw" style="right:${m}mm;top:${m + 3.5}mm;font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:${K4.sub}">Session ${s.n} · ${s.day} · ${F.room}</div>
+        <div class="abs d" style="left:${m}mm;top:62mm;font-size:32mm;line-height:1.12">
+          <div class="nw" style="color:${K4.ink}">${F.tagline[0]}</div><div class="nw" style="color:${K4.hi}">${F.tagline[1]}</div></div>
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:${K4.sub}">${WELCOME}</div>`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: solid blue, no grid, no box. Lines start on the left edge, like the other pieces.',
+      html: (i) => {
+        const s = F.sessions[i];
+        return `${flat(K5)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K5, 14)}</div>
+        <div class="abs t nw" style="right:${m}mm;top:${m + 3.5}mm;font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:${K5.sub}">Session ${s.n} · ${s.title} · ${s.day}</div>
+        <div class="abs d" style="left:${m}mm;top:58mm;font-size:35mm;line-height:1.08;color:${K5.ink}">
+          <div class="nw">Stand out on paper.</div><div class="nw">Stand out in <span style="color:${K5.hi}">person.</span></div></div>
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:${K5.sub}">${WELCOME}</div>`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: no grid, and the session name is one flat light blue.',
+      html: (i) => {
+        const s = F.sessions[i], f = fit(s.title);
+        return `${flat(K6)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${word(10, K6.word)}</div>
+        <div class="abs t nw" style="right:${m}mm;top:${m + 1.5}mm;font-size:6mm;font-weight:600;color:${K6.sub}">${s.day} · ${F.room}</div>
+        <div class="abs t nw" style="left:${m}mm;top:48mm;font-size:10mm;font-weight:600;color:${K6.sub}">Session ${s.n}</div>
+        <div class="abs d nw" style="left:${m}mm;top:${64 + (62 - f) * 0.55}mm;font-size:${f}mm;color:${K6.hi}">${s.title}</div>
+        <div class="abs t nw" style="left:${m}mm;top:130mm;font-size:10mm;font-weight:600;letter-spacing:-0.02em;color:${K6.ink}">${s.idea}</div>
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:6mm;font-weight:500;color:${K6.sub}">${WELCOME}</div>`;
+      },
+    },
+  );
+}
+
+{
+  const m = margin(FW, FH), wf = { fold: 'rgba(255,255,255,0.5)' };
+  const grp = (k, size = 12) => `<div class="abs t" style="left:${m}mm;top:${m}mm;font-size:${size}mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}">Group</div>`;
+  numbers.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: white card, a big blue number, and the logo in the corner.',
+      html: (i) => tent(`${flat(K4)}${grp(K4)}
+        <div class="abs d" style="left:${m - 2}mm;top:30mm;font-size:112mm;line-height:0.85;color:${K4.hi}">${i + 1}</div>
+        <div class="abs" style="right:${m}mm;bottom:${m}mm">${logo(K4, 12)}</div>`),
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: solid blue, no grid, no box. A big white number on the right.',
+      html: (i) => tent(`${flat(K5)}${grp(K5)}
+        <div class="abs" style="left:${m}mm;bottom:${m}mm">${logo(K5, 14)}</div>
+        <div class="abs d" style="right:${m}mm;top:0;bottom:0;display:flex;align-items:center;font-size:120mm;line-height:0.8;color:${K5.ink}">${i + 1}</div>`, wf),
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: no grid. The number still fills the card, in one flat light blue.',
+      html: (i) => tent(`${flat(K6)}${grp(K6, 8)}
+        <div class="abs" style="left:${m}mm;bottom:${m}mm">${word(8, K6.word)}</div>
+        <div class="fill" style="display:flex;align-items:center;justify-content:center"><span class="dd" style="font-size:148mm;line-height:0.74;color:${K6.hi}">${i + 1}</span></div>`, wf),
+    },
+  );
+}
+
+{
+  const m = margin(210, 297);
+  const fields = (k, color, line, w = [128, 38]) => `${field('Name', w[0], { mono: false, color, line })}${field('Group', w[1], { mono: false, color, line })}`;
+  kits.versions.push(
+    {
+      id: 'v4',
+      note: 'V1 cleaned up: no blue band. Logo, two lines, a place for the name, all on one edge.',
+      html: () => `${flat(K4)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K4, 16)}</div>
+        <div class="abs d" style="left:${m}mm;top:96mm;font-size:20mm;line-height:1.12;color:${K4.ink}">
+          <div class="nw">${F.tagline[0]}</div><div class="nw" style="color:${K4.hi}">${F.tagline[1]}</div></div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;top:206mm;display:flex;gap:10mm">${fields(K4, K4.sub, WRITE)}</div>
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:3.4mm;font-weight:600;color:${K4.sub}">Career workshop · ${F.room}</div>`,
+    },
+    {
+      id: 'v5',
+      note: 'V2 cleaned up: solid blue on top, plain white at the bottom to write the name on.',
+      html: () => `${flat(K5)}
+        <div class="abs" style="left:0;right:0;bottom:0;height:86mm;background:${K5.tile}"></div>
+        <div class="abs" style="left:${m}mm;top:${m}mm">${logo(K5, 16)}</div>
+        <div class="abs t nw" style="right:${m}mm;top:${m + 5}mm;font-size:3.6mm;font-weight:600;color:${K5.sub}">Career workshop</div>
+        <div class="abs d" style="left:${m}mm;top:82mm;font-size:20mm;line-height:1.1;color:${K5.ink}">
+          <div class="nw">Stand out on paper.</div><div class="nw">Stand out in <span style="color:${K5.hi}">person.</span></div></div>
+        <div class="abs t" style="left:${m}mm;width:150mm;top:136mm;font-size:5.2mm;font-weight:500;color:${K5.sub}">${F.promise}</div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;top:228mm;display:flex;gap:10mm">${fields(K5, K5.bg, WRITE)}</div>
+        <div class="abs t nw" style="left:${m}mm;bottom:${m}mm;font-size:3.4mm;font-weight:600;color:${K5.bg}">${F.dates} · ${F.room}</div>`,
+    },
+    {
+      id: 'v6',
+      note: 'V3 cleaned up: no grid, one light-blue line. The white box lines up with the words.',
+      html: () => `${flat(K6)}
+        <div class="abs" style="left:${m}mm;top:${m}mm">${word(14, K6.word)}</div>
+        <div class="abs d" style="left:${m}mm;top:62mm;font-size:30mm;line-height:1.02;color:${K6.ink}">
+          <div class="nw">Stand out</div><div class="nw">on paper.</div>
+          <div class="nw" style="margin-top:4mm">Stand out</div><div class="nw" style="color:${K6.hi}">in person.</div></div>
+        <div class="abs" style="left:${m}mm;right:${m}mm;bottom:${m}mm;height:44mm;background:${K6.tile};border-radius:3mm;padding:0 10mm 4mm;display:flex;align-items:center;gap:8mm">
+          ${fields(K6, K6.bg, WRITE, [112, 36])}</div>`,
+    },
+  );
+}
 
 export default {
   page: 'venue',

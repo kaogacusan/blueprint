@@ -47,7 +47,21 @@ export const LOOKS = [
   { id: 'v1', label: 'As rendered', about: 'The design on the 3D model now. Facts fixed to match the site.' },
   { id: 'v2', label: 'Drafting grid', about: 'Light paper, blue grid lines, and the selection box from the site’s first screen.' },
   { id: 'v3', label: 'Big type', about: 'Fewer words, bigger. Built to read from far away.' },
+  { id: 'v4', label: 'Clean white', about: 'V1, cleaned up. White paper, navy type, one blue. No grid, no box.' },
+  { id: 'v5', label: 'Solid blue', about: 'V2, cleaned up. Solid brand blue and white type. No grid, no box.' },
+  { id: 'v6', label: 'Plain navy', about: 'V3, cleaned up. Navy, fewest words, one light-blue word.' },
 ];
+
+// Colors for the clean looks (V4 to V6). No grid, no selection box, no gradient text, no mono labels.
+// bg = page, ink = main text, sub = second text, hi = the one accent, rule = thin lines,
+// mark / word = logo colors, arrow = arrows, tile = what a QR sits on.
+export const CLEAN = {
+  v4: { bg: '#fff', ink: C.navy, sub: C.ink2, hi: C.core, rule: 'rgba(6,26,77,0.18)', mark: 'grad', word: C.navy, arrow: C.core, tile: null },
+  v5: { bg: C.core, ink: '#fff', sub: C.ice, hi: C.ice, rule: 'rgba(255,255,255,0.35)', mark: '#fff', word: '#fff', arrow: '#fff', tile: '#fff' },
+  v6: { bg: C.navy, ink: '#fff', sub: C.ice, hi: C.cyan, rule: 'rgba(185,238,255,0.28)', mark: '#fff', word: '#fff', arrow: '#fff', tile: '#fff' },
+};
+// One margin for a whole piece: 8% of its short edge, in mm.
+export const margin = (w, h) => Math.round(Math.min(w, h) * 0.08);
 
 // ---------- logos ----------
 const WORD_SVG = readFileSync(here('./wordmark.svg'), 'utf8');

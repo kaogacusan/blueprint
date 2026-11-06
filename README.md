@@ -33,11 +33,16 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 
 ### Print files
 
-Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in three versions:
+Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in six versions:
 
 - **V1 As rendered**: the design on the model, with the facts fixed to match the site.
 - **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
 - **V3 Big type**: fewer words, bigger. Reads from far away.
+- **V4 Clean white**: V1 cleaned up. White paper, navy type, one blue.
+- **V5 Solid blue**: V2 cleaned up. Solid brand blue, white type.
+- **V6 Plain navy**: V3 cleaned up. Navy, fewest words, one light-blue word.
+
+V4 to V6 have no grid, no selection box, and no gradient text. They share one margin and the colors in `CLEAN` in `scripts/print/kit.mjs`.
 
 Each version has a print **PDF** (vector, for the print shop) and a **JPG** (to share). They are in `assets/print/venue/` and `assets/print/booth/`, and the pages list them in the "Print files" section.
 

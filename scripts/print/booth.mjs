@@ -1,7 +1,7 @@
 // Print files for /boothrender: every printed piece on the booth model, in three looks.
 // Sizes in mm. `piece` is the id in boothrender/booth.js, so the list and the 3D model can find it.
 // A version's html(i) returns page i. Keep the words from the live site (F in kit.mjs).
-import { C, F, grid, word, mark, lockup, qr, sampleQR, sel } from './kit.mjs';
+import { C, F, CLEAN as K, margin, grid, word, mark, lockup, qr, sampleQR, sel } from './kit.mjs';
 
 const TARP = 'Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.';
 const SINTRA = 'Printed sintra board, 3 mm. Ask the shop to print to the edge.';
@@ -40,6 +40,43 @@ const header = {
         <div class="abs" style="left:100mm;top:64mm">${word(300, '#fff')}</div>
         <div class="abs d nw" style="left:104mm;top:428mm;font-size:80mm;color:#fff;letter-spacing:-0.035em">Career workshop · <span class="gl">${F.dates}</span></div>`,
     },
+    {
+      id: 'v4',
+      note: 'V1 on a white tarp. The logo and the two lines sit in one clean row, and nothing else.',
+      html: () => {
+        const k = K.v4, m = margin(1400, 600);
+        return `
+        ${flat('v4')}
+        <div class="abs" style="left:${m}mm;right:${m}mm;top:${m}mm;bottom:${m}mm;display:flex;align-items:center;gap:84mm">
+          ${mark(400, k.mark)}
+          <div>${word(170, k.word)}
+            <div class="nw" style="margin-top:44mm;font-weight:600;font-size:96mm;letter-spacing:-0.03em;line-height:1.12;color:${k.ink}">${F.tagline[0]}<br><span style="color:${k.hi}">${F.tagline[1]}</span></div>
+          </div>
+        </div>`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue. No grid and no box: just the logo and the two lines, big.',
+      html: () => {
+        const k = K.v5, m = margin(1400, 600);
+        return `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 150))}
+        ${atb(m, m, `<div>${F.tagline[0]}</div><div style="color:${k.hi}">${F.tagline[1]}</div>`, `font-size:116mm;color:${k.ink};line-height:1.02`, 'd nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid. The name is even bigger, and the date is the one light-blue word.',
+      html: () => {
+        const k = K.v6, m = margin(1400, 600);
+        return `
+        ${flat('v6')}
+        ${at(m, m, word(320, k.word))}
+        ${atb(m, m, `Career workshop · <span style="color:${k.hi}">${F.dates}</span>`, `font-size:80mm;color:${k.ink};letter-spacing:-0.035em`, 'd nw')}`;
+      },
+    },
   ],
 };
 
@@ -51,6 +88,32 @@ const white = '<div class="fill" style="background:#fff"></div>';
 const gradBg = '<div class="fill bg-grad"></div>';
 // a white tile that holds a QR on dark grounds
 const tile = (size, pad, inner, extra = '') => `<div style="width:${size}mm;height:${size + extra}mm;padding:${pad}mm;background:#fff;border-radius:${(pad * 0.9).toFixed(1)}mm">${inner}</div>`;
+
+// ---------- helpers for the clean looks (V4 to V6): one flat color, no grid, no box, no gradient text ----------
+const flat = (v) => `<div class="fill" style="background:${K[v].bg}"></div>`;
+const band = (v, w, h) => `<div class="abs" style="left:0;top:0;width:${w}mm;height:${h}mm;background:${K[v].bg}"></div>`;
+const logo = (v, h) => lockup(h, { markColor: K[v].mark, wordColor: K[v].word });
+// like at(), but y is the space under the block, so it sits on the bottom margin
+const atb = (x, y, inner, style = '', cls = '') => `<div class="abs ${cls}" style="left:${x}mm;bottom:${y}mm;${style}">${inner}</div>`;
+// a QR on a white tile as wide as the text column (w). q = QR size, py / pb = space above / below the QR.
+const wide = (w, q, inner, py, pb = py) => `<div style="width:${w}mm;height:${(q + py + pb).toFixed(1)}mm;padding-top:${py}mm;display:flex;justify-content:center;background:#fff;border-radius:${Math.min(py * 0.6, 12).toFixed(1)}mm">${inner}</div>`;
+// a row: text on the left, the wordmark on the right
+const row = (w, left, logoHtml, style = '', cls = '') => `<div class="${cls}" style="width:${w}mm;display:flex;justify-content:space-between;align-items:flex-end;${style}"><span>${left}</span>${logoHtml}</div>`;
+// the 4 sessions as rows, in plain type
+const rows4 = ({ size, small, ink, sub, rule, pad = 2.6 }) => F.sessions.map((s) => `
+  <div style="display:grid;grid-template-columns:${(small * 3).toFixed(1)}mm 1fr auto;align-items:baseline;padding:${pad}mm 0;border-top:0.3mm solid ${rule}">
+    <span style="font-size:${small}mm;font-weight:600;color:${sub}">${s.n}</span>
+    <span class="d nw" style="font-size:${size}mm;color:${ink}">${s.title}</span>
+    <span class="nw" style="font-size:${small}mm;font-weight:600;color:${sub}">${s.day}</span></div>`).join('');
+// the "Scan to sign up." back of the A6 cards (V6)
+const scanBack = async (facts) => {
+  const k = K.v6, m = margin(105, 148);
+  return `
+    ${flat('v6')}
+    ${at(m, m, `Scan to<br><span style="color:${k.hi}">sign up.</span>`, `font-size:14mm;color:${k.ink};line-height:1`, 'd nw')}
+    ${at(m, 42, wide(105 - 2 * m, 62, await qr(undefined, 62), 8))}
+    ${atb(m, m, facts, `font-size:4.2mm;font-weight:600;color:${k.sub};line-height:1.45`, 'nw')}`;
+};
 
 const backdrop = {
   id: 'backdrop', piece: 'backdrop', name: 'Backdrop tarp', size: '1.5 m × 1.5 m', mm: [1500, 1500], pages: ['Front'], print: TARP,
@@ -98,6 +161,53 @@ const backdrop = {
         ${at(100, 1120, `${F.time} · ${F.room}`, 'font-size:66mm;color:#fff;font-weight:600;letter-spacing:-0.03em', 'nw')}
         ${at(100, 1262, F.regBy, `font-size:66mm;font-weight:700;letter-spacing:-0.03em;color:${C.navy};background:${C.cyan};padding:18mm 34mm;border-radius:60mm`, 'nw')}`,
     },
+    {
+      id: 'v4',
+      note: 'V1 on white. The navy date strip is now a plain line of text under a thin rule.',
+      html: () => {
+        const k = K.v4, m = margin(1500, 1500);
+        return `
+        ${flat('v4')}
+        ${at(m, m, logo('v4', 150))}
+        ${at(m, 360, `<div>A hands-on</div><div style="color:${k.hi}">career workshop.</div>`, `font-size:140mm;line-height:0.98;color:${k.ink}`, 'd nw')}
+        ${at(m, 720, 'Bring what you’ve already done.<br>Leave with a resume, LinkedIn,<br>and intro that show it.', `font-size:72mm;line-height:1.3;font-weight:500;letter-spacing:-0.025em;color:${k.sub}`, 'nw')}
+        ${atb(m, m, `<div style="font-weight:700;color:${k.ink}">${F.dates}</div><div style="color:${k.sub}">${F.time} · ${F.room}</div>`,
+          `width:${1500 - 2 * m}mm;border-top:1.6mm solid ${k.rule};padding-top:40mm;font-size:72mm;font-weight:600;letter-spacing:-0.03em;line-height:1.25`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue. Same 4 sessions, but no grid and no box, and every line starts on one edge.',
+      html: () => {
+        const k = K.v5, m = margin(1500, 1500);
+        return `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 150))}
+        ${at(m, 340, `<div>4 sessions.</div><div>One <span style="color:${k.hi}">blueprint.</span></div>`, `font-size:150mm;line-height:1;color:${k.ink}`, 'd nw')}
+        ${at(m, 690, `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:80mm;row-gap:50mm">
+          ${F.sessions.map((s) => `<div style="border-top:1.6mm solid ${k.rule};padding-top:24mm">
+            <div class="nw" style="font-size:60mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}">${s.n} · ${s.day}</div>
+            <div class="d nw" style="font-size:86mm;margin-top:14mm;color:${k.ink}">${s.title}</div></div>`).join('')}
+          </div>`, `width:${1500 - 2 * m}mm`)}
+        ${atb(m, m, `<div>${F.time} · ${F.room}</div><div style="color:${k.sub}">${F.regBy}</div>`,
+          `font-size:60mm;font-weight:600;letter-spacing:-0.03em;line-height:1.25;color:${k.ink}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid and the pill. The QR is still 37 cm, so people can scan it from the aisle.',
+      html: async () => {
+        const k = K.v6, m = margin(1500, 1500);
+        return `
+        ${flat('v6')}
+        ${at(m, m, word(130, k.word))}
+        ${at(1500 - m - 430, m, wide(430, 370, await qr(undefined, 370), 30))}
+        ${at(m, 330, `Scan to<br><span style="color:${k.hi}">sign up.</span>`, `font-size:190mm;color:${k.ink};line-height:1`, 'd nw')}
+        ${atb(m, m, `<div class="d" style="font-size:190mm;line-height:1;margin-bottom:44mm;color:${k.ink}">${F.dates}</div>
+          <div style="color:${k.sub}">${F.time} · ${F.room}</div><div style="color:${k.ink}">${F.regBy}</div>`,
+          'font-size:66mm;font-weight:600;letter-spacing:-0.03em;line-height:1.3', 'nw')}`;
+      },
+    },
   ],
 };
 
@@ -130,6 +240,41 @@ const skirt = {
         ${at(70, 56, word(150, '#fff'))}
         ${at(64, 262, F.full, 'font-size:200mm', 'd nw gl')}
         ${at(70, 470, 'all four sessions,<br>or ₱699 a session', 'font-size:66mm;line-height:1.12;color:#fff;font-weight:600;letter-spacing:-0.03em', 'nw')}`,
+    },
+    {
+      id: 'v4',
+      note: 'V1 on white, with the logo in the corner and the words at the bottom, so it is easy to read below the table edge.',
+      html: () => {
+        const k = K.v4, m = margin(900, 700);
+        return `
+        ${flat('v4')}
+        ${at(m, m, logo('v4', 180))}
+        ${atb(m, m, `<div class="d" style="font-size:96mm;color:${k.ink}">Career workshop</div>
+          <div style="font-size:66mm;font-weight:600;letter-spacing:-0.03em;margin-top:26mm;color:${k.hi}">${F.dates}</div>`, '', 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue. The deadline is still the biggest thing, now with no grid and no box.',
+      html: () => {
+        const k = K.v5, m = margin(900, 700);
+        return `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 150))}
+        ${atb(m, m, `<div>Register by</div><div style="font-size:180mm;color:${k.hi}">Nov 9.</div>`, `font-size:120mm;color:${k.ink};line-height:1`, 'd nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid. One big price in light blue, and one plain line under it.',
+      html: () => {
+        const k = K.v6, m = margin(900, 700);
+        return `
+        ${flat('v6')}
+        ${at(m, m, word(150, k.word))}
+        ${atb(m, m, `<div class="d" style="font-size:200mm;line-height:1;margin-bottom:30mm;color:${k.hi}">${F.full}</div><div>all four sessions,<br>or ${F.single} a session</div>`,
+          `font-size:66mm;line-height:1.12;color:${k.ink};font-weight:600;letter-spacing:-0.03em`, 'nw')}`;
+      },
     },
   ],
 };
@@ -167,6 +312,45 @@ const banner = {
         ${at(54, 194, 'Scan to<br><span class="gl">sign up.</span>', 'font-size:124mm;color:#fff;line-height:1', 'd nw')}
         ${at(60, 470, tile(390, 26, await qr(undefined, 338)))}`,
     },
+    {
+      id: 'v4',
+      note: 'V1 on white. The white box around “Sign up at our booth” is gone; it is now the one blue line.',
+      html: () => {
+        const k = K.v4, m = margin(610, 914);
+        return `
+        ${flat('v4')}
+        ${at(m, m, logo('v4', 100))}
+        ${at(m, 230, 'Career<br>workshop.', `font-size:92mm;color:${k.ink};line-height:0.98`, 'd nw')}
+        ${at(m, 466, `${F.dates}<br>${F.time}<br>${F.room}`, `font-size:58mm;color:${k.ink};font-weight:600;letter-spacing:-0.03em;line-height:1.15`, 'nw')}
+        ${atb(m, m, 'Sign up at<br>our booth →', `font-size:58mm;line-height:1.1;color:${k.hi};font-weight:700;letter-spacing:-0.035em`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue, so it stands out in a crowd. No grid and no box.',
+      html: () => {
+        const k = K.v5, m = margin(610, 914);
+        return `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 100))}
+        ${at(m, 220, `Sign up<br>at our<br><span style="color:${k.hi}">booth.</span>`, `font-size:124mm;color:${k.ink};line-height:1`, 'd nw')}
+        ${atb(m, m, `<div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;color:${k.ink};border-top:1.6mm solid ${k.rule};padding-top:22mm"><span>Red Brick Road</span><span>→</span></div>
+          <div style="margin-top:14mm;color:${k.sub}">${F.dates}</div>`,
+          `width:${610 - 2 * m}mm;font-size:60mm;font-weight:600;letter-spacing:-0.03em;line-height:1.1`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid. The QR tile now spans the full width, edge to edge with the words.',
+      html: async () => {
+        const k = K.v6, m = margin(610, 914);
+        return `
+        ${flat('v6')}
+        ${at(m, m, word(84, k.word))}
+        ${at(m, 180, `Scan to<br><span style="color:${k.hi}">sign up.</span>`, `font-size:124mm;color:${k.ink};line-height:1`, 'd nw')}
+        ${atb(m, m, wide(610 - 2 * m, 350, await qr(undefined, 350), 26))}`;
+      },
+    },
   ],
 };
 
@@ -201,6 +385,43 @@ const regqr = {
         ${at(15, 14, 'Scan to<br><span class="gl">sign up.</span>', 'font-size:25mm;color:#fff;line-height:1', 'd nw')}
         ${at(20, 76, tile(108, 8, await qr(undefined, 92)))}
         ${at(0, 192, F.regBy, `width:148mm;text-align:center;font-size:7mm;font-weight:700;letter-spacing:-0.02em;color:${C.ice}`, 'nw')}`,
+    },
+    {
+      id: 'v4',
+      note: 'V1 with everything on one left edge. The QR is as wide as the card allows, so it scans faster.',
+      html: async () => {
+        const k = K.v4, m = margin(148, 210), cw = 148 - 2 * m;
+        return `
+        ${flat('v4')}
+        ${at(m, m, 'Sign up', `font-size:21mm;color:${k.ink}`, 'd nw')}
+        ${at(m, 44, await qr(undefined, cw))}
+        ${atb(m, m, row(cw, 'It takes a minute.', word(6, k.word)), `font-size:10mm;font-weight:600;letter-spacing:-0.02em;color:${k.hi}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue. The web address is plain text now, not small code letters.',
+      html: async () => {
+        const k = K.v5, m = margin(148, 210), cw = 148 - 2 * m;
+        return `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 13))}
+        ${at(m, 32, `Sign <span style="color:${k.hi}">up.</span>`, `font-size:24mm;color:${k.ink}`, 'd nw')}
+        ${at(m, 62, wide(cw, 92, await qr(undefined, 92), 9))}
+        ${atb(m, m, `<div>${F.url}</div><div style="color:${k.sub}">${F.regBy} · It takes a minute.</div>`, `font-size:5mm;font-weight:600;letter-spacing:-0.01em;line-height:1.4;color:${k.ink}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid. The white tile lines up with the words on both sides.',
+      html: async () => {
+        const k = K.v6, m = margin(148, 210), cw = 148 - 2 * m;
+        return `
+        ${flat('v6')}
+        ${at(m, m, `Scan to<br><span style="color:${k.hi}">sign up.</span>`, `font-size:22mm;color:${k.ink};line-height:1`, 'd nw')}
+        ${at(m, 64, wide(cw, 100, await qr(undefined, 100), 8))}
+        ${atb(m, m, F.regBy, `font-size:7mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}`, 'nw')}`;
+      },
     },
   ],
 };
@@ -246,6 +467,53 @@ const card = {
         ${at(17, 236, F.regBy, `font-size:9mm;font-weight:700;letter-spacing:-0.025em;color:${C.navy};background:${C.cyan};padding:3mm 6mm;border-radius:10mm`, 'nw')}
         ${at(17, 272, `${F.time} · ${F.room}`, `font-size:4.2mm;color:${C.ice}`, 'm nw')}`,
     },
+    {
+      id: 'v4',
+      note: 'V1 on white. “Limited seats” is the one blue line now, not a blue box.',
+      html: () => {
+        const k = K.v4, m = margin(210, 297);
+        return `
+        ${flat('v4')}
+        ${at(m, m, logo('v4', 14))}
+        ${at(m, 66, 'Career workshop', `font-size:14.5mm;font-weight:600;letter-spacing:-0.025em;color:${k.sub}`, 'nw')}
+        ${at(m, 92, 'Nov 10<br>to 13', `font-size:48mm;color:${k.ink};line-height:0.95`, 'd nw')}
+        ${atb(m, m, `<div>${F.days}</div><div>${F.time}</div><div>${F.room}</div><div style="color:${k.hi};font-weight:700;margin-top:6mm">${F.seats}</div>`,
+          `font-size:14.5mm;color:${k.ink};font-weight:600;letter-spacing:-0.025em;line-height:1.3`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue. Same 4 sessions, in plain type with no code letters.',
+      html: () => {
+        const k = K.v5, m = margin(210, 297), cw = 210 - 2 * m;
+        return `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 15))}
+        ${at(m, 46, `4 sessions.<br>One <span style="color:${k.hi}">blueprint.</span>`, `font-size:22mm;color:${k.ink};line-height:1.02`, 'd nw')}
+        ${at(m, 106, F.sessions.map((s) => `<div style="display:grid;grid-template-columns:22mm 1fr;align-items:baseline;padding:7.5mm 0;border-top:0.5mm solid ${k.rule}">
+            <span class="d" style="font-size:12.5mm;color:${k.sub}">${s.n}</span>
+            <span><span class="d nw" style="display:block;font-size:12.5mm;color:${k.ink}">${s.title}</span>
+            <span class="nw" style="display:block;font-size:5.5mm;font-weight:600;margin-top:3mm;color:${k.sub}">${s.day}</span></span></div>`).join(''), `width:${cw}mm`)}
+        ${atb(m, m, `<span>${F.time} · ${F.room}</span><span>${F.regBy}</span>`,
+          `width:${cw}mm;display:flex;justify-content:space-between;font-size:5.5mm;font-weight:600;color:${k.ink};border-top:0.5mm solid ${k.rule};padding-top:5mm`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid and the pill. Two big prices, and the deadline as plain text.',
+      html: () => {
+        const k = K.v6, m = margin(210, 297);
+        return `
+        ${flat('v6')}
+        ${at(m, m, word(11, k.word))}
+        ${at(m, 40, `Career workshop · ${F.dates}`, `font-size:7mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}`, 'nw')}
+        ${at(m, 70, `<div class="d" style="font-size:54mm;line-height:1;color:${k.hi}">${F.full}</div><div style="margin-top:4mm">${F.fullLabel}</div>
+          <div class="d" style="font-size:54mm;line-height:1;margin-top:20mm">${F.single}</div><div style="margin-top:4mm">${F.singleLabel}</div>`,
+          `font-size:7mm;font-weight:600;letter-spacing:-0.02em;color:${k.ink}`, 'nw')}
+        ${atb(m, m, `<div style="font-weight:700;color:${k.ink}">${F.regBy}</div><div style="color:${k.sub}">${F.time} · ${F.room}</div>`,
+          'font-size:7mm;font-weight:600;letter-spacing:-0.02em;line-height:1.4', 'nw')}`;
+      },
+    },
   ],
 };
 
@@ -283,14 +551,53 @@ const gcash = {
         ${at(20, 66, `<div style="width:108mm;padding:8mm 8mm 15mm;background:#fff;border-radius:7mm">${sampleQR(92)}</div>`)}
         ${at(0, 188, 'Account name here', 'width:148mm;text-align:center;font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:#fff', 'nw')}`,
     },
+    {
+      id: 'v4',
+      note: 'V1 with everything on one left edge and a small logo. The QR is a stand-in.',
+      html: () => {
+        const k = K.v4, m = margin(148, 210), cw = 148 - 2 * m;
+        return `
+        ${flat('v4')}
+        ${at(m, m, 'Pay with GCash', `font-size:16mm;color:${k.ink}`, 'd nw')}
+        ${at(m, 36, sampleQR(cw))}
+        ${atb(m, m, row(cw, 'Account name here', word(6, k.word)), `font-size:9mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue, with the two prices in plain type. The QR is a stand-in.',
+      html: () => {
+        const k = K.v5, m = margin(148, 210), cw = 148 - 2 * m;
+        return `
+        ${flat('v5')}
+        ${at(m, m, `Pay with <span style="color:${k.hi}">GCash.</span>`, `font-size:16mm;color:${k.ink}`, 'd nw')}
+        ${at(m, 36, wide(cw, 84, sampleQR(84), 8, 16))}
+        ${at(m, 152, `<div><b class="d" style="display:block;font-size:11mm">${F.full}</b><span style="color:${k.sub}">Full Pass</span></div>
+          <div><b class="d" style="display:block;font-size:11mm">${F.single}</b><span style="color:${k.sub}">Single Session</span></div>`,
+          `width:${cw}mm;display:grid;grid-template-columns:1fr 1fr;border-top:0.4mm solid ${k.rule};padding-top:4mm;font-size:5mm;font-weight:600;color:${k.ink}`)}
+        ${atb(m, m, row(cw, 'Account name here', word(6, k.word)), `font-size:5mm;font-weight:600;color:${k.ink}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid. One big word, then the QR on a full-width white tile. The QR is a stand-in.',
+      html: () => {
+        const k = K.v6, m = margin(148, 210), cw = 148 - 2 * m;
+        return `
+        ${flat('v6')}
+        ${at(m, m, 'GCash', `font-size:42mm;color:${k.hi}`, 'd nw')}
+        ${at(m, 62, wide(cw, 90, sampleQR(90), 8, 16))}
+        ${atb(m, m, 'Account name here', `font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:${k.ink}`, 'nw')}`;
+      },
+    },
   ],
 };
 
 // AAA card front: word, the prompt from the site, and lines to write on
-const aaaRows = ({ top, step, size, prompt, lineGap, lines = 2, color = C.navy, ruleColor = 'rgba(6,26,77,0.25)', left = 8, width = 89 }) =>
+const aaaRows = ({ top, step, size, prompt, lineGap, lines = 2, color = C.navy, sub = C.ink3, ruleColor = 'rgba(6,26,77,0.25)', left = 8, width = 89 }) =>
   F.aaa.map(([w, p], i) => at(left, top + i * step, `
     <div class="d nw" style="font-size:${size}mm;color:${color}">${w}</div>
-    <div class="nw" style="font-size:${prompt}mm;margin-top:1.4mm;color:${C.ink3};font-weight:500;letter-spacing:-0.01em">${p}</div>
+    <div class="nw" style="font-size:${prompt}mm;margin-top:1.4mm;color:${sub};font-weight:500;letter-spacing:-0.01em">${p}</div>
     ${Array.from({ length: lines }, () => `<div style="margin-top:${lineGap}mm;border-top:0.35mm solid ${ruleColor}"></div>`).join('')}`, `width:${width}mm`)).join('');
 
 const aaa = {
@@ -337,18 +644,66 @@ const aaa = {
         ${at(19.5, 43, tile(66, 6, await qr(undefined, 54)))}
         ${at(9, 120, `${F.dates} · ${F.room}<br>${F.regBy}`, `font-size:3.4mm;color:${C.ice};line-height:1.6`, 'm nw')}`,
     },
+    {
+      id: 'v4',
+      note: 'V1 on white with no blue band. The back is white too, with one blue line.',
+      html: (i) => {
+        const k = K.v4, m = margin(105, 148), cw = 105 - 2 * m;
+        return i === 0 ? `
+        ${flat('v4')}
+        ${at(m, m, row(cw, 'AAA Card', word(4.5, k.word), 'align-items:center'), `font-size:11.5mm;color:${k.ink}`, 'd nw')}
+        ${aaaRows({ top: 32, step: 37, size: 8.6, prompt: 3.3, lineGap: 8.4, color: k.ink, ruleColor: k.rule, left: m, width: cw })}` : `
+        ${flat('v4')}
+        ${at(m, m, logo('v4', 9))}
+        ${at(m, 40, `A hands-on<br>career workshop<br><span style="color:${k.hi}">in 4 sessions.</span>`, `font-size:11.5mm;color:${k.ink};line-height:1.08`, 'd nw')}
+        ${atb(m, m, `<div>${F.dates}</div><div>${F.time}</div><div>${F.room}</div><div style="font-weight:700;margin-top:2mm">${F.regBy}</div>`,
+          `font-size:5.4mm;color:${k.ink};font-weight:600;letter-spacing:-0.02em;line-height:1.3`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 with a solid blue band and white lines to write on. The back is solid blue.',
+      html: (i) => {
+        const k = K.v5, m = margin(105, 148), cw = 105 - 2 * m;
+        return i === 0 ? `
+        ${white}
+        ${band('v5', 105, 26)}
+        ${at(m, m, row(cw, 'AAA Card', word(4.5, k.word), 'align-items:center'), `font-size:11mm;color:${k.ink}`, 'd nw')}
+        ${aaaRows({ top: 35, step: 35.5, size: 8.6, prompt: 3.3, lineGap: 8.4, color: C.navy, ruleColor: 'rgba(6,70,200,0.4)', left: m, width: cw })}` : `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 9))}
+        ${at(m, 36, `Stand out<br>on paper.<br>Stand out<br><span style="color:${k.hi}">in person.</span>`, `font-size:12mm;color:${k.ink};line-height:1.02`, 'd nw')}
+        ${atb(m, m, `<div>${F.dates}</div><div>${F.time}</div><div>${F.room}</div><div style="font-weight:700">${F.regBy}</div>`,
+          `width:${cw}mm;border-top:0.35mm solid ${k.rule};padding-top:3mm;font-size:4.5mm;font-weight:600;line-height:1.45;color:${k.ink}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid. A navy band on top, white lines to write on, and a QR back.',
+      html: async (i) => {
+        const k = K.v6, m = margin(105, 148), cw = 105 - 2 * m;
+        return i === 0 ? `
+        ${white}
+        ${band('v6', 105, 36)}
+        ${at(m, m, `<span class="d" style="font-size:22mm;color:${k.hi}">AAA</span><span style="font-size:3.6mm;color:${k.sub};font-weight:600;letter-spacing:-0.01em;line-height:1.3;text-align:right">Write one<br>resume bullet.</span>`,
+          `width:${cw}mm;height:${36 - 2 * m}mm;display:flex;justify-content:space-between;align-items:center`, 'nw')}
+        ${aaaRows({ top: 44, step: 32, size: 10, prompt: 3.6, lineGap: 7.2, color: C.navy, left: m, width: cw })}` : scanBack(`${F.dates} · ${F.room}<br>${F.regBy}`);
+      },
+    },
   ],
 };
 
 // sign-up sheet table: fields from the site form
 const FIELDS = [['Name', 52], ['Email', 58], ['Mobile', 34], ['Course & year', 38]];
-const sheet = ({ top, rows, rowH, head, line, num = false, numW = 0 }) => {
-  const cols = `${num ? `${numW}mm ` : ''}${FIELDS.map(([, w]) => `${num ? w - numW / 4 : w}mm`).join(' ')}`;
+// left / width move and scale the table (the columns keep their ratio). numCls / numStyle set the look of the row numbers.
+const sheet = ({ top, rows, rowH, head, line, num = false, numW = 0, left = 14, width = 182, numCls = 'm', numStyle = `font-size:3mm;color:${C.ink3}` }) => {
+  const k = width / 182;
+  const cols = `${num ? `${numW}mm ` : ''}${FIELDS.map(([, w]) => `${+(w * k - (num ? numW / 4 : 0)).toFixed(2)}mm`).join(' ')}`;
   let r = '';
   for (let i = 0; i < rows; i++) {
-    r += `<div style="display:grid;grid-template-columns:${cols};height:${rowH}mm;border-bottom:${line}">${num ? `<span class="m" style="align-self:end;padding-bottom:1.6mm;font-size:3mm;color:${C.ink3}">${String(i + 1).padStart(2, '0')}</span>` : ''}${FIELDS.map((_, j) => `<span style="${j ? `border-left:0.25mm solid ${C.line}` : ''}"></span>`).join('')}</div>`;
+    r += `<div style="display:grid;grid-template-columns:${cols};height:${rowH}mm;border-bottom:${line}">${num ? `<span class="${numCls}" style="align-self:end;padding-bottom:1.6mm;${numStyle}">${String(i + 1).padStart(2, '0')}</span>` : ''}${FIELDS.map((_, j) => `<span style="${j ? `border-left:0.25mm solid ${C.line}` : ''}"></span>`).join('')}</div>`;
   }
-  return at(14, top, `<div style="display:grid;grid-template-columns:${cols};${head}">${num ? '<span>#</span>' : ''}${FIELDS.map(([f], j) => `<span style="${j ? 'padding-left:2mm' : ''}">${f}</span>`).join('')}</div>${r}`, 'width:182mm');
+  return at(left, top, `<div style="display:grid;grid-template-columns:${cols};${head}">${num ? '<span>#</span>' : ''}${FIELDS.map(([f], j) => `<span style="${j ? 'padding-left:2mm' : ''}">${f}</span>`).join('')}</div>${r}`, `width:${width}mm`);
 };
 
 const signup = {
@@ -382,6 +737,46 @@ const signup = {
         ${at(13, 14, 'Sign <span class="gl">up.</span>', 'font-size:30mm;color:#fff', 'd nw')}
         ${at(14, 47, `${F.dates} · ${F.room}`, `font-size:3.6mm;color:${C.ice}`, 'm nw')}
         ${sheet({ top: 72, rows: 13, rowH: 16, head: `font-size:5.2mm;font-weight:700;letter-spacing:-0.02em;color:${C.navy};padding-bottom:3mm;border-bottom:0.6mm solid ${C.navy}`, line: '0.4mm solid rgba(6,26,77,0.3)' })}`,
+    },
+    {
+      id: 'v4',
+      note: 'V1 with the title and table on one left edge and a small logo. 16 big rows.',
+      html: () => {
+        const k = K.v4, m = margin(210, 297), cw = 210 - 2 * m;
+        return `
+        ${flat('v4')}
+        ${at(m, m, row(cw, 'Sign-up sheet', word(6, k.word), 'align-items:center'), `font-size:15mm;color:${k.ink}`, 'd nw')}
+        ${sheet({ top: 52, rows: 16, rowH: 13, left: m, width: cw, head: `font-size:4.2mm;font-weight:600;color:${C.ink3};padding-bottom:3mm;border-bottom:0.4mm solid ${C.navy}`, line: `0.35mm solid ${k.rule}` })}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 with a solid blue band on top. Plain numbers and headings, no code letters, no grid. 20 rows.',
+      html: () => {
+        const k = K.v5, m = margin(210, 297), cw = 210 - 2 * m;
+        return `
+        ${white}
+        ${band('v5', 210, 50)}
+        ${at(m, m, row(cw, 'Sign-up sheet', word(6, k.word), 'align-items:center'), `font-size:13mm;color:${k.ink}`, 'd nw')}
+        ${at(m, 36, `Career workshop · ${F.dates} · ${F.room}`, `font-size:4.2mm;font-weight:600;color:${k.sub}`, 'nw')}
+        ${sheet({ top: 60, rows: 20, rowH: 10, num: true, numW: 10, left: m, width: cw, numCls: '', numStyle: `font-size:3.4mm;font-weight:600;color:${C.ink3}`,
+          head: `font-size:4.2mm;font-weight:700;color:${C.core};padding-bottom:2.6mm;border-bottom:0.5mm solid ${C.core}`, line: '0.3mm solid rgba(6,26,77,0.22)' })}
+        ${atb(m, m, `<span>${F.url}</span><span>${F.regBy}</span>`, `width:${cw}mm;display:flex;justify-content:space-between;font-size:4.2mm;font-weight:600;color:${C.ink3}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the gradient. Navy band on top and 12 tall rows, easy to write in while standing.',
+      html: () => {
+        const k = K.v6, m = margin(210, 297), cw = 210 - 2 * m;
+        return `
+        ${white}
+        ${band('v6', 210, 70)}
+        ${at(m, m, `<span class="d" style="font-size:30mm;color:${k.ink}">Sign <span style="color:${k.hi}">up.</span></span>${word(7, k.word)}`,
+          `width:${cw}mm;display:flex;justify-content:space-between;align-items:flex-start`, 'nw')}
+        ${at(m, 50, `${F.dates} · ${F.room}`, `font-size:5.2mm;font-weight:600;color:${k.sub}`, 'nw')}
+        ${sheet({ top: 82, rows: 12, rowH: 15.5, left: m, width: cw, head: `font-size:5.2mm;font-weight:700;letter-spacing:-0.02em;color:${C.navy};padding-bottom:3mm;border-bottom:0.6mm solid ${C.navy}`, line: '0.4mm solid rgba(6,26,77,0.3)' })}`;
+      },
     },
   ],
 };
@@ -445,6 +840,59 @@ const flyer = {
         ${at(9, 9, 'Scan to<br><span class="gl">sign up.</span>', 'font-size:14mm;color:#fff;line-height:1', 'd nw')}
         ${at(19.5, 43, tile(66, 6, await qr(undefined, 54)))}
         ${at(9, 118, `${F.dates} · ${F.time}<br>${F.room} · ${F.regBy}`, `font-size:3mm;color:${C.ice};line-height:1.6`, 'm nw')}`,
+    },
+    {
+      id: 'v4',
+      note: 'V1 on white. The back keeps the sessions, prices, and QR, with plain numbers and one left edge.',
+      html: async (i) => {
+        const k = K.v4, m = margin(105, 148), cw = 105 - 2 * m;
+        return i === 0 ? `
+        ${flat('v4')}
+        ${at(m, m, logo('v4', 9))}
+        ${at(m, 44, `A hands-on<br>career<br><span style="color:${k.hi}">workshop.</span>`, `font-size:14mm;color:${k.ink};line-height:1.06`, 'd nw')}
+        ${atb(m, m, `${F.dates}<br>${F.room}`, `font-size:7mm;color:${k.ink};font-weight:600;letter-spacing:-0.02em;line-height:1.28`, 'nw')}` : `
+        ${flat('v4')}
+        ${at(m, m, '4 sessions.', `font-size:10mm;color:${k.ink}`, 'd nw')}
+        ${at(m, 24, rows4({ size: 4.6, small: 3.4, ink: k.ink, sub: k.sub, rule: k.rule }), `width:${cw}mm`)}
+        ${at(m, 70, `<div>${F.time} · ${F.room}</div><div style="color:${k.sub}"><b style="color:${k.ink}">${F.full}</b> all four, or <b style="color:${k.ink}">${F.single}</b> a session</div>`,
+          `font-size:3.4mm;font-weight:600;line-height:1.6;color:${k.ink}`, 'nw')}
+        ${atb(m, m, `${await qr(undefined, 34)}<div><div class="d" style="font-size:10mm;line-height:1;color:${k.hi}">Scan to<br>sign up.</div>
+          <div style="margin-top:3mm;font-size:3.4mm;font-weight:600;color:${k.ink}">${F.regBy}</div></div>`, 'display:flex;align-items:flex-end;gap:6mm', 'nw')}`;
+      },
+    },
+    {
+      id: 'v5',
+      note: 'V2 on solid blue, both sides. No grid and no box; the web address is plain text.',
+      html: async (i) => {
+        const k = K.v5, m = margin(105, 148), cw = 105 - 2 * m;
+        return i === 0 ? `
+        ${flat('v5')}
+        ${at(m, m, logo('v5', 9))}
+        ${at(m, 36, `Stand out<br>on paper.<br>Stand out<br><span style="color:${k.hi}">in person.</span>`, `font-size:13.5mm;color:${k.ink};line-height:1.02`, 'd nw')}
+        ${atb(m, m, `<div>${F.dates} · ${F.time}</div><div>${F.room}</div>`,
+          `width:${cw}mm;border-top:0.35mm solid ${k.rule};padding-top:2.6mm;font-size:3.6mm;font-weight:600;line-height:1.5;color:${k.ink}`, 'nw')}` : `
+        ${flat('v5')}
+        ${at(m, m, `4 sessions.<br>One <span style="color:${k.hi}">blueprint.</span>`, `font-size:9mm;color:${k.ink};line-height:1.04`, 'd nw')}
+        ${at(m, 30, rows4({ size: 4.4, small: 3, ink: k.ink, sub: k.sub, rule: k.rule }), `width:${cw}mm`)}
+        ${at(m, 76, `<div><b class="d" style="display:block;font-size:9mm">${F.full}</b><span style="color:${k.sub}">Full Pass · all four</span></div>
+          <div><b class="d" style="display:block;font-size:9mm">${F.single}</b><span style="color:${k.sub}">Single Session</span></div>`,
+          `width:${cw}mm;display:grid;grid-template-columns:1fr 1fr;border-top:0.3mm solid ${k.rule};padding-top:3mm;font-size:3mm;font-weight:600;color:${k.ink}`)}
+        ${atb(m, m, `${wide(34, 28, await qr(undefined, 28), 3)}<div><div class="d" style="font-size:4.4mm;line-height:1.1">Sign up<br>in a minute.</div>
+          <div style="margin-top:2.4mm;color:${k.sub}">${F.url}</div><div style="color:${k.sub}">${F.regBy}</div></div>`,
+          `display:flex;align-items:flex-end;gap:5mm;font-size:3mm;font-weight:600;line-height:1.4;color:${k.ink}`, 'nw')}`;
+      },
+    },
+    {
+      id: 'v6',
+      note: 'V3 without the grid. One light-blue line on the front; the back is a QR and the dates.',
+      html: async (i) => {
+        const k = K.v6, m = margin(105, 148);
+        return i === 0 ? `
+        ${flat('v6')}
+        ${at(m, m, word(10, k.word))}
+        ${at(m, 34, `Stand out<br>on paper.<br>Stand out<br><span style="color:${k.hi}">in person.</span>`, `font-size:16mm;color:${k.ink};line-height:0.98`, 'd nw')}
+        ${atb(m, m, `<div class="d" style="font-size:9mm;color:${k.ink}">${F.dates}</div><div style="margin-top:2.4mm;font-size:4.2mm;font-weight:600;color:${k.sub}">${F.room}</div>`, '', 'nw')}` : scanBack(`${F.dates} · ${F.time}<br>${F.room} · ${F.regBy}`);
+      },
     },
   ],
 };
