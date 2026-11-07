@@ -5,7 +5,7 @@ import { C, F, CLEAN as K, LOOKS, margin, grid, word, mark, lockup, qr, sampleQR
 import * as V1 from './booth-v1.mjs';
 
 const TARP = 'Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.';
-const SINTRA = 'Printed sintra board, 3 mm. Ask the shop to print to the edge.';
+const STAND = (a) => `Paper or card stock, colour, printed at a shop (home printers leave a white edge). Slides into an ${a} acrylic stand, the same kind as Prince’s booth.`;
 const PAPER = 'Paper. Print at 100% (no “fit to page”).';
 
 const header = {
@@ -101,117 +101,6 @@ const wide = (w, q, inner, py, pb = py) => `<div style="width:${w}mm;height:${(q
 // a row: text on the left, the wordmark on the right
 const row = (w, left, logoHtml, style = '', cls = '') => `<div class="${cls}" style="width:${w}mm;display:flex;justify-content:space-between;align-items:flex-end;${style}"><span>${left}</span>${logoHtml}</div>`;
 // the 4 sessions as rows, in plain type
-const rows4 = ({ size, small, ink, sub, rule, pad = 2.6 }) => F.sessions.map((s) => `
-  <div style="display:grid;grid-template-columns:${(small * 3).toFixed(1)}mm 1fr auto;align-items:baseline;padding:${pad}mm 0;border-top:0.3mm solid ${rule}">
-    <span style="font-size:${small}mm;font-weight:600;color:${sub}">${s.n}</span>
-    <span class="d nw" style="font-size:${size}mm;color:${ink}">${s.title}</span>
-    <span class="nw" style="font-size:${small}mm;font-weight:600;color:${sub}">${s.day}</span></div>`).join('');
-// the "Scan to sign up." back of the A6 cards (V6)
-const scanBack = async (facts) => {
-  const k = K.v6, m = margin(105, 148);
-  return `
-    ${flat('v6')}
-    ${at(m, m, `Scan to<br><span style="color:${k.hi}">sign up.</span>`, `font-size:14mm;color:${k.ink};line-height:1`, 'd nw')}
-    ${at(m, 42, wide(105 - 2 * m, 62, await qr(undefined, 62), 8))}
-    ${atb(m, m, facts, `font-size:4.2mm;font-weight:600;color:${k.sub};line-height:1.45`, 'nw')}`;
-};
-
-const backdrop = {
-  id: 'backdrop', piece: 'backdrop', name: 'Backdrop tarp', size: '1.5 m × 1.5 m', mm: [1500, 1500], pages: ['Front'], print: TARP,
-  versions: [
-    {
-      id: 'v1',
-      note: 'Same layout as the model: what Blueprint is, in big words, with the date strip at the bottom.',
-      html: () => `
-        <div class="fill bg-paper"></div>
-        ${grid(1500, 1500, { step: 100, major: 1000, minor: 0.1, width: 1.9 })}
-        ${at(112, 100, lockup(150, { markColor: 'grad' }))}
-        ${at(108, 312, `<div style="color:${C.navy}">A hands-on</div><div style="color:${C.core}">career workshop.</div>`, 'font-size:140mm;line-height:0.98', 'd nw')}
-        ${at(112, 700, 'Bring what you’ve already done.<br>Leave with a resume, LinkedIn,<br>and intro that show it.', `font-size:72mm;line-height:1.34;font-weight:600;letter-spacing:-0.03em;color:${C.navy}`, 'nw')}
-        ${at(112, 1162, `<div style="display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 52mm;color:#fff">
-            <div class="d nw" style="font-size:92mm">${F.dates}</div>
-            <div class="nw" style="font-size:60mm;font-weight:600;letter-spacing:-0.03em;line-height:1.12;text-align:right">${F.time}<br>${F.room}</div></div>`,
-          `width:1276mm;height:200mm;background:${C.navy}`)}`,
-    },
-    {
-      id: 'v2',
-      note: 'Shows all 4 sessions and their days. Logo and headline sit at the top, above the seller’s shoulders, so they stay in view.',
-      html: () => `
-        ${paper(1500, 1500, 20, 1)}
-        ${at(90, 80, lockup(150, { markColor: 'grad' }))}
-        ${at(0, 96, '4 sessions.', `width:1410mm;text-align:right;font-size:150mm;color:${C.ink}`, 'd nw')}
-        ${at(84, 268, `One ${sel('<span class="g">blueprint.</span>', { size: 'W 1500 × H 1500 mm' })}`, `font-size:150mm;color:${C.ink}`, 'd nw')}
-        ${at(90, 560, `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:80mm;row-gap:70mm">
-          ${F.sessions.map((s) => `<div style="border-top:1.6mm solid ${C.navy};padding-top:26mm">
-            <div class="m" style="font-size:60mm;color:${C.electric};letter-spacing:0.02em">${s.n}</div>
-            <div class="d nw" style="font-size:86mm;margin-top:16mm;color:${C.ink}">${s.title}</div>
-            <div class="m" style="font-size:60mm;margin-top:18mm;color:${C.ink2};letter-spacing:0.02em">${s.day}</div></div>`).join('')}
-          </div>`, 'width:1320mm')}
-        ${at(90, 1300, `<span>${F.time} · ${F.room}</span><span class="g" style="font-weight:700">${F.regBy}</span>`,
-          `width:1320mm;display:flex;justify-content:space-between;font-size:62mm;font-weight:600;letter-spacing:-0.03em;color:${C.navy}`, 'nw')}`,
-    },
-    {
-      id: 'v3',
-      note: 'A 37 cm QR to the sign-up page. People can scan it from the aisle, about 3 m away, without walking in.',
-      html: async () => `
-        ${navy(1500, 1500, 20, 1)}
-        ${at(100, 100, word(130, '#fff'))}
-        ${at(94, 330, 'Scan to<br><span class="gl">sign up.</span>', 'font-size:200mm;color:#fff;line-height:1', 'd nw')}
-        ${at(970, 100, tile(430, 30, await qr(undefined, 370)))}
-        ${at(94, 890, F.dates, 'font-size:190mm', 'd nw gl')}
-        ${at(100, 1120, `${F.time} · ${F.room}`, 'font-size:66mm;color:#fff;font-weight:600;letter-spacing:-0.03em', 'nw')}
-        ${at(100, 1262, F.regBy, `font-size:66mm;font-weight:700;letter-spacing:-0.03em;color:${C.navy};background:${C.cyan};padding:18mm 34mm;border-radius:60mm`, 'nw')}`,
-    },
-    {
-      id: 'v4',
-      note: 'V1 on white. The navy date strip is now a plain line of text under a thin rule.',
-      html: () => {
-        const k = K.v4, m = margin(1500, 1500);
-        return `
-        ${flat('v4')}
-        ${at(m, m, logo('v4', 150))}
-        ${at(m, 360, `<div>A hands-on</div><div style="color:${k.hi}">career workshop.</div>`, `font-size:140mm;line-height:0.98;color:${k.ink}`, 'd nw')}
-        ${at(m, 720, 'Bring what you’ve already done.<br>Leave with a resume, LinkedIn,<br>and intro that show it.', `font-size:72mm;line-height:1.3;font-weight:500;letter-spacing:-0.025em;color:${k.sub}`, 'nw')}
-        ${atb(m, m, `<div style="font-weight:700;color:${k.ink}">${F.dates}</div><div style="color:${k.sub}">${F.time} · ${F.room}</div>`,
-          `width:${1500 - 2 * m}mm;border-top:1.6mm solid ${k.rule};padding-top:40mm;font-size:72mm;font-weight:600;letter-spacing:-0.03em;line-height:1.25`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v5',
-      note: 'V2 on solid blue. Same 4 sessions, but no grid and no box, and every line starts on one edge.',
-      html: () => {
-        const k = K.v5, m = margin(1500, 1500);
-        return `
-        ${flat('v5')}
-        ${at(m, m, logo('v5', 150))}
-        ${at(m, 340, `<div>4 sessions.</div><div>One <span style="color:${k.hi}">blueprint.</span></div>`, `font-size:150mm;line-height:1;color:${k.ink}`, 'd nw')}
-        ${at(m, 690, `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:80mm;row-gap:50mm">
-          ${F.sessions.map((s) => `<div style="border-top:1.6mm solid ${k.rule};padding-top:24mm">
-            <div class="nw" style="font-size:60mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}">${s.n} · ${s.day}</div>
-            <div class="d nw" style="font-size:86mm;margin-top:14mm;color:${k.ink}">${s.title}</div></div>`).join('')}
-          </div>`, `width:${1500 - 2 * m}mm`)}
-        ${atb(m, m, `<div>${F.time} · ${F.room}</div><div style="color:${k.sub}">${F.regBy}</div>`,
-          `font-size:60mm;font-weight:600;letter-spacing:-0.03em;line-height:1.25;color:${k.ink}`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v6',
-      note: 'V3 without the grid and the pill. The QR is still 37 cm, so people can scan it from the aisle.',
-      html: async () => {
-        const k = K.v6, m = margin(1500, 1500);
-        return `
-        ${flat('v6')}
-        ${at(m, m, word(130, k.word))}
-        ${at(1500 - m - 430, m, wide(430, 370, await qr(undefined, 370), 30))}
-        ${at(m, 330, `Scan to<br><span style="color:${k.hi}">sign up.</span>`, `font-size:190mm;color:${k.ink};line-height:1`, 'd nw')}
-        ${atb(m, m, `<div class="d" style="font-size:190mm;line-height:1;margin-bottom:44mm;color:${k.ink}">${F.dates}</div>
-          <div style="color:${k.sub}">${F.time} · ${F.room}</div><div style="color:${k.ink}">${F.regBy}</div>`,
-          'font-size:66mm;font-weight:600;letter-spacing:-0.03em;line-height:1.3', 'nw')}`;
-      },
-    },
-  ],
-};
-
 const skirt = {
   id: 'skirt', piece: 'skirt', name: 'Table skirt tarp', size: '0.9 m × 0.7 m', mm: [900, 700], pages: ['Front'], print: 'Tarp. Print at 100 dpi or more. Ask for grommets in the 4 corners for the cable ties.',
   versions: [
@@ -281,7 +170,7 @@ const skirt = {
 };
 
 const regqr = {
-  id: 'regqr', piece: 'regqr', name: 'Sign-up QR', size: 'A5, 148 × 210 mm', mm: [148, 210], pages: ['Front'], print: SINTRA,
+  id: 'regqr', piece: 'regqr', name: 'Sign-up QR', size: 'A5, 148 × 210 mm', mm: [148, 210], pages: ['Front'], print: STAND('A5'),
   versions: [
     {
       id: 'v1',
@@ -353,7 +242,7 @@ const regqr = {
 };
 
 const card = {
-  id: 'card', piece: 'card', name: 'Workshop card', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'], print: SINTRA,
+  id: 'card', piece: 'card', name: 'Workshop card', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'], print: STAND('A4'),
   versions: [
     {
       id: 'v1',
@@ -446,85 +335,6 @@ const card = {
   ],
 };
 
-const gcash = {
-  id: 'gcash', piece: 'gcash', name: 'GCash QR', size: 'A5, 148 × 210 mm', mm: [148, 210], pages: ['Front'], print: `${SINTRA} Put our real GCash QR and account name in first.`,
-  versions: [
-    {
-      id: 'v1',
-      note: 'Same as the model. The QR is a stand-in: put the QR from our GCash app in before you print.',
-      html: () => `
-        ${white}
-        ${at(0, 16, 'Pay with GCash', `width:148mm;text-align:center;font-size:18mm;color:${C.navy}`, 'd nw')}
-        ${at(24, 50, sampleQR(100))}
-        ${at(0, 172, 'Account name here', `width:148mm;text-align:center;font-size:9mm;font-weight:600;letter-spacing:-0.02em;color:${C.ink3}`, 'nw')}`,
-    },
-    {
-      id: 'v2',
-      note: 'Adds the three prices, so the buyer knows what to send. The QR is a stand-in.',
-      html: () => `
-        ${paper(148, 210, 5, 0.15)}
-        ${at(12, 12, lockup(13))}
-        ${at(11, 32, 'Pay with <span class="g">GCash.</span>', `font-size:17mm;color:${C.ink}`, 'd nw')}
-        ${at(32, 58, `<div style="padding:4mm;background:#fff;border:0.3mm solid ${C.line};border-radius:3mm">${sampleQR(76)}</div>`)}
-        ${at(12, 160, `<div><b class="d" style="display:block;font-size:9mm;color:${C.ink}">${F.full}</b><span class="m" style="font-size:2.8mm;color:${C.ink3}">Full Pass</span></div>
-          <div><b class="d" style="display:block;font-size:9mm;color:${C.ink}">${F.single}</b><span class="m" style="font-size:2.8mm;color:${C.ink3}">One session</span></div>
-          <div><b class="d" style="display:block;font-size:9mm;color:${C.ink}">${F.barkada}</b><span class="m" style="font-size:2.8mm;color:${C.ink3}">Barkada of 3</span></div>`,
-          `width:124mm;display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.4mm solid ${C.navy};padding-top:4mm`)}
-        ${at(12, 190, 'Account name here', `font-size:4mm;color:${C.navy}`, 'm nw')}`,
-    },
-    {
-      id: 'v3',
-      note: 'One big word, then the QR on a white tile. The QR is a stand-in.',
-      html: () => `
-        ${navy(148, 210, 5, 0.15)}
-        ${at(14, 14, 'GCash', 'font-size:42mm', 'd nw gl')}
-        ${at(20, 66, `<div style="width:108mm;padding:8mm 8mm 15mm;background:#fff;border-radius:7mm">${sampleQR(92)}</div>`)}
-        ${at(0, 188, 'Account name here', 'width:148mm;text-align:center;font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:#fff', 'nw')}`,
-    },
-    {
-      id: 'v4',
-      note: 'V1 with everything on one left edge and a small logo. The QR is a stand-in.',
-      html: () => {
-        const k = K.v4, m = margin(148, 210), cw = 148 - 2 * m;
-        return `
-        ${flat('v4')}
-        ${at(m, m, 'Pay with GCash', `font-size:16mm;color:${k.ink}`, 'd nw')}
-        ${at(m, 36, sampleQR(cw))}
-        ${atb(m, m, row(cw, 'Account name here', word(6, k.word)), `font-size:9mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v5',
-      note: 'V2 on solid blue, with the three prices in plain type. The QR is a stand-in.',
-      html: () => {
-        const k = K.v5, m = margin(148, 210), cw = 148 - 2 * m;
-        return `
-        ${flat('v5')}
-        ${at(m, m, `Pay with <span style="color:${k.hi}">GCash.</span>`, `font-size:16mm;color:${k.ink}`, 'd nw')}
-        ${at(m, 36, wide(cw, 84, sampleQR(84), 8, 16))}
-        ${at(m, 152, `<div><b class="d" style="display:block;font-size:9mm">${F.full}</b><span style="color:${k.sub}">Full Pass</span></div>
-          <div><b class="d" style="display:block;font-size:9mm">${F.single}</b><span style="color:${k.sub}">One session</span></div>
-          <div><b class="d" style="display:block;font-size:9mm">${F.barkada}</b><span style="color:${k.sub}">Barkada of 3</span></div>`,
-          `width:${cw}mm;display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.4mm solid ${k.rule};padding-top:4mm;font-size:4.2mm;font-weight:600;color:${k.ink}`)}
-        ${atb(m, m, row(cw, 'Account name here', word(6, k.word)), `font-size:5mm;font-weight:600;color:${k.ink}`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v6',
-      note: 'V3 without the grid. One big word, then the QR on a full-width white tile. The QR is a stand-in.',
-      html: () => {
-        const k = K.v6, m = margin(148, 210), cw = 148 - 2 * m;
-        return `
-        ${flat('v6')}
-        ${at(m, m, 'GCash', `font-size:42mm;color:${k.hi}`, 'd nw')}
-        ${at(m, 62, wide(cw, 90, sampleQR(90), 8, 16))}
-        ${atb(m, m, 'Account name here', `font-size:8mm;font-weight:600;letter-spacing:-0.02em;color:${k.ink}`, 'nw')}`;
-      },
-    },
-  ],
-};
-
-// AAA card front: word, the prompt from the site, and lines to write on
 // sign-up sheet table: fields from the site form
 const FIELDS = [['Name', 52], ['Email', 58], ['Mobile', 34], ['Course & year', 38]];
 // left / width move and scale the table (the columns keep their ratio). numCls / numStyle set the look of the row numbers.
@@ -613,130 +423,12 @@ const signup = {
   ],
 };
 
-// flyer back: the 4 sessions as rows
-const sessionRows = ({ size, day, color = C.ink, sub = C.ink3, num = C.core, rule = C.line, pad = 2.6 }) => F.sessions.map((s) => `
-  <div style="display:grid;grid-template-columns:9mm 1fr auto;align-items:baseline;padding:${pad}mm 0;border-top:0.3mm solid ${rule}">
-    <span class="m" style="font-size:${day}mm;color:${num}">${s.n}</span>
-    <span class="d nw" style="font-size:${size}mm;color:${color}">${s.title}</span>
-    <span class="m nw" style="font-size:${day}mm;color:${sub}">${s.day}</span></div>`).join('');
-
-const flyer = {
-  id: 'flyer', piece: 'flyers', name: 'Flyer', size: 'A6, 105 × 148 mm', mm: [105, 148], pages: ['Front', 'Back'], print: 'Paper or card stock, 2 sides. Print 4 on one A4 sheet, then cut.',
-  versions: [
-    {
-      id: 'v1',
-      note: 'Same front as the model, dates fixed. The back lists the 4 sessions, the prices, and a QR to sign up.',
-      html: async (i) => i === 0 ? `
-        ${gradBg}
-        ${at(9, 13, word(15, '#fff'))}
-        ${at(8.4, 50, 'A hands-on<br>career<br>workshop.', 'font-size:14mm;color:#fff;line-height:1.08', 'd nw')}
-        ${at(9, 118, `${F.dates}<br>${F.room}`, 'font-size:7mm;color:#fff;font-weight:600;letter-spacing:-0.02em;line-height:1.28', 'nw')}` : `
-        ${white}
-        ${at(9, 10, '4 sessions.', `font-size:10mm;color:${C.navy}`, 'd nw')}
-        ${at(9, 25, sessionRows({ size: 4.6, day: 2.7 }), 'width:87mm')}
-        ${at(9, 74, `${F.time} · ${F.room}`, `font-size:3.4mm;font-weight:600;color:${C.navy};letter-spacing:-0.01em`, 'nw')}
-        ${at(9, 81, `<b>${F.full}</b> all four, or <b>${F.single}</b> a session<br><b>${F.barkada}</b> for a barkada of 3`, `font-size:3.4mm;font-weight:500;line-height:1.55;color:${C.ink2};letter-spacing:-0.01em`, 'nw')}
-        ${at(9, 103, await qr(undefined, 34))}
-        ${at(49, 106, `Scan to<br>sign up.`, `font-size:7.4mm;color:${C.core};line-height:1`, 'd nw')}
-        ${at(49, 125, `${F.regBy}`, `font-size:3.2mm;font-weight:600;color:${C.navy}`, 'nw')}`,
-    },
-    {
-      id: 'v2',
-      note: 'The site’s two lines with the selection box on the front. Back: sessions, prices, and the web address.',
-      html: async (i) => i === 0 ? `
-        ${paper(105, 148, 5, 0.12)}
-        ${at(9, 9, lockup(9))}
-        ${at(8, 42, `Stand out<br>on paper.<br>Stand out<br>in ${sel('<span class="g">person.</span>', { size: 'A6 · 105 × 148' })}`, `font-size:13.5mm;color:${C.ink};line-height:1.02`, 'd nw')}
-        ${at(9, 122, `<div>${F.dates} · ${F.time}</div><div>${F.room}</div>`, `width:87mm;font-size:3.1mm;line-height:1.6;color:${C.navy};border-top:0.35mm solid ${C.navy};padding-top:2.4mm`, 'm nw')}` : `
-        ${paper(105, 148, 5, 0.12)}
-        ${at(9, 9, '4 sessions.<br>One <span class="g">blueprint.</span>', `font-size:9mm;color:${C.ink};line-height:1.04`, 'd nw')}
-        ${at(9, 31, sessionRows({ size: 4.4, day: 2.6, num: C.electric, rule: C.navy }), 'width:87mm')}
-        ${at(9, 80, `<div><b class="d" style="display:block;font-size:6mm;color:${C.ink}">${F.full}</b><span class="m" style="font-size:2.2mm;color:${C.ink3}">Full Pass</span></div>
-          <div><b class="d" style="display:block;font-size:6mm;color:${C.ink}">${F.single}</b><span class="m" style="font-size:2.2mm;color:${C.ink3}">One session</span></div>
-          <div><b class="d" style="display:block;font-size:6mm;color:${C.ink}">${F.barkada}</b><span class="m" style="font-size:2.2mm;color:${C.ink3}">Barkada of 3</span></div>`,
-          `width:87mm;display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.35mm solid ${C.navy};padding-top:2.6mm`)}
-        ${at(9, 104, `<div style="padding:1.6mm;background:#fff;border:0.25mm solid ${C.line};border-radius:1.4mm">${await qr(undefined, 28)}</div>`)}
-        ${at(44, 107, `<div class="d" style="font-size:6mm;color:${C.ink};line-height:1.05">Sign up<br>in a minute.</div>
-          <div class="m" style="font-size:2.3mm;margin-top:3mm;color:${C.navy};text-transform:none;letter-spacing:0">${F.url}</div>
-          <div class="m" style="font-size:2.3mm;margin-top:1.2mm;color:${C.core}">${F.regBy}</div>`)}`,
-    },
-    {
-      id: 'v3',
-      note: 'Fewest words, biggest type. The back is a QR plus the dates, nothing else.',
-      html: async (i) => i === 0 ? `
-        ${navy(105, 148, 5, 0.12)}
-        ${at(9, 10, word(10, '#fff'))}
-        ${at(8, 36, `Stand out<br><span class="gl">on paper.</span><br>Stand out<br><span class="gl">in person.</span>`, 'font-size:16mm;color:#fff;line-height:0.98', 'd nw')}
-        ${at(9, 117, F.dates, 'font-size:9mm;color:#fff', 'd nw')}
-        ${at(9, 129, F.room, `font-size:3.2mm;color:${C.ice}`, 'm nw')}` : `
-        ${navy(105, 148, 5, 0.12)}
-        ${at(9, 9, 'Scan to<br><span class="gl">sign up.</span>', 'font-size:14mm;color:#fff;line-height:1', 'd nw')}
-        ${at(19.5, 43, tile(66, 6, await qr(undefined, 54)))}
-        ${at(9, 118, `${F.dates} · ${F.time}<br>${F.room} · ${F.regBy}`, `font-size:3mm;color:${C.ice};line-height:1.6`, 'm nw')}`,
-    },
-    {
-      id: 'v4',
-      note: 'V1 on white. The back keeps the sessions, prices, and QR, with plain numbers and one left edge.',
-      html: async (i) => {
-        const k = K.v4, m = margin(105, 148), cw = 105 - 2 * m;
-        return i === 0 ? `
-        ${flat('v4')}
-        ${at(m, m, logo('v4', 9))}
-        ${at(m, 44, `A hands-on<br>career<br><span style="color:${k.hi}">workshop.</span>`, `font-size:14mm;color:${k.ink};line-height:1.06`, 'd nw')}
-        ${atb(m, m, `${F.dates}<br>${F.room}`, `font-size:7mm;color:${k.ink};font-weight:600;letter-spacing:-0.02em;line-height:1.28`, 'nw')}` : `
-        ${flat('v4')}
-        ${at(m, m, '4 sessions.', `font-size:10mm;color:${k.ink}`, 'd nw')}
-        ${at(m, 24, rows4({ size: 4.6, small: 3.4, ink: k.ink, sub: k.sub, rule: k.rule }), `width:${cw}mm`)}
-        ${at(m, 70, `<div>${F.time} · ${F.room}</div><div style="color:${k.sub}"><b style="color:${k.ink}">${F.full}</b> all four, or <b style="color:${k.ink}">${F.single}</b> a session</div><div style="color:${k.sub}"><b style="color:${k.ink}">${F.barkada}</b> for a barkada of 3</div>`,
-          `font-size:3.4mm;font-weight:600;line-height:1.6;color:${k.ink}`, 'nw')}
-        ${atb(m, m, `${await qr(undefined, 34)}<div><div class="d" style="font-size:10mm;line-height:1;color:${k.hi}">Scan to<br>sign up.</div>
-          <div style="margin-top:3mm;font-size:3.4mm;font-weight:600;color:${k.ink}">${F.regBy}</div></div>`, 'display:flex;align-items:flex-end;gap:6mm', 'nw')}`;
-      },
-    },
-    {
-      id: 'v5',
-      note: 'V2 on solid blue, both sides. No grid and no box; the web address is plain text.',
-      html: async (i) => {
-        const k = K.v5, m = margin(105, 148), cw = 105 - 2 * m;
-        return i === 0 ? `
-        ${flat('v5')}
-        ${at(m, m, logo('v5', 9))}
-        ${at(m, 36, `Stand out<br>on paper.<br>Stand out<br><span style="color:${k.hi}">in person.</span>`, `font-size:13.5mm;color:${k.ink};line-height:1.02`, 'd nw')}
-        ${atb(m, m, `<div>${F.dates} · ${F.time}</div><div>${F.room}</div>`,
-          `width:${cw}mm;border-top:0.35mm solid ${k.rule};padding-top:2.6mm;font-size:3.6mm;font-weight:600;line-height:1.5;color:${k.ink}`, 'nw')}` : `
-        ${flat('v5')}
-        ${at(m, m, `4 sessions.<br>One <span style="color:${k.hi}">blueprint.</span>`, `font-size:9mm;color:${k.ink};line-height:1.04`, 'd nw')}
-        ${at(m, 30, rows4({ size: 4.4, small: 3, ink: k.ink, sub: k.sub, rule: k.rule }), `width:${cw}mm`)}
-        ${at(m, 76, `<div><b class="d" style="display:block;font-size:7mm">${F.full}</b><span style="color:${k.sub}">Full Pass</span></div>
-          <div><b class="d" style="display:block;font-size:7mm">${F.single}</b><span style="color:${k.sub}">One session</span></div>
-          <div><b class="d" style="display:block;font-size:7mm">${F.barkada}</b><span style="color:${k.sub}">Barkada of 3</span></div>`,
-          `width:${cw}mm;display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.3mm solid ${k.rule};padding-top:3mm;font-size:3mm;font-weight:600;color:${k.ink}`)}
-        ${atb(m, m, `${wide(34, 28, await qr(undefined, 28), 3)}<div><div class="d" style="font-size:4.4mm;line-height:1.1">Sign up<br>in a minute.</div>
-          <div style="margin-top:2.4mm;color:${k.sub}">${F.url}</div><div style="color:${k.sub}">${F.regBy}</div></div>`,
-          `display:flex;align-items:flex-end;gap:5mm;font-size:3mm;font-weight:600;line-height:1.4;color:${k.ink}`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v6',
-      note: 'V3 without the grid. One light-blue line on the front; the back is a QR and the dates.',
-      html: async (i) => {
-        const k = K.v6, m = margin(105, 148);
-        return i === 0 ? `
-        ${flat('v6')}
-        ${at(m, m, word(10, k.word))}
-        ${at(m, 34, `Stand out<br>on paper.<br>Stand out<br><span style="color:${k.hi}">in person.</span>`, `font-size:16mm;color:${k.ink};line-height:0.98`, 'd nw')}
-        ${atb(m, m, `<div class="d" style="font-size:9mm;color:${k.ink}">${F.dates}</div><div style="margin-top:2.4mm;font-size:4.2mm;font-weight:600;color:${k.sub}">${F.room}</div>`, '', 'nw')}` : scanBack(`${F.dates} · ${F.time}<br>${F.room} · ${F.regBy}`);
-      },
-    },
-  ],
-};
-
-// V1 is the campaign look (booth-v1.mjs). It replaces the first version of each piece.
-// The pull-up banner, Red Flag Bingo, candy sign and photo frame are new and have V1 only.
-for (const a of [header, backdrop, skirt, regqr, card, gcash, signup, flyer]) a.versions[0] = V1[a.id];
+// V1 is the original design, refined (booth-v1.mjs). It replaces the first version of each piece.
+// The standing banner and the Red Flag Bingo card are new and have V1 only.
+for (const a of [header, skirt, regqr, card, signup]) a.versions[0] = V1[a.id];
 
 export default {
   page: 'booth',
-  looks: LOOKS.map((L) => (L.id === 'v1' ? { id: 'v1', label: 'Campaign', about: 'The pick. “Delulu is not a career plan. Blueprint is.” Red-pen roast notes, yellow freebie stickers, Red Flag Bingo, a photo frame.' } : L)),
-  assets: [header, backdrop, skirt, V1.pullup, regqr, card, gcash, V1.bingo, signup, flyer, V1.candy, V1.frame],
+  looks: LOOKS.map((L) => (L.id === 'v1' ? { ...L, about: 'The pick. The design on the 3D model, refined: one margin, one type scale, all three tickets. The banner and the bingo card follow it.' } : L)),
+  assets: [header, skirt, V1.pullup, regqr, card, V1.bingo, signup],
 };

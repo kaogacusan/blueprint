@@ -155,7 +155,7 @@ export const sel = (text, { size = '', cls = '' } = {}) =>
   `<span class="sel ${cls}">${text}<i class="sel__h tl"></i><i class="sel__h tr"></i><i class="sel__h bl"></i><i class="sel__h br"></i>${size ? `<b class="sel__size">${size}</b>` : ''}</span>`;
 
 // ---------- fonts + base CSS for every print page ----------
-export const FONTS = 'https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600&display=block';
+export const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600&display=block';
 
 export const BASE_CSS = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}

@@ -412,3 +412,20 @@ table.shop { min-width: 940px; }
 .shop .shop__price small { color: var(--ink-3); font-weight: 500; }
 .shop .shop__eta { color: var(--ink-2); font-size: 0.86rem; }
 .shop .shop__note { color: var(--ink-3); font-size: 0.82rem; margin-top: 2px; }
+
+/* booth set-up plan */
+.when { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 30px; }
+@media (max-width: 1020px) { .when { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .when { grid-template-columns: 1fr; } }
+.when__day ul { margin: 0; padding-left: 1.1em; }
+.when__day li { margin: 6px 0; line-height: 1.5; }
+.when__k { margin: 0 0 8px; font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--core); }
+.when__day--hi { border-color: var(--electric); box-shadow: inset 0 0 0 1px var(--electric); }
+.steps__h { margin: 26px 0 12px; font-family: var(--display); font-size: 1.25rem; letter-spacing: -0.02em; }
+.steps__h .muted { font-weight: 500; }
+.steps { margin: 0 0 30px; padding-left: 1.4em; max-width: 78ch; line-height: 1.55; color: var(--ink-2); }
+.steps > li { margin: 10px 0; padding-left: 4px; }
+.steps > li > b { color: var(--ink); }
+.steps ul { margin: 6px 0 0; padding-left: 1.1em; }
+.steps ul li { margin: 4px 0; }
+table.shop--shared { min-width: 640px; }
