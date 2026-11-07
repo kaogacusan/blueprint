@@ -239,8 +239,8 @@ const skirt = {
       html: () => `
         ${navy(900, 700, 20, 1)}
         ${at(70, 56, word(150, '#fff'))}
-        ${at(64, 168, F.full, 'font-size:200mm', 'd nw gl')}
-        ${at(70, 382, `all four sessions,<br>or ${F.single} a session.<br>Barkada of 3: ${F.barkada}`, 'font-size:62mm;line-height:1.14;color:#fff;font-weight:600;letter-spacing:-0.03em', 'nw')}`,
+        ${at(64, 196, F.full, 'font-size:200mm', 'd nw gl')}
+        ${at(70, 410, `all four sessions,<br>or ${F.single} a session.<br>Barkada of 3: ${F.barkada}`, 'font-size:62mm;line-height:1.14;color:#fff;font-weight:600;letter-spacing:-0.03em', 'nw')}`,
     },
     {
       id: 'v4',
