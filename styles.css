@@ -1020,7 +1020,13 @@ section[id] { scroll-margin-top: 72px; }
 .tix__up b { color: var(--navy); }
 .tix__switch { padding: 0; border: 0; background: none; color: var(--core); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
 .tix__switch:hover { color: var(--electric); }
+/* Barkada: a wide card under the two tickets (three Full Passes, one payer) */
+.tix__card--crew { grid-column: 1 / -1; display: grid; grid-template-columns: 1.25fr 1fr; align-items: center; gap: 14px 36px; }
+.tix__card--crew .tix__price { margin: 10px 0 12px; }
+.crew__copy { margin: 0; color: var(--ink-2); font-size: 0.98rem; line-height: 1.5; text-wrap: pretty; }
+.crew__side .tix__note { margin-top: 10px; }
 @media (max-width: 760px) { .tix { grid-template-columns: 1fr; gap: 28px; max-width: 520px; } }
+@media (max-width: 760px) { .tix__card--crew { grid-template-columns: 1fr; } }
 
 /* ---------- Footer ---------- */
 .foot { background: #030d2a; color: rgba(225, 235, 255, 0.7); padding: 28px 0; border-top: 1px solid rgba(185, 238, 255, 0.08); }
@@ -1120,6 +1126,13 @@ section[id] { scroll-margin-top: 72px; }
 .field[hidden], [hidden] { display: none !important; }
 .field.is-invalid input, .field.is-invalid select { border-color: #e5484d; background: #fff6f6; }
 .field.is-invalid .field__err { display: block; }
+/* the Barkada's two friends, in the sign-up form */
+.crew { margin: 2px 0 8px; padding: 14px 16px 2px; border: 1px solid rgba(6, 70, 200, 0.14); border-radius: 14px; background: var(--tint); min-width: 0; }
+.crew__title { margin: 0 0 10px; font-size: 0.9rem; font-weight: 650; color: var(--navy); }
+.crew__title small { display: block; margin-top: 2px; font-size: 0.8rem; font-weight: 500; color: var(--ink-3); line-height: 1.4; }
+.crew .field input { background: #fff; }
+.crew .field-row { grid-template-columns: 1fr 1fr; }
+@media (max-width: 560px) { .crew .field-row { grid-template-columns: 1fr; gap: 0; } }
 .consent { display: flex; gap: 10px; align-items: flex-start; font-weight: 500 !important; line-height: 1.45; cursor: pointer; }
 .field .consent input { flex: none; width: 18px; height: 18px; margin: 2px 0 0; padding: 0; border-radius: 4px; -webkit-appearance: auto; appearance: auto; accent-color: var(--core); box-shadow: none; }
 .consent a { color: var(--core); font-weight: 600; }

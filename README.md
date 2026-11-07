@@ -101,12 +101,17 @@ Search `index.html` for `PLACEHOLDER` to find each one.
 
 ## Tickets
 
-Two tickets, in the dark section at the bottom (`#tickets`). Every Register button on the page scrolls there; the ticket buttons open the form.
+Pilot prices from Nov 7. Three tickets, in the dark section at the bottom (`#tickets`). Every Register button on the page scrolls there; the ticket buttons open the form.
 
-- **Full Pass**, ₱1,999 (marked Best value): all four sessions, a locked seat for all four days and the full pre-work bundle.
-- **Single Session**, ₱699 each, with a session picker. Picking 2 shows "All four for ₱601 more." (3 shows how much less the Full Pass is; picking all 4 gets the Full Pass).
+- **Full Pass**, ₱799 (marked Best value): all four sessions, a locked seat for all four days and the full pre-work bundle.
+- **Single Session**, ₱299 each, with a session picker. Picking 1 shows "All four for ₱500 more", 2 shows "₱201 more", 3 shows how much less the Full Pass is; picking all 4 gets the Full Pass.
+- **Barkada**, ₱1,999 for three Full Passes (₱666 each). One person signs up and pays, and adds two friends' names and emails in the form. The slot confirmation and pre-work go to all three (the friends are copied). A Barkada takes 3 seats in every session.
 
-Prices live in three places: the page copy (`index.html`), `PRICE` in `main.js` (what the picker and form show) and `PRICE` in `api/_lib.js` (what people actually pay). The server works out each sign-up's `ticket`, `sessions` and `amount` and saves them (`010_tickets.sql`), so the payment page, emails and Sign-ups page all show that person's amount. Seats are counted per session: a Full Pass takes a seat in all four, a single only in the sessions picked.
+**Upgrades:** a Single Session sign-up can move up to the Full Pass on their own payment page (`/pay`). Not paid yet: the ticket just switches to the Full Pass. Paid already: they pay the difference with the same QR (₱500 after one session, ₱201 after two), upload that receipt, and the team confirms it on Sign-ups, which makes them a Full Pass and emails them (`011_pilot_pricing.sql`: `topup`, `topup_at`). The paid-single confirmation email offers the upgrade too.
+
+The GCash amounts the team will see: ₱299, ₱598, ₱799, ₱1,999, and the ₱500 / ₱201 top-ups. One QR covers all of them; each person's page and email show their own amount.
+
+Prices live in: the page copy (`index.html`), `PRICE` in `main.js` (what the picker and form show), `PRICE` in `api/_lib.js` (what people actually pay), `F` in `scripts/print/kit.mjs` (print files), the promo video (`private/video/video.html`), and Budget → Ticket price in `/admin` (break-even). The server works out each sign-up's `ticket`, `sessions`, `amount` and `friends` and saves them (`010_tickets.sql`, `011_pilot_pricing.sql`), so the payment page, emails and Sign-ups page all show that person's amount. Seats are counted per session: a Full Pass takes a seat in all four, a single only in the sessions picked, a Barkada three in all four.
 
 ## Registration
 

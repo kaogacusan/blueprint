@@ -1,6 +1,6 @@
 /* POST /api/register: the site's sign-up form. Saves the sign-up with a sign-up number and a private
    payment link, and emails the GCash QR. Same checks as the database (migrations 001, 003, 005, 006, 007, 010).
-   The ticket (Full Pass, or Single Session with the sessions they picked) sets the amount here, never in the browser.
+   The ticket (Full Pass, Single Session with the sessions they picked, or Barkada with two friends) sets the amount here, never in the browser.
    A new sign-up gets its payment link back so the site can send them straight to /pay. */
 import { send, body, db, enc, settings, newCode, paymentEmail, ticketFor } from "./_lib.js";
 
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     year: b.year, mobile: str(b.mobile, 40), heard_from: b.heard_from || "", heard_org: b.heard_from === "Student org" ? str(b.heard_org, 120) : "",
     consent: b.consent === true, privacy_version: str(b.privacy_version, 20),
   };
-  const tk = ticketFor(b.ticket, b.sessions);
+  const tk = ticketFor(b.ticket, b.sessions, b.friends, row.email);
   const digits = row.mobile.replace(/\D/g, "");
   if (!tk || !row.name || !row.course || !YEARS.includes(row.year) || !HEARD.includes(row.heard_from) || !row.consent || !row.privacy_version
     || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row.email) || !/^\+?[\d\s-]+$/.test(row.mobile) || digits.length < 10 || digits.length > 13) {
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   try {
     // already signed up: resend the payment email (at most every 10 minutes), say nothing else
     // (never hand back their link here: anyone can type someone else's email)
-    const [old] = await db(`registrations?select=id,name,email,code,status,emailed_at,pay_token,ticket,sessions,amount&email=eq.${enc(row.email)}`);
+    const [old] = await db(`registrations?select=id,name,email,code,status,emailed_at,pay_token,ticket,sessions,amount,friends&email=eq.${enc(row.email)}`);
     if (old) {
       const quiet = old.emailed_at && Date.now() - Date.parse(old.emailed_at) < 10 * 60e3;
       if (old.status === "registered" && old.code && !quiet) {

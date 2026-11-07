@@ -38,23 +38,41 @@ export async function teamName(req) {
   return (await r.json()) || null;
 }
 
-/* ---------- tickets (migration 010). The site shows the same prices (index.html, main.js PRICE). ---------- */
-export const PRICE = { full: 1999, single: 699 };
+/* ---------- tickets (migrations 010, 011). The site shows the same prices (index.html, main.js PRICE). ----------
+   Pilot pricing from Nov 7: Full Pass ₱799, Single Session ₱299 each, Barkada ₱1,999 (three Full Passes, one payer). */
+export const PRICE = { full: 799, single: 299, barkada: 1999 };
 const ALL = [1, 2, 3, 4];
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /* what they picked on the site → what we save, or null if it doesn't add up.
-   Picking all four singles gets them the Full Pass: it's cheaper and comes with the pre-work bundle. */
-export function ticketFor(ticket, sessions) {
-  if (ticket === "full") return { ticket: "full", sessions: ALL, amount: PRICE.full };
+   Picking all four singles gets them the Full Pass: it's cheaper and comes with the pre-work bundle.
+   A Barkada needs two friends with a name and an email each, different from the payer's and each other's. */
+export function ticketFor(ticket, sessions, friends, email = "") {
+  if (ticket === "full") return { ticket: "full", sessions: ALL, amount: PRICE.full, friends: [] };
+  if (ticket === "barkada") {
+    if (!Array.isArray(friends) || friends.length !== 2) return null;
+    const f = friends.map((x) => ({ name: String(x?.name ?? "").trim().slice(0, 120), email: String(x?.email ?? "").trim().toLowerCase().slice(0, 200) }));
+    const emails = new Set([email, ...f.map((x) => x.email)]);
+    if (f.some((x) => !x.name || !EMAIL.test(x.email)) || emails.size !== 3) return null;
+    return { ticket: "barkada", sessions: ALL, amount: PRICE.barkada, friends: f };
+  }
   if (ticket !== "single" || !Array.isArray(sessions) || !sessions.length) return null;
   const s = [...new Set(sessions)].filter((n) => ALL.includes(n)).sort((a, b) => a - b);
   if (s.length !== sessions.length) return null;
   if (s.length === 4) return ticketFor("full");
-  return { ticket: "single", sessions: s, amount: s.length * PRICE.single };
+  return { ticket: "single", sessions: s, amount: s.length * PRICE.single, friends: [] };
 }
+/* a Single Session sign-up can move up to the Full Pass and pay the difference: ₱500 after one session, ₱201 after two.
+   0 = nothing to upgrade (already all four, or three singles, which already cost more than the Full Pass). */
+export const upgradeDue = (r) => (r.ticket === "single" ? Math.max(0, PRICE.full - (r.amount || 0)) : 0);
+/* a Barkada takes three seats in each session, everyone else one */
+export const seatsOf = (r) => (r.ticket === "barkada" ? 3 : 1);
 const and = (a) => (a.length < 2 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a.at(-1)}`);
-/* "the Full Pass (all four sessions)" or "Session 2: Proof on Paper" (titles: { 2: "Proof on Paper" }) */
+const friendNames = (r) => (r.friends || []).map((f) => f.name.trim().split(/\s+/)[0]);
+/* "the Full Pass (all four sessions)", "Session 2: Proof on Paper" (titles: { 2: "Proof on Paper" }),
+   or "the Barkada ticket (all four sessions for you, Ana and Ben)" */
 export const ticketLine = (r, titles = {}) => r.ticket === "single"
   ? and((r.sessions || []).map((n) => `Session ${n}${titles[n] ? `: ${titles[n]}` : ""}`))
+  : r.ticket === "barkada" ? `the Barkada ticket (all four sessions for ${and(["you", ...friendNames(r)])})`
   : "the Full Pass (all four sessions)";
 export async function sessionTitles() {
   return Object.fromEntries((await db("sessions?select=n,title&order=n")).map((x) => [x.n, x.title]));
@@ -66,9 +84,9 @@ export const newCode = () => "BP-" + Array.from(crypto.getRandomValues(new Uint8
 
 /* ---------- email ---------- */
 let mailer;
-async function mail({ to, subject, html, text, attachments }) {
+async function mail({ to, cc, subject, html, text, attachments }) {
   mailer ||= nodemailer.createTransport({ service: "gmail", auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD } });
-  await mailer.sendMail({ from: `Blueprint <${process.env.GMAIL_USER}>`, to, subject, html, text, attachments });
+  await mailer.sendMail({ from: `Blueprint <${process.env.GMAIL_USER}>`, to, cc, subject, html, text, attachments });
 }
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -93,6 +111,8 @@ async function context(r) {
   return {
     price: r.amount || PRICE.full,
     full: r.ticket !== "single",
+    barkada: r.ticket === "barkada",
+    friends: friendNames(r),
     mine,
     what: ticketLine(r, Object.fromEntries(sessions.map((x) => [x.n, x.title]))),
     gcashName: pay.gcashName || "",
@@ -265,22 +285,37 @@ export async function paymentEmail(r) {
   await mail({ to: r.email, subject: `Pay to lock your Blueprint slot (${r.code})`, html, text, attachments: qr ? [qr] : [] });
 }
 
-/* 2. after the team checks the screenshot and clicks Paid: slot confirmation (+ the pre-work bundle for the Full Pass) */
-export async function confirmEmail(r) {
+/* 2. after the team checks the screenshot and clicks Paid: slot confirmation (+ the pre-work bundle for the Full Pass and Barkada).
+   upgrade: the top-up they just paid to move from Single Session to the Full Pass (api/signups.js).
+   A Barkada's two friends are copied, so all three have the schedule and the pre-work. */
+export async function confirmEmail(r, { upgrade = 0 } = {}) {
   const c = await context(r);
+  const due = upgradeDue(r), link = payLink(r);
+  const withFriends = c.barkada && c.friends.length ? `, with ${and(c.friends)}` : "";
+  const got = upgrade
+    ? `We got your ${peso(upgrade)} top-up, so you’re now on the <b>Full Pass</b>: all four Blueprint sessions.`
+    : `We got your ${peso(c.price)}, and you’re in for ${c.full ? `all four Blueprint sessions${esc(withFriends)}` : esc(c.what)}.`;
+  const copied = withFriends ? ` ${esc(and(c.friends))}, you’re copied on this email so you have the schedule too.` : "";
   const html = shell({
-    preview: c.full ? `You're in for all four Blueprint sessions. Here's the schedule and pre-work.` : `You're in for ${c.what}. Here's when and where.`,
-    kicker: "Payment received",
-    title: "Your slot is confirmed",
+    preview: upgrade ? "You're on the Full Pass now. Here's the full schedule and pre-work."
+      : c.full ? `You're in for all four Blueprint sessions${withFriends}. Here's the schedule and pre-work.` : `You're in for ${c.what}. Here's when and where.`,
+    kicker: upgrade ? "Upgrade received" : "Payment received",
+    title: upgrade ? "You’re on the Full Pass" : "Your slot is confirmed",
     body:
-      p(`Hi ${esc(first(r.name))}! We got your ${peso(c.price)}, and you’re in for ${c.full ? "all four Blueprint sessions" : esc(c.what)}.`) +
+      p(`Hi ${esc(first(r.name))}! ${got}${copied}`) +
       chip(r.code, "paid") +
       h(scheduleHead(c)) + schedule(c) +
-      infoBox([["doc", c.full ? "Your pre-work bundle" : `Before ${yours(c)}`, prework(c)], ["laptop", "What to bring", bring(c)]]),
+      infoBox([["doc", c.full ? "Your pre-work bundle" : `Before ${yours(c)}`, prework(c)], ["laptop", "What to bring", bring(c)]]) +
+      (due ? h("Want all four?") +
+        p(`Move up to the <b>Full Pass</b> for <b>${peso(due)} more</b>: every session, and the full pre-work bundle. Do it on your payment page, same QR.`) +
+        btn(link, `Upgrade for ${peso(due)}`) : ""),
     end: "See you there!",
   });
-  const text = `Hi ${first(r.name)}!\n\nYour slot is confirmed. We got your ${peso(c.price)}, and you're in for ${c.full ? "all four Blueprint sessions" : c.what} (sign-up number ${r.code}).\n\n${scheduleHead(c)}:\n${scheduleText(c)}\n\n${preworkText(c)}\n\nWhat to bring: ${bring(c)}\n\nSee you there! ${askText}`;
-  await mail({ to: r.email, subject: `Your Blueprint slot is confirmed (${r.code})`, html, text });
+  const gotText = upgrade ? `We got your ${peso(upgrade)} top-up, so you're now on the Full Pass: all four Blueprint sessions.`
+    : `Your slot is confirmed. We got your ${peso(c.price)}, and you're in for ${c.full ? `all four Blueprint sessions${withFriends}` : c.what}.`;
+  const text = `Hi ${first(r.name)}!\n\n${gotText}${withFriends ? ` ${and(c.friends)}, you're copied on this email so you have the schedule too.` : ""} Sign-up number ${r.code}.\n\n${scheduleHead(c)}:\n${scheduleText(c)}\n\n${preworkText(c)}\n\nWhat to bring: ${bring(c)}${due ? `\n\nWant all four? Move up to the Full Pass for ${peso(due)} more on your payment page: ${link}` : ""}\n\nSee you there! ${askText}`;
+  const cc = c.barkada ? (r.friends || []).map((f) => f.email).filter(Boolean) : undefined;
+  await mail({ to: r.email, cc, subject: upgrade ? `You're on the Blueprint Full Pass (${r.code})` : `Your Blueprint slot is confirmed (${r.code})`, html, text });
 }
 
 /* 3. paid after the seats ran out */

@@ -37,6 +37,10 @@
     .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
     .sent { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--tint); color: var(--ink-2); font-size: 0.92rem; line-height: 1.45; }
     .code { font-family: var(--mono); font-weight: 500; letter-spacing: 0.06em; }
+    /* Single Session → Full Pass (pay.js): before paying it switches the ticket, after paying it's a top-up */
+    .up { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 22px 0 0; padding: 14px 16px; border: 1px solid rgba(6, 70, 200, 0.18); border-radius: var(--radius-sm); background: var(--tint); color: var(--ink-2); font-size: 0.95rem; line-height: 1.45; text-align: left; }
+    .up b { color: var(--navy); }
+    .done .up { margin: 4px 0 18px; }
     @media (max-width: 480px) { .paid .reg, .paid .done { padding: 28px 20px 24px; } }
   </style>
 </head>
@@ -50,7 +54,7 @@
     <p class="help" id="loading">Loading your payment page…</p>
 
     <form class="reg" id="payForm" novalidate hidden>
-      <h1 class="reg__title">Lock your <span class="grad">slot.</span></h1>
+      <h1 class="reg__title" id="payTitle">Lock your <span class="grad">slot.</span></h1>
       <p class="reg__sub" id="hello">Two quick steps.</p>
 
       <div class="step" id="stepPay">
@@ -86,6 +90,12 @@
       <h2 class="reg__title" id="doneTitle">Got it.</h2>
       <p class="reg__sub" id="doneText">We’ll check your receipt and email your slot confirmation within 24 hours.</p>
       <a class="btn btn--ghost btn--block" href="./">Back to Blueprint</a>
+    </div>
+
+    <!-- moved into the form (not paid yet) or under "You're in" (paid) by pay.js -->
+    <div class="up" id="upBox" hidden>
+      <span id="upText"></span>
+      <button class="btn btn--primary btn--sm" type="button" id="upBtn"><span class="btn__label" id="upLabel">Move up to the Full Pass</span><span class="spinner" aria-hidden="true"></span></button>
     </div>
 
     <p class="help">This page is just for you, and you can come back to it anytime from the button in your sign-up email. Lost the email? Register again on the site with the same email and we’ll resend it.</p>

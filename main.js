@@ -184,9 +184,10 @@
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
   /* ---------- Tickets ----------
-     Full Pass, or Single Session with a session picker. Every Register button scrolls to the tickets;
-     a ticket button opens the sign-up form. The server works out the amount again (api/_lib.js PRICE). */
-  const PRICE = { full: 1999, single: 699 };
+     Full Pass, Single Session with a session picker, or Barkada (three Full Passes, one payer). Every Register button
+     scrolls to the tickets; a ticket button opens the sign-up form. The server works out the amount again (api/_lib.js PRICE).
+     Pilot prices from Nov 7. */
+  const PRICE = { full: 799, single: 299, barkada: 1999 };
   const ALL = [1, 2, 3, 4];
   const peso = (n) => `₱${n.toLocaleString("en-PH")}`;
   const tickets = document.getElementById("tickets");
@@ -208,10 +209,10 @@
       : `Get ${n} sessions · ${peso(cost)}`;
     singleBtn.classList.toggle("btn--primary", n > 0);
     singleBtn.classList.toggle("btn--ghost", n === 0);
-    /* two or more singles: the Full Pass is close (or cheaper) */
-    upsell.hidden = n < 2;
+    /* any singles: show how close the Full Pass is (₱500 more after one, ₱201 after two, cheaper after three) */
+    upsell.hidden = n < 1;
     upsell.innerHTML = n === 4 ? `That’s all four, so it’s the Full Pass: <b>${peso(-diff)} less</b>.`
-      : n >= 2 ? `All four for <b>${peso(Math.abs(diff))} ${diff > 0 ? "more" : "less"}</b>. <button class="tix__switch" type="button" data-ticket="full">Get the Full Pass</button>`
+      : n >= 1 ? `All four for <b>${peso(Math.abs(diff))} ${diff > 0 ? "more" : "less"}</b>. <button class="tix__switch" type="button" data-ticket="full">Get the Full Pass</button>`
       : "";
   };
   picker.addEventListener("change", syncSingle);
@@ -243,12 +244,15 @@
 
   /* "Session 2: Proof on Paper" / "Sessions 1 and 3" */
   const sessionsLabel = (s) => (s.length === 1 ? `Session ${s[0]}: ${titleOf(s[0])}` : `Sessions ${s.slice(0, -1).join(", ")} and ${s.at(-1)}`);
-  const amountOf = (t) => (t.ticket === "full" ? PRICE.full : t.sessions.length * PRICE.single);
+  const amountOf = (t) => (t.ticket === "single" ? t.sessions.length * PRICE.single : PRICE[t.ticket]);
+  const crew = document.getElementById("crewFields");
   const paintTicket = () => {
-    const full = ticket.ticket === "full", s = ticket.sessions;
-    document.getElementById("mineName").textContent = full ? "Full Pass" : s.length === 1 ? "Single Session" : `${s.length} single sessions`;
-    document.getElementById("mineMeta").textContent = full ? "All four sessions, Nov 10 to 13"
+    const full = ticket.ticket === "full", s = ticket.sessions, barkada = ticket.ticket === "barkada";
+    document.getElementById("mineName").textContent = barkada ? "Barkada" : full ? "Full Pass" : s.length === 1 ? "Single Session" : `${s.length} single sessions`;
+    document.getElementById("mineMeta").textContent = barkada ? "Three Full Passes: you and two friends, Nov 10 to 13"
+      : full ? "All four sessions, Nov 10 to 13"
       : s.map((n) => `Session ${n}: ${titleOf(n)}, ${dateOf(n)}`).join("\n");
+    crew.hidden = !barkada;
     document.getElementById("minePrice").textContent = peso(amountOf(ticket));
     document.getElementById("regFine").textContent = `No payment yet. Right after this form, you pay ${peso(amountOf(ticket))} by GCash.`;
   };
@@ -274,17 +278,30 @@
       boxes[0].focus();
       return;
     }
-    ticket = b.dataset.ticket === "full" || s.length === 4 ? { ticket: "full", sessions: ALL } : { ticket: "single", sessions: s };
+    ticket = b.dataset.ticket === "barkada" ? { ticket: "barkada", sessions: ALL }
+      : b.dataset.ticket === "full" || s.length === 4 ? { ticket: "full", sessions: ALL } : { ticket: "single", sessions: s };
     openModal();
   });
   modal.addEventListener("click", (e) => {
     if (e.target === modal || e.target.closest("[data-close]")) modal.close();
   });
 
+  /* Barkada: both friends need a name and their own email (not the payer's, not each other's) */
+  const friendEmails = ["f-f1-email", "f-f2-email"].map((id) => document.getElementById(id));
+  const checkFriends = () => {
+    const mine = document.getElementById("f-email").value.trim().toLowerCase();
+    friendEmails.forEach((el, i) => {
+      const v = el.value.trim().toLowerCase(), taken = [mine, ...(i ? [friendEmails[0].value.trim().toLowerCase()] : [])];
+      el.setCustomValidity(v && taken.includes(v) ? "Use their own email." : "");
+    });
+  };
   const validate = () => {
     checkMobile();
+    checkFriends();
+    crew.querySelectorAll("input").forEach((el) => { el.required = !crew.hidden; });
     let ok = true;
     form.querySelectorAll(".field:not(.field--optional)").forEach((f) => {
+      if (f.closest("[hidden]")) return; // the Barkada's friends, when it isn't a Barkada
       const input = f.querySelector("input, select");
       const valid = input.checkValidity() && input.value.trim() !== "";
       f.classList.toggle("is-invalid", !valid);
@@ -298,7 +315,7 @@
   });
 
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
-  const PRIVACY_VERSION = "2026-11-04";
+  const PRIVACY_VERSION = "2026-11-07";
 
   /* the server saves it and emails their payment link (api/register.js). A new sign-up gets the link back. */
   const saveRegistration = async (row) => {
@@ -325,6 +342,7 @@
       website: data.website || "",
       ticket: ticket.ticket,
       sessions: ticket.sessions,
+      ...(ticket.ticket === "barkada" ? { friends: [1, 2].map((n) => ({ name: data[`f${n}_name`].trim(), email: data[`f${n}_email`].trim().toLowerCase() })) } : {}),
     };
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");
@@ -352,7 +370,7 @@
     payNow.hidden = !out.pay;
     if (out.pay) payNow.href = out.pay;
     /* a new sign-up: the amount the server saved. Signed up before: their first ticket stands (it's on their payment page) */
-    document.getElementById("regTicket").textContent = `Blueprint · ${out.pay ? (ticket.ticket === "full" ? "Full Pass" : sessionsLabel(ticket.sessions).replace(/:.*/, "")) : "Sign-up"}`;
+    document.getElementById("regTicket").textContent = `Blueprint · ${out.pay ? (ticket.ticket === "barkada" ? "Barkada of 3" : ticket.ticket === "full" ? "Full Pass" : sessionsLabel(ticket.sessions).replace(/:.*/, "")) : "Sign-up"}`;
     document.getElementById("stepPay").innerHTML = out.pay
       ? `<b>Pay ${peso(out.amount || amountOf(ticket))} by GCash</b> using the QR on your payment page.`
       : "<b>Pay by GCash</b> using the QR on your payment page. It shows your ticket and amount.";
