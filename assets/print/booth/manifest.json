@@ -146,6 +146,118 @@
    ]
   },
   {
+   "id": "backdrop",
+   "piece": "backdrop",
+   "name": "Backdrop tarp",
+   "size": "1.5 m × 1.5 m",
+   "mm": [
+    1500,
+    1500
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "The original layout on the site’s grid. The date strip moved up so the table no longer hides it, and now carries the Barkada deal.",
+     "pdf": "/assets/print/booth/backdrop/v1.pdf",
+     "pdfKb": 73,
+     "jpg": [
+      "/assets/print/booth/backdrop/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v1-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "Shows all 4 sessions and their days. Logo and headline sit at the top, above the seller’s shoulders, so they stay in view.",
+     "pdf": "/assets/print/booth/backdrop/v2.pdf",
+     "pdfKb": 667,
+     "jpg": [
+      "/assets/print/booth/backdrop/v2-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v2-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v2-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "A 37 cm QR to the sign-up page. People can scan it from the aisle, about 3 m away, without walking in.",
+     "pdf": "/assets/print/booth/backdrop/v3.pdf",
+     "pdfKb": 385,
+     "jpg": [
+      "/assets/print/booth/backdrop/v3-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v3-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v3-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white. The navy date strip is now a plain line of text under a thin rule.",
+     "pdf": "/assets/print/booth/backdrop/v4.pdf",
+     "pdfKb": 64,
+     "jpg": [
+      "/assets/print/booth/backdrop/v4-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v4-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v4-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue. Same 4 sessions, but no grid and no box, and every line starts on one edge.",
+     "pdf": "/assets/print/booth/backdrop/v5.pdf",
+     "pdfKb": 62,
+     "jpg": [
+      "/assets/print/booth/backdrop/v5-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v5-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v5-1.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid and the pill. The QR is still 37 cm, so people can scan it from the aisle.",
+     "pdf": "/assets/print/booth/backdrop/v6.pdf",
+     "pdfKb": 48,
+     "jpg": [
+      "/assets/print/booth/backdrop/v6-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/backdrop/v6-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/backdrop/v6-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
    "id": "skirt",
    "piece": "skirt",
    "name": "Table skirt tarp",
@@ -402,6 +514,38 @@
    ]
   },
   {
+   "id": "check",
+   "piece": "check",
+   "name": "Resume check sign",
+   "size": "A4, 210 × 297 mm",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Paper or card stock, colour, printed at a shop. Slides into an A4 acrylic stand.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "The booth’s one activity: a free 60-second resume check. Three steps, and no sign-up needed.",
+     "pdf": "/assets/print/booth/check/v1.pdf",
+     "pdfKb": 301,
+     "jpg": [
+      "/assets/print/booth/check/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/check/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/check/v1-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
    "id": "card",
    "piece": "card",
    "name": "Workshop card",
@@ -531,9 +675,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. The back is the AAA back, with the QR.",
+     "note": "Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. It leads into the free resume check. The back is the AAA back, with the QR.",
      "pdf": "/assets/print/booth/bingo/v1.pdf",
-     "pdfKb": 173,
+     "pdfKb": 178,
      "jpg": [
       "/assets/print/booth/bingo/v1-1.jpg",
       "/assets/print/booth/bingo/v1-2.jpg"
@@ -545,6 +689,137 @@
      "t": [
       "/assets/print/booth/bingo/v1-1.t.jpg",
       "/assets/print/booth/bingo/v1-2.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "flyer",
+   "piece": "flyers",
+   "name": "Flyer",
+   "size": "A6, 105 × 148 mm",
+   "mm": [
+    105,
+    148
+   ],
+   "pages": [
+    "Front",
+    "Back"
+   ],
+   "print": "Paper or card stock, 2 sides. Print 4 on one A4 sheet, then cut.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "The original front, with the site’s line under the headline. The back lists the 4 sessions, all three tickets, and a QR.",
+     "pdf": "/assets/print/booth/flyer/v1.pdf",
+     "pdfKb": 159,
+     "jpg": [
+      "/assets/print/booth/flyer/v1-1.jpg",
+      "/assets/print/booth/flyer/v1-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v1-1.m.jpg",
+      "/assets/print/booth/flyer/v1-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v1-1.t.jpg",
+      "/assets/print/booth/flyer/v1-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v2",
+     "look": "v2",
+     "note": "The site’s two lines with the selection box on the front. Back: sessions, prices, and the web address.",
+     "pdf": "/assets/print/booth/flyer/v2.pdf",
+     "pdfKb": 384,
+     "jpg": [
+      "/assets/print/booth/flyer/v2-1.jpg",
+      "/assets/print/booth/flyer/v2-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v2-1.m.jpg",
+      "/assets/print/booth/flyer/v2-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v2-1.t.jpg",
+      "/assets/print/booth/flyer/v2-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v3",
+     "look": "v3",
+     "note": "Fewest words, biggest type. The back is a QR plus the dates, nothing else.",
+     "pdf": "/assets/print/booth/flyer/v3.pdf",
+     "pdfKb": 117,
+     "jpg": [
+      "/assets/print/booth/flyer/v3-1.jpg",
+      "/assets/print/booth/flyer/v3-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v3-1.m.jpg",
+      "/assets/print/booth/flyer/v3-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v3-1.t.jpg",
+      "/assets/print/booth/flyer/v3-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v4",
+     "look": "v4",
+     "note": "V1 on white. The back keeps the sessions, prices, and QR, with plain numbers and one left edge.",
+     "pdf": "/assets/print/booth/flyer/v4.pdf",
+     "pdfKb": 103,
+     "jpg": [
+      "/assets/print/booth/flyer/v4-1.jpg",
+      "/assets/print/booth/flyer/v4-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v4-1.m.jpg",
+      "/assets/print/booth/flyer/v4-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v4-1.t.jpg",
+      "/assets/print/booth/flyer/v4-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v5",
+     "look": "v5",
+     "note": "V2 on solid blue, both sides. No grid and no box; the web address is plain text.",
+     "pdf": "/assets/print/booth/flyer/v5.pdf",
+     "pdfKb": 107,
+     "jpg": [
+      "/assets/print/booth/flyer/v5-1.jpg",
+      "/assets/print/booth/flyer/v5-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v5-1.m.jpg",
+      "/assets/print/booth/flyer/v5-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v5-1.t.jpg",
+      "/assets/print/booth/flyer/v5-2.t.jpg"
+     ]
+    },
+    {
+     "id": "v6",
+     "look": "v6",
+     "note": "V3 without the grid. One light-blue line on the front; the back is a QR and the dates.",
+     "pdf": "/assets/print/booth/flyer/v6.pdf",
+     "pdfKb": 69,
+     "jpg": [
+      "/assets/print/booth/flyer/v6-1.jpg",
+      "/assets/print/booth/flyer/v6-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyer/v6-1.m.jpg",
+      "/assets/print/booth/flyer/v6-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyer/v6-1.t.jpg",
+      "/assets/print/booth/flyer/v6-2.t.jpg"
      ]
     }
    ]
@@ -657,6 +932,38 @@
      ],
      "t": [
       "/assets/print/booth/signup/v6-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "guide",
+   "piece": "guide",
+   "name": "Resume check guide (team)",
+   "size": "A4, 210 × 297 mm",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Paper, black and white is fine. One for each person on shift. Not for the table.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "How to run the 60-second check: what to say, the 8 most common fixes (the same red flags as the bingo card), the AAA rewrite, and the pitch. A tally at the bottom counts checks per day.",
+     "pdf": "/assets/print/booth/guide/v1.pdf",
+     "pdfKb": 407,
+     "jpg": [
+      "/assets/print/booth/guide/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/guide/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/guide/v1-1.t.jpg"
      ]
     }
    ]

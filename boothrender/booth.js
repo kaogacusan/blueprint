@@ -1,6 +1,6 @@
 // /boothrender — our half of a shared 3 × 3 m tent on Red Brick Road (LAS 50 bazaar).
 // Metres. X = across the tent (our half is x 0 to 1.5, on the left). Z = depth (0 = aisle side, -3 = back). Y = up.
-// Kept lean on purpose: only what the booth needs, plus a header and a skirt so it looks finished.
+// Kept lean on purpose: what the booth needs, the tarps that make it look finished, and one activity (the resume check).
 import { THREE, canvasTexture } from '/render/stage.js';
 import { mountPage } from '/render/page.js';
 import { loadArt, mountAssets } from '/render/assets.js';
@@ -18,6 +18,7 @@ const PU = { x: -0.36, z: 0.36, rot: -0.55, w: 0.6, h: 1.6 };          // standi
 // ---------- the list ----------
 const groups = [
   { code: 'tarp', label: 'Tarps and banner' },
+  { code: 'activity', label: 'The activity: free resume check' },
   { code: 'table', label: 'On the table' },
   { code: 'furniture', label: 'Table and seat' },
   { code: 'kit', label: 'Hanging kit' },
@@ -32,49 +33,62 @@ const pieces = [
     cost: [136, 316], basis: 'assumed',
     note: 'Logo, “Stand out on paper. Stand out in person.”, and what, when, where. Above the bar, not under it: under the bar it hangs to 1.4 m and hits heads. How to hang it is in “Set it up” below.',
     view: { az: 0.18, el: 0.12, tx: 0.75, ty: 2.15, tz: 0, size: 1.4, width: 2.1 } },
-  { id: 'skirt', num: 2, cat: 'tarp', name: 'Table skirt tarp', size: '0.9 m × 0.7 m', where: 'Aisle face of the table, over the tablecloth',
+  { id: 'backdrop', num: 2, cat: 'tarp', name: 'Backdrop tarp', size: '1.5 m × 1.5 m', where: 'Back roof bar, behind the seller, facing the road',
+    cost: [363, 847], basis: 'assumed',
+    note: 'What Blueprint is, in big words, with the dates and the Barkada deal on a navy strip. Hangs from the back bar on zip ties; the bottom-left corner is tied to the back leg and a water bottle weighs down the right one. Bottom edge 0.5 m off the floor. Steps in “Set it up” below.',
+    view: { az: 0.05, el: 0.08, tx: 0.75, ty: 1.25, tz: -2.9, size: 1.9, width: 2.2 } },
+  { id: 'skirt', num: 3, cat: 'tarp', name: 'Table skirt tarp', size: '0.9 m × 0.7 m', where: 'Aisle face of the table, over the tablecloth',
     cost: [102, 237], basis: 'assumed',
     note: 'Logo, what and when, and the prices. Zip-tied to the front table legs through its 4 corner grommets.',
     view: { az: 0.1, el: 0.1, tx: 0.45, ty: 0.45, tz: -0.25, size: 1.1, width: 1.5 } },
-  { id: 'pullup', num: 3, cat: 'tarp', name: 'Standing banner + stand', size: '60 × 160 cm, roll-up or X-stand', where: 'Outside the booth, just left of the front-left tent leg, angled up the road',
+  { id: 'pullup', num: 4, cat: 'tarp', name: 'Standing banner + stand', size: '60 × 160 cm, roll-up or X-stand', where: 'Outside the booth, just left of the front-left tent leg, angled up the road',
     cost: [650, 1300], basis: 'assumed', flag: PRINCE,
     note: `${PRINCE} Prince’s banner is 60 × 160 cm too, so one seller prints both; we also need a stand (theirs is borrowed). Zip-tie the stand’s pole to the tent leg: it tips over in wind. Keep it out of the e-jeep lane. Bring it in every night.`,
     view: { az: -0.3, el: 0.1, tx: -0.3, ty: 0.85, tz: 0.3, size: 1.9, width: 2.2 } },
 
-  { id: 'regqr', num: 4, cat: 'table', name: 'Sign-up QR in an A5 acrylic stand', size: 'A5 print (148 × 210 mm) + A5 stand', where: 'Table, back row, left',
+  { id: 'check', num: 5, cat: 'activity', name: 'Resume check sign in an A4 acrylic stand', size: 'A4 print (210 × 297 mm) + A4 stand', where: 'Table, back row, middle',
+    cost: [170, 260], basis: 'assumed',
+    note: '“Free 60-second resume check. No sign-up needed.” People show their resume or LinkedIn on their phone and leave with one fix. It is a free taste of the workshop, and a crowd at the table pulls in more people.', view: zoomTable },
+  { id: 'guide', num: null, cat: 'activity', name: 'Resume check guide (for the team)', size: 'A4, black and white, one per person on shift', where: 'With the seller. Not on the table',
+    cost: [5, 25], basis: 'assumed',
+    note: 'What to say, the 8 most common fixes (the same red flags as the bingo card), how to rewrite one bullet with AAA, the pitch, and a tally of checks per day.' },
+  { id: 'regqr', num: 6, cat: 'table', name: 'Sign-up QR in an A5 acrylic stand', size: 'A5 print (148 × 210 mm) + A5 stand', where: 'Table, back row, left',
     cost: [139, 159], basis: 'assumed', flag: PRINCE,
     note: `${PRINCE} The stand is Prince’s ₱119 A5 acrylic stand. The QR opens the register form on the site, which takes the payment, so no GCash sign is needed. Test it on 2 phones.`, view: zoomTable },
-  { id: 'card', num: 5, cat: 'table', name: 'Workshop card in an A4 acrylic stand', size: 'A4 print (210 × 297 mm) + A4 stand', where: 'Table, back row, right',
+  { id: 'card', num: 7, cat: 'table', name: 'Workshop card in an A4 acrylic stand', size: 'A4 print (210 × 297 mm) + A4 stand', where: 'Table, back row, right',
     cost: [170, 260], basis: 'assumed',
     note: 'Dates, time, room, and the three tickets: Full Pass ₱799, Single ₱299, Barkada of 3 ₱1,999. Ask the same seller for an A4 stand.', view: zoomTable },
-  { id: 'bingo', num: 6, cat: 'table', name: 'Red Flag Bingo cards + pens', size: 'A6 cards, 2 sides, 4 per A4 sheet. 3 pens in a cup', where: 'Table, front row, left. The floater hands them out too',
+  { id: 'bingo', num: 8, cat: 'table', name: 'Red Flag Bingo cards + pens', size: 'A6 cards, 2 sides, 4 per A4 sheet. 3 pens in a cup', where: 'Table, front row, left',
     cost: [150, 300], basis: 'assumed',
-    note: 'Replaces the AAA try-out cards and the flyers. People tick the resume red flags that are true for them; it starts the chat. The back has the dates, prices, and QR, so the card goes home as the flyer.', view: zoomTable },
-  { id: 'signup', num: 7, cat: 'table', name: 'Sign-up sheet on a clipboard', size: 'A4 sheet: name, email, mobile, course, ticket', where: 'Table, front row, right',
+    note: 'Replaces the AAA try-out cards. People tick the resume red flags that are true for them while they wait; 3 in a row leads into the resume check. The back has the dates, prices, and QR.', view: zoomTable },
+  { id: 'flyers', num: 9, cat: 'table', name: 'Flyers', size: 'A6 (105 × 148 mm), 2 sides, 4 per A4 sheet', where: 'Table, front row, middle. The floater carries a stack',
+    cost: [150, 300], basis: 'assumed',
+    note: 'Front: “A hands-on career workshop.” and the dates. Back: the 4 sessions, all three tickets, and the QR. Hand one over after every resume check.', view: zoomTable },
+  { id: 'signup', num: 10, cat: 'table', name: 'Sign-up sheet on a clipboard', size: 'A4 sheet: name, email, mobile, course, ticket', where: 'Table, front row, right',
     cost: [10, 25], basis: 'assumed',
     note: 'For people who do not want to scan. Same fields as the site form, plus which ticket. Clipboard from home.', view: zoomTable },
 
-  { id: 'cloth', num: 8, cat: 'furniture', name: 'Tablecloth', size: 'About 150 × 230 cm, navy (or black)', where: 'Over the selling table, to the floor on the sides',
+  { id: 'cloth', num: 11, cat: 'furniture', name: 'Tablecloth', size: 'About 150 × 230 cm, navy (or black)', where: 'Over the selling table, to the floor on the sides',
     cost: [105, 379], basis: 'assumed', flag: PRINCE,
     note: `${PRINCE} Prince’s booth wants navy or black too. It makes the table look finished, and hides the legs and the supply box.` },
-  { id: 'table', num: 9, cat: 'furniture', name: 'Selling table', size: '0.9 m × 0.6 m, 0.75 m high (3 ft folding)', where: 'Front left, 0.25 m in from the front',
+  { id: 'table', num: 12, cat: 'furniture', name: 'Selling table', size: '0.9 m × 0.6 m, 0.75 m high (3 ft folding)', where: 'Front left, 0.25 m in from the front',
     basis: 'borrow',
     note: 'No tables or chairs are given (Gelo’s plan, not confirmed). Not a 6 ft table: it eats the walkway.' },
-  { id: 'stool', num: 10, cat: 'furniture', name: 'Stool or chair', size: 'Any, low', where: 'Behind the table. Out when it is quiet',
+  { id: 'stool', num: 13, cat: 'furniture', name: 'Stool or chair', size: 'Any, low', where: 'Behind the table. Out when it is quiet',
     basis: 'home',
     note: 'Keep the walkway on the right clear.' },
-  { id: 'box', num: 11, cat: 'furniture', name: 'Supply box', size: 'About 45 × 30 × 30 cm', where: 'Under the table, hidden by the cloth',
+  { id: 'box', num: 14, cat: 'furniture', name: 'Supply box', size: 'About 45 × 30 × 30 cm', where: 'Under the table, hidden by the cloth',
     basis: 'home',
-    note: 'Spare bingo cards, sign-up sheets, pens, zip ties, tape, scissors, a power bank.' },
+    note: 'Spare flyers and bingo cards, sign-up sheets, the resume check guide, pens, zip ties, tape, scissors, a power bank.' },
   { id: 'phone', num: null, cat: 'furniture', name: 'Phone + power bank', size: 'A phone with the sign-up page open', where: 'With the seller',
     basis: 'home',
     note: 'To sign people up on the spot. Do not count on a socket.' },
 
-  { id: 'kit', num: 12, cat: 'kit', name: 'Hanging kit', size: '100 zip ties (8 in), 5 m rope, duct or masking tape, scissors', where: 'In the supply box',
+  { id: 'kit', num: 15, cat: 'kit', name: 'Hanging kit', size: '100 zip ties (8 in), 5 m rope, duct or masking tape, scissors', where: 'In the supply box',
     cost: [100, 200], basis: 'assumed', flag: PRINCE,
-    note: `${PRINCE} Zip ties for the header, the skirt, and the banner pole; rope for the header’s top corners.` },
+    note: `${PRINCE} Zip ties for the two tarps, the skirt, and the banner pole; rope for the header’s top corners and the backdrop’s bottom corners.` },
 
-  { id: 'tent', num: 13, cat: 'space', name: 'Tent (our half)', size: '3 m × 3 m tent. Our half: 1.5 m × 3 m. Eave 2.0 m or more', where: 'Red Brick Road. Stall not given yet. We take one half',
+  { id: 'tent', num: 16, cat: 'space', name: 'Tent (our half)', size: '3 m × 3 m tent. Our half: 1.5 m × 3 m. Eave 2.0 m or more', where: 'Red Brick Road. Stall not given yet. We take one half',
     basis: 'provided',
     note: 'Two groups share one tent (official). Only the tent is given. Prince’s group paid ₱1,126.76 for theirs; check if we owe the same. Ask for the top leg setting: at a 1.8 m eave, a 5′9″ head has 2 cm.' },
 ];
@@ -108,7 +122,10 @@ function makeTextures() {
   return {
     header: art.tex('header'),
     skirt: art.tex('skirt'),
+    backdrop: art.tex('backdrop'),
     pullup: art.tex('pullup', { w: 512 }),
+    check: art.tex('check', { w: 512 }),
+    flyer: art.tex('flyer', { w: 384 }),       // front of the flyer
     regqr: art.tex('regqr', { w: 512 }),
     card: art.tex('card', { w: 512 }),
     bingo: art.tex('bingo', { w: 384 }),       // front of the card
@@ -214,6 +231,11 @@ async function build(S) {
   S.put('header', header);
   const ropes = [[0.06, EAVE + 0.58, 0.01], [0.32, EAVE + 0.25, -0.3], [1.44, EAVE + 0.58, 0.01], [1.2, EAVE + 0.25, -0.3]];
   S.add(S.lines([ropes[0], ropes[1], ropes[2], ropes[3]], S.lineMat(0x3b4255, 1, 0.5)));
+  // 2 backdrop tarp, hung from the back bar; bottom corners tied to the back legs
+  const backdrop = S.panel({ w: 1.5, h: 1.5, map: tx.backdrop });
+  backdrop.position.set(0.75, EAVE - 0.75, -DEPTH + 0.03);
+  S.put('backdrop', backdrop);
+  S.autoHide(backdrop, [0, 0, -1]);   // seen from behind (its outside), it gets out of the way
 
   // 9 selling table (under the cloth: only the top edge shows)
   const tableTop = S.mat(0xf4f1ea);
@@ -258,8 +280,9 @@ async function build(S) {
     g.position.set(x, TOP, z);
     S.put(id, g);
   };
-  sign('regqr', 0.148, 0.21, 0.2, -0.69, tx.regqr);
-  sign('card', 0.21, 0.297, 0.62, -0.71, tx.card);
+  sign('regqr', 0.148, 0.21, 0.11, -0.69, tx.regqr);
+  sign('check', 0.21, 0.297, 0.41, -0.71, tx.check);
+  sign('card', 0.21, 0.297, 0.73, -0.71, tx.card);
 
   // front row, flat
   const flat = (w, d, x, z, map, y = TOP, t = 0.003) => {
@@ -282,7 +305,15 @@ async function build(S) {
     bingo.add(pen);
   });
   S.put('bingo', bingo);
-  // 7 sign-up sheet on a clipboard
+  // 9 flyers, front row middle
+  const flyers = new THREE.Group();
+  for (let i = 0; i < 6; i++) {
+    const f = flat(0.105, 0.148, 0.4 + i * 0.002, -0.42, tx.flyer, TOP + i * 0.0025, 0.0025);
+    f.rotation.y = -0.08 + i * 0.025;
+    flyers.add(f);
+  }
+  S.put('flyers', flyers);
+  // 10 sign-up sheet on a clipboard
   const clip = new THREE.Group();
   clip.add(S.box(0.53, TOP, -0.6, 0.76, TOP + 0.004, -0.28, S.mat(0x8c6a4a)));
   clip.add(flat(0.21, 0.297, 0.645, -0.435, tx.signup, TOP + 0.004, 0.002));
@@ -315,7 +346,7 @@ async function build(S) {
   S.tag([0.35, 1.86, -1.22], 'seller, 5′9″', { cls: 'tag--soft', layer: 'people' });
   L.people.add(S.person(3.2, 0.9, { h: 1.7 }));
   L.people.add(S.box(3.14, 1.02, 0.98, 3.25, 1.024, 1.13, S.mat(0xffffff), { cast: false }));
-  S.tag([3.2, 1.82, 0.9], 'floater, with bingo cards', { cls: 'tag--soft', layer: 'people' });
+  S.tag([3.2, 1.82, 0.9], 'floater, with flyers', { cls: 'tag--soft', layer: 'people' });
 
   // ---------- size lines ----------
   S.dim([0, 0, 0], [HALF, 0, 0], '1.5 m', { off: [0, 0, 0.32], tick: [0, 0, 1] });
@@ -324,13 +355,15 @@ async function build(S) {
   S.dim([3, 0, -1.5], [3, PEAK, -1.5], 'peak 3.05 m, assumed', { off: [0.75, 0, 0], tick: [1, 0, 0] });
   S.dim([0.05, EAVE + 0.6, 0.02], [1.45, EAVE + 0.6, 0.02], '1.4 m', { off: [0, 0.14, 0], tick: [0, 1, 0] });
   S.dim([1.45, EAVE, 0.02], [1.45, EAVE + 0.6, 0.02], '0.6 m', { off: [0.16, 0, 0], tick: [1, 0, 0] });
+  S.dim([HALF, 0.5, -DEPTH + 0.03], [HALF, EAVE, -DEPTH + 0.03], '1.5 m', { off: [0.2, 0, 0], tick: [1, 0, 0] });
   S.dim([T.x1, 0.02, -2.75], [HALF, 0.02, -2.75], '0.6 m', { tick: [0, 0, 1] });
   S.dim([0, 0.01, 0], [0, 0.01, T.z1], '0.25 m', { off: [0.06, 0, 0], tick: [1, 0, 0] });
 
   // ---------- pins (numbers match the list) ----------
   const pins = {
-    header: [1.25, EAVE + 0.45, 0.04], skirt: [0.78, 0.22, T.z1 + 0.03], pullup: [PU.x + 0.22, 1.35, PU.z + 0.16],
-    regqr: [0.2, TOP + 0.26, -0.69], card: [0.62, TOP + 0.35, -0.71], bingo: [0.1, TOP + 0.05, -0.35], signup: [0.66, TOP + 0.04, -0.31],
+    header: [1.25, EAVE + 0.45, 0.04], backdrop: [1.25, 1.75, -DEPTH + 0.05], skirt: [0.78, 0.22, T.z1 + 0.03], pullup: [PU.x + 0.22, 1.35, PU.z + 0.16],
+    regqr: [0.11, TOP + 0.26, -0.69], check: [0.41, TOP + 0.35, -0.71], card: [0.73, TOP + 0.35, -0.71], bingo: [0.1, TOP + 0.05, -0.35],
+    flyers: [0.42, TOP + 0.05, -0.33], signup: [0.68, TOP + 0.04, -0.31],
     cloth: [0.05, 0.3, T.z1 + 0.02], table: [T.x1, 0.42, T.z0], stool: [0.78, 0.45, -1.3], box: [0.45, 0.2, T.z0 - 0.02],
     kit: [0.06, EAVE + 0.1, 0.02], tent: [3, EAVE - 0.25, 0],
   };

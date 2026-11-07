@@ -18,7 +18,7 @@ Use the server. The 3D will not load if you double-click `index.html`.
 Two extra pages. They are not linked from the landing page.
 
 - http://localhost:5180/venuerender/ — FA Annex 104 set up for the Nov 10 workshop (5:00–7:30 pm, 26 people): 3D room, numbered checklist, run sheet, who stands where, what to check.
-- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth (kept lean: header, table skirt, 60 × 160 cm standing banner, two signs in acrylic stands), numbered parts list, a set-up plan and schedule, and an order list, including the items to order together with Prince's booth.
+- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth (kept lean: header, backdrop and skirt tarps, a 60 × 160 cm standing banner, signs in acrylic stands, flyers, and one activity: a free 60-second resume check), numbered parts list, a set-up plan and schedule, and an order list, including the items to order together with Prince's booth.
 
 Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `?view=top` (or any tab id) to open a view.
 
@@ -36,7 +36,7 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 
 Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in six versions:
 
-- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's standing banner and Red Flag Bingo card are built on it and exist in V1 only.
+- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's standing banner, Red Flag Bingo card, resume check sign, and its team guide are built on it and exist in V1 only.
 - **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
 - **V3 Big type**: fewer words, bigger. Reads from far away.
 - **V4 Clean white**: V1 cleaned up. White paper, navy type, one blue.

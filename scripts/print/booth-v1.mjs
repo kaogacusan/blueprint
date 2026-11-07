@@ -2,13 +2,14 @@
 // (the standing banner and the Red Flag Bingo card).
 //
 // The system, so every piece looks like one set:
-//   Grounds   brand gradient (outward-facing: header, banner, the bingo card's back), navy (table pieces: skirt,
-//             workshop card), white (things people use: the QR sign, the sign-up sheet, the bingo card).
+//   Grounds   brand gradient (outward-facing: header, banner, flyer front, the bingo card's back), navy (table pieces:
+//             skirt, workshop card), paper + the site's grid (backdrop), white (things people use: the QR sign, the
+//             resume-check sign, the sign-up sheet, the bingo card).
 //   Margin    8% of the short edge, the same on all four sides (m()).
 //   Type      Inter display for headlines (.d), Inter 600 for facts, JetBrains Mono caps for small labels (.m).
 //   Colour    one accent per ground: core blue on light, ice/cyan on dark. No gradient text, no extra colours.
 //   QR        on a white tile on dark grounds. Prices always show all three tickets, Barkada included.
-// Sizes in mm. booth.mjs puts these in as V1 of each piece; pullup (the standing banner) and bingo are V1 only.
+// Sizes in mm. booth.mjs puts these in as V1 of each piece; pullup (the standing banner), bingo, check and guide are V1 only.
 import { C, F, word, mark, lockup, qr, grid } from './kit.mjs';
 
 const m = (w, h) => Math.round(Math.min(w, h) * 0.08);
@@ -16,6 +17,7 @@ const at = (x, y, inner, style = '', cls = '') => `<div class="abs ${cls}" style
 const atb = (x, y, inner, style = '', cls = '') => `<div class="abs ${cls}" style="left:${x}mm;bottom:${y}mm;${style}">${inner}</div>`;
 const fill = (bg) => `<div class="fill" style="background:${bg}"></div>`;
 const gradBg = '<div class="fill bg-grad"></div>';
+const paperGrid = (w, h, step, width) => `${fill(C.paper)}${grid(w, h, { step, major: 1000, minor: 0.09, width })}`;
 const navyGrid = (w, h, step, width) => `${fill(C.navy)}${grid(w, h, { step, major: 1000, color: C.ice, minor: 0.06, width })}`;
 const tile = (size, pad, inner) => `<div style="width:${size}mm;height:${size}mm;padding:${pad}mm;background:#fff;border-radius:${(pad * 0.8).toFixed(1)}mm">${inner}</div>`;
 const pill = (text, size, { bg = C.electric, ink = '#fff' } = {}) =>
@@ -55,6 +57,25 @@ export const header = {
     ${at(412, 270, `${F.tagline[0]}<br>${F.tagline[1]}`, 'font-size:68mm;color:#fff;font-weight:600;letter-spacing:-0.03em;line-height:1.12', 'nw')}
     ${at(414, 446, `<span>Career workshop</span><span style="opacity:0.55">·</span><span>${DATES}</span><span style="opacity:0.55">·</span><span>${F.room}</span>`,
       `display:flex;gap:16mm;padding-top:22mm;border-top:1.4mm solid rgba(255,255,255,0.35);font-size:38mm;font-weight:600;letter-spacing:-0.02em;color:${C.ice};width:${1400 - 414 - M - 40}mm`, 'nw')}`;
+  },
+};
+
+// 2 Backdrop tarp, 1.5 × 1.5 m, from the back bar. What Blueprint is, in big words. The navy strip sits above
+// the table line (the table hides the bottom 250 mm), and carries the dates and the Barkada deal.
+export const backdrop = {
+  id: 'v1',
+  note: 'The original layout on the site’s grid. The date strip moved up so the table no longer hides it, and now carries the Barkada deal.',
+  html: () => {
+    const M = 112;
+    return `
+    ${paperGrid(1500, 1500, 100, 1.9)}
+    ${at(M, 96, lockup(140, { markColor: 'grad' }))}
+    ${at(M - 4, 300, `<div style="color:${C.navy}">A hands-on</div><div style="color:${C.core}">career workshop.</div>`, 'font-size:140mm;line-height:0.98', 'd nw')}
+    ${at(M, 640, 'Bring what you’ve already done.<br>Leave with a resume, LinkedIn,<br>and intro that show it.', `font-size:66mm;line-height:1.3;font-weight:600;letter-spacing:-0.03em;color:${C.navy}`, 'nw')}
+    ${at(M, 1010, `<div style="display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 56mm;color:#fff">
+        <div class="nw"><div class="d" style="font-size:84mm">${DATES}</div><div style="font-size:40mm;font-weight:600;letter-spacing:-0.02em;color:${C.ice};margin-top:10mm">${TIME} · ${F.room}</div></div>
+        <div class="nw" style="text-align:right"><div class="m" style="font-size:24mm;color:${C.ice}">Barkada of 3</div><div class="d" style="font-size:84mm;margin-top:8mm">${F.barkada}</div></div></div>`,
+      `width:${1500 - 2 * M}mm;height:230mm;background:${C.navy}`)}`;
   },
 };
 
@@ -108,6 +129,72 @@ export const regqr = {
     ${at(0, 190, F.url, `width:148mm;text-align:center;font-size:3.2mm;color:${C.ink3}`, 'm nw')}`,
 };
 
+// The activity: a free 60-second resume check at the table. The sign, A4, in an acrylic stand.
+const STEPS3 = [['01', 'Open your resume or LinkedIn on your phone.'], ['02', 'We read it the way a recruiter does.'], ['03', 'You leave with one fix you can make today.']];
+export const check = {
+  id: 'check', piece: 'check', name: 'Resume check sign', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'],
+  print: 'Paper or card stock, colour, printed at a shop. Slides into an A4 acrylic stand.',
+  versions: [{
+    id: 'v1',
+    note: 'The booth’s one activity: a free 60-second resume check. Three steps, and no sign-up needed.',
+    html: () => {
+      const M = m(210, 297), W = 210 - 2 * M;   // 17, 176
+      return `
+      ${fill('#fff')}
+      ${at(M, M, lockup(10))}
+      ${at(210 - M - 70, M + 3, 'At this table', `width:70mm;text-align:right;font-size:3.2mm;color:${C.core}`, 'm nw')}
+      ${at(M - 1.5, 52, `Free<br>60-second<br><span style="color:${C.core}">resume check.</span>`, `font-size:31mm;color:${C.navy};line-height:0.98`, 'd nw')}
+      ${at(M, 152, 'Show us your resume or LinkedIn on your phone. We’ll give you one fix you can make today.', `width:${W}mm;font-size:7.2mm;color:${C.ink2};font-weight:600;letter-spacing:-0.02em;line-height:1.3`)}
+      ${at(M, 196, `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;width:${W}mm;padding-top:7mm;border-top:0.4mm solid ${C.line}">
+          ${STEPS3.map(([n, t]) => `<div><div class="m" style="font-size:3.6mm;color:${C.core}">${n}</div><div style="font-size:4.6mm;font-weight:600;color:${C.navy};line-height:1.3;margin-top:2mm;letter-spacing:-0.01em">${t}</div></div>`).join('')}</div>`)}
+      ${atb(M, M, `<span>No sign-up needed.</span><span style="color:${C.ink3};font-weight:500">${DATES} · ${F.room}</span>`,
+        `display:flex;justify-content:space-between;align-items:baseline;width:${W}mm;font-size:5.4mm;font-weight:700;letter-spacing:-0.02em;color:${C.navy};padding-top:5mm;border-top:0.4mm solid ${C.line}`, 'nw')}`;
+    },
+  }],
+};
+
+// The team guide for the resume check, A4 paper. Not for the table: whoever runs the check keeps it.
+const FIXES = [
+  ['Objective statement', 'Cut it. One line on what you do goes at the top instead.'],
+  ['Bullets start with “Responsible for”', 'Start with a verb: led, built, ran, wrote, organised.'],
+  ['No numbers', 'Add one: how many people, how much money, how often.'],
+  ['“Proficient in MS Word”', 'Cut basic tools. List what the role asks for.'],
+  ['Email like xX_gamer_Xx', 'Use the school email or firstname.lastname.'],
+  ['Two pages or more', 'One page. Cut the oldest and the least related first.'],
+  ['LinkedIn headline “Student at ADMU”', 'Say what you do: course, plus the 2 things you want to be known for.'],
+  ['LinkedIn photo cropped from a group pic', 'A clear photo of just you, face filling the frame.'],
+];
+export const guide = {
+  id: 'guide', piece: 'guide', name: 'Resume check guide (team)', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'],
+  print: 'Paper, black and white is fine. One for each person on shift. Not for the table.',
+  versions: [{
+    id: 'v1',
+    note: 'How to run the 60-second check: what to say, the 8 most common fixes (the same red flags as the bingo card), the AAA rewrite, and the pitch. A tally at the bottom counts checks per day.',
+    html: () => {
+      const M = 14, W = 182;
+      const h = (n, t) => `<div style="display:flex;align-items:baseline;gap:3mm;margin:0 0 2.4mm"><span class="m" style="font-size:3mm;color:${C.core}">${n}</span><span class="d" style="font-size:5.4mm;color:${C.navy}">${t}</span></div>`;
+      const say = (t) => `<div style="font-size:3.8mm;line-height:1.4;color:${C.ink};font-weight:500;padding:2.4mm 3.4mm;background:${C.paper};border-left:0.8mm solid ${C.core};margin-bottom:5mm">“${t}”</div>`;
+      return `
+      ${fill('#fff')}
+      ${at(M, M, lockup(8))}
+      ${at(210 - M - 90, M + 1.5, 'For the team · not for the table', `width:90mm;text-align:right;font-size:2.7mm;color:${C.ink3}`, 'm nw')}
+      ${at(M - 0.5, 28, 'Resume check. <span style="color:' + C.core + '">60 seconds.</span>', `font-size:11mm;color:${C.navy}`, 'd nw')}
+      ${at(M, 42, 'One fix, one rewritten bullet, then the pitch. Keep it friendly and quick.', `font-size:3.8mm;color:${C.ink2};font-weight:500`, 'nw')}
+      ${at(M, 54, `
+        ${h('01', 'Ask')}${say('Want a free 60-second resume check? Open your resume or your LinkedIn on your phone.')}
+        ${h('02', 'Read the top third, about 10 seconds')}
+        <div style="font-size:3.6mm;color:${C.ink2};line-height:1.4;margin:-1mm 0 5mm">That is about how long a recruiter looks first. Then give <b>one</b> fix, the first one that applies:</div>
+        <div style="display:grid;grid-template-columns:62mm 1fr;border-top:0.3mm solid ${C.line};margin-bottom:5mm">
+          ${FIXES.map(([a, b]) => `<div style="font-size:3.4mm;font-weight:650;color:${C.navy};padding:1.8mm 3mm 1.8mm 0;border-bottom:0.3mm solid ${C.line}">${a}</div><div style="font-size:3.4mm;color:${C.ink2};padding:1.8mm 0;border-bottom:0.3mm solid ${C.line}">${b}</div>`).join('')}</div>
+        ${h('03', 'Rewrite one bullet together, with AAA')}
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin-bottom:5mm">${F.aaa.map(([a, b]) => `<div style="border:0.3mm solid ${C.line};border-radius:1.6mm;padding:2.4mm 3mm"><div class="d" style="font-size:4.2mm;color:${C.core}">${a}</div><div style="font-size:3.3mm;color:${C.ink2};margin-top:1mm">${b}</div></div>`).join('')}</div>
+        ${h('04', 'Close')}${say(`That was one bullet in a minute. In 4 sessions we do your whole resume, LinkedIn, and intro. Here’s a flyer, and the QR is right here. With friends? Barkada of 3 is ${F.barkada}, ${'₱666'} each.`)}`, `width:${W}mm`)}
+      ${atb(M, M, `<div class="m" style="font-size:2.8mm;color:${C.ink3};margin-bottom:2mm">Tally: one line per check</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);border:0.3mm solid ${C.line};border-radius:1.6mm">${['Mon 9', 'Tue 10', 'Wed 11', 'Thu 12', 'Fri 13'].map((d, i) => `<div style="height:16mm;padding:1.6mm 2.4mm;${i ? `border-left:0.3mm solid ${C.line}` : ''}"><span class="m" style="font-size:2.6mm;color:${C.ink3}">${d}</span></div>`).join('')}</div>`, `width:${W}mm`)}`;
+    },
+  }],
+};
+
 // 6 Workshop card, A4, in an acrylic stand. Dates big, then when and where, then the three tickets.
 export const card = {
   id: 'v1',
@@ -142,7 +229,7 @@ export const bingo = {
   print: 'Card stock, 2 sides. Print 4 on one A4 sheet, then cut. Pens on the table so people can tick boxes.',
   versions: [{
     id: 'v1',
-    note: 'Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. The back is the AAA back, with the QR.',
+    note: 'Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. It leads into the free resume check. The back is the AAA back, with the QR.',
     html: async (i) => {
       const M = m(105, 148);   // 8
       return i === 0 ? `
@@ -154,7 +241,7 @@ export const bingo = {
       ${at(M, 39, `<div style="display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:26.5mm;gap:1.5mm;width:${105 - 2 * M}mm">
         ${SQUARES.map((s) => s ? `<div style="border:0.35mm solid rgba(6,26,77,0.22);border-radius:1.4mm;display:flex;align-items:center;justify-content:center;text-align:center;padding:1.8mm;font-size:2.95mm;line-height:1.22;font-weight:600;color:${C.navy};letter-spacing:-0.01em">${s}</div>`
           : `<div style="background:${C.navy};border-radius:1.4mm;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:1.6mm"><div class="m" style="font-size:2.4mm;color:${C.cyan}">Free space</div><div style="font-size:3.1mm;font-weight:700;line-height:1.2;margin-top:1mm">No LinkedIn yet</div></div>`).join('')}</div>`)}
-      ${atb(M, M - 1, `<span>3 in a row? We fix all of it<br>in 4 sessions. Ask us.</span>${word(4.4, C.navy)}`,
+      ${atb(M, M - 1, `<span>3 in a row? Get a free 60-second<br>resume check at our table.</span>${word(4.4, C.navy)}`,
         `display:flex;justify-content:space-between;align-items:flex-end;width:${105 - 2 * M}mm;font-size:3.4mm;font-weight:650;letter-spacing:-0.015em;line-height:1.3;color:${C.navy}`, 'nw')}` : `
       ${gradBg}
       ${at(M + 1, 12, word(13, '#fff'))}
@@ -188,5 +275,27 @@ export const signup = {
       ${at(M, 68, head + body, 'width:182mm')}
       ${at(M, 270, `Ticket: Full (${F.full}), Single + which session (${F.single} each), or Barkada (${F.barkada} for 3).`, `font-size:3.2mm;color:${C.ink2};font-weight:500`, 'nw')}
       ${at(M, 278, F.url, `font-size:2.8mm;color:${C.ink3}`, 'm nw')}`;
+  },
+};
+
+// 11 Flyer, A6, 2 sides. The floater hands these out.
+export const flyer = {
+  id: 'v1',
+  note: 'The original front, with the site’s line under the headline. The back lists the 4 sessions, all three tickets, and a QR.',
+  html: async (i) => {
+    const M = m(105, 148), W = 105 - 2 * M;   // 8, 89
+    return i === 0 ? `
+    ${gradBg}
+    ${at(M + 1, 12, word(14, '#fff'))}
+    ${at(M + 0.4, 44, 'A hands-on<br>career<br>workshop.', 'font-size:14mm;color:#fff;line-height:1.04', 'd nw')}
+    ${at(M + 1, 94, `${F.tagline[0]}<br>${F.tagline[1]}`, `font-size:4.6mm;color:${C.ice};font-weight:600;letter-spacing:-0.02em;line-height:1.3`, 'nw')}
+    ${atb(M + 1, M + 2, `${DATES} · ${F.days}<br>${F.room}`, `font-size:6mm;color:#fff;font-weight:650;letter-spacing:-0.02em;line-height:1.25;padding-top:3.6mm;border-top:0.35mm solid rgba(255,255,255,0.4);width:${W - 2}mm`, 'nw')}` : `
+    ${fill('#fff')}
+    ${at(M, M + 1, '4 sessions.', `font-size:9.4mm;color:${C.navy}`, 'd nw')}
+    ${at(M, 22, sessions(W, 4.4, false))}
+    ${at(M, 64, `${F.days} · ${TIME} · ${F.room}`, `font-size:3.3mm;font-weight:650;color:${C.navy};letter-spacing:-0.01em`, 'nw')}
+    ${at(M, 73, tickets(W, 6.6, false), `padding-top:3mm;border-top:0.3mm solid ${C.line}`)}
+    ${atb(M, M, `${await qr(undefined, 30)}<div><div class="d nw" style="font-size:7mm;color:${C.core};line-height:1">Scan to<br>sign up.</div><div class="m nw" style="font-size:2.3mm;color:${C.ink3};margin-top:2.4mm">${F.url}</div></div>`,
+      'display:flex;align-items:flex-end;gap:5mm')}`;
   },
 };

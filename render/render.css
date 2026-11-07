@@ -429,3 +429,4 @@ table.shop { min-width: 940px; }
 .steps ul { margin: 6px 0 0; padding-left: 1.1em; }
 .steps ul li { margin: 4px 0; }
 table.shop--shared { min-width: 640px; }
+.steps--tight { margin: 0; }
