@@ -18,14 +18,15 @@ Use the server. The 3D will not load if you double-click `index.html`.
 Two extra pages. They are not linked from the landing page.
 
 - http://localhost:5180/venuerender/ — FA Annex 104 set up for the Nov 10 workshop (5:00–7:30 pm, 26 people): 3D room, numbered checklist, run sheet, who stands where, what to check.
-- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth, numbered parts list, costs.
+- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth (pull-up banner out front, cheap decor under the “Glow-up” toggle), numbered parts list, costs, and an order list with a quote and link per item.
 
 Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `?view=top` (or any tab id) to open a view.
 
 | File | What it is |
 |---|---|
 | `venuerender/venue.js` | The room: sizes at the top (`W`, `D`, `H`), the checklist, run sheet, posts, and the 3D model. **The room size is an estimate.** Change `W`, `D`, `H` after you measure. |
-| `boothrender/booth.js` | The booth: sizes at the top, the parts list with costs, and the 3D model. Tarp prices use ₱15–20 per sq ft (from Gelo's plan). |
+| `boothrender/booth.js` | The booth: sizes at the top, the parts list with costs, and the 3D model. Costs come from `shop.js` when it has a quote; otherwise they are guesses. |
+| `boothrender/shop.js` | The order list: per item, what to get, where (walk-in or link), price, and a backup. Prices as seen on the date in `asOf`. |
 | `render/stage.js` | Shared 3D engine (camera, pins, size lines, highlight). |
 | `render/page.js` | Shared page wiring (tabs, sliders, toggles, list, table). |
 | `render/render.css` | Shared styles for both pages. |
@@ -35,7 +36,7 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 
 Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in six versions:
 
-- **V1 As rendered**: the design on the model, with the facts fixed to match the site.
+- **V1 As rendered** (venue) / **V1 Campaign** (booth): on the booth, V1 is the campaign look in `scripts/print/booth-v1.mjs`: “Delulu is not a career plan. Blueprint is.”, red-pen roast notes (Caveat font), yellow freebie stickers. The booth's pull-up banner, Red Flag Bingo card, candy sign and photo frame exist in V1 only.
 - **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
 - **V3 Big type**: fewer words, bigger. Reads from far away.
 - **V4 Clean white**: V1 cleaned up. White paper, navy type, one blue.

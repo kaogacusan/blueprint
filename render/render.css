@@ -396,3 +396,19 @@ table.mat { width: 100%; border-collapse: collapse; font-size: 0.92rem; min-widt
   .run li { grid-template-columns: 1fr; gap: 2px; }
   .run--posts li { grid-template-columns: 40px 1fr; gap: 10px; }
 }
+
+/* booth order list */
+.rhero__btns { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.shop__plan { margin: 0 0 22px; padding-left: 1.3em; color: var(--ink-2); line-height: 1.55; max-width: 72ch; }
+.shop__plan:empty { display: none; }
+.shop__plan li { margin: 4px 0; }
+table.shop { min-width: 940px; }
+.shop td.shop__o { min-width: 230px; }
+.shop td.shop__o > * { display: block; }
+.shop td.shop__o b { font-weight: 650; color: var(--ink); }
+.shop td.shop__o a { color: var(--core); font-weight: 600; text-decoration: none; }
+.shop td.shop__o a:hover { text-decoration: underline; }
+.shop .shop__price { color: var(--core); font-weight: 700; margin-top: 2px; }
+.shop .shop__price small { color: var(--ink-3); font-weight: 500; }
+.shop .shop__eta { color: var(--ink-2); font-size: 0.86rem; }
+.shop .shop__note { color: var(--ink-3); font-size: 0.82rem; margin-top: 2px; }

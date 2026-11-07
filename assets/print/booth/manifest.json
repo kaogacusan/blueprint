@@ -3,8 +3,8 @@
  "looks": [
   {
    "id": "v1",
-   "label": "As rendered",
-   "about": "The design on the 3D model now. Facts fixed to match the site."
+   "label": "Campaign",
+   "about": "The pick. “Delulu is not a career plan. Blueprint is.” Red-pen roast notes, yellow freebie stickers, Red Flag Bingo, a photo frame."
   },
   {
    "id": "v2",
@@ -50,9 +50,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same layout as the model: logo on the left, the two lines on the right.",
+     "note": "Logo, what it is, when, and a free-candy sticker that gives people a reason to walk over now.",
      "pdf": "/assets/print/booth/header/v1.pdf",
-     "pdfKb": 22,
+     "pdfKb": 61,
      "jpg": [
       "/assets/print/booth/header/v1-1.jpg"
      ],
@@ -162,9 +162,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same layout as the model: what Blueprint is, in big words, with the date strip at the bottom.",
+     "note": "The resume roast. A bad resume with red-pen notes on the right, where nobody stands in front of it. The offer and dates sit above the table line.",
      "pdf": "/assets/print/booth/backdrop/v1.pdf",
-     "pdfKb": 64,
+     "pdfKb": 577,
      "jpg": [
       "/assets/print/booth/backdrop/v1-1.jpg"
      ],
@@ -274,9 +274,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same as the model: logo and what it is. The date is now Nov 10 to 13, on its own line so the text stays 6 cm tall.",
+     "note": "Navy, to match a navy tablecloth. Says the two things that make people stop at a table: free candy, and a game.",
      "pdf": "/assets/print/booth/skirt/v1.pdf",
-     "pdfKb": 23,
+     "pdfKb": 48,
      "jpg": [
       "/assets/print/booth/skirt/v1-1.jpg"
      ],
@@ -306,9 +306,9 @@
     {
      "id": "v3",
      "look": "v3",
-     "note": "Shows the price, like the site does now. People at the aisle know the cost before they ask.",
+     "note": "Shows the prices, like the site does now. People at the aisle know the cost before they ask.",
      "pdf": "/assets/print/booth/skirt/v3.pdf",
-     "pdfKb": 375,
+     "pdfKb": 383,
      "jpg": [
       "/assets/print/booth/skirt/v3-1.jpg"
      ],
@@ -354,9 +354,9 @@
     {
      "id": "v6",
      "look": "v6",
-     "note": "V3 without the grid. One big price in light blue, and one plain line under it.",
+     "note": "V3 without the grid. One big price in light blue, and the other two in plain lines under it.",
      "pdf": "/assets/print/booth/skirt/v6.pdf",
-     "pdfKb": 29,
+     "pdfKb": 32,
      "jpg": [
       "/assets/print/booth/skirt/v6-1.jpg"
      ],
@@ -370,113 +370,33 @@
    ]
   },
   {
-   "id": "banner",
-   "piece": "banner",
-   "name": "Roaming banner",
-   "size": "2 ft × 3 ft",
+   "id": "pullup",
+   "piece": "pullup",
+   "name": "Pull-up banner",
+   "size": "2.75 × 6.5 ft (84 × 198 cm), roll-up stand",
    "mm": [
-    610,
-    914
+    840,
+    1980
    ],
    "pages": [
     "Front"
    ],
-   "print": "Tarp. Print at 100 dpi or more. Ask for pole pockets on the left and right edges.",
+   "print": "Roll-up (pull-up) banner, 2.75 × 6.5 ft, with stand and bag: the size InterMatrix and Jincos stock. For an 80 × 200 cm stand, ask the shop to fit to height. The bottom 15 cm sits in the stand.",
    "versions": [
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same as the model. Dates and time fixed. All text is now 6 cm or more, so it reads across the road.",
-     "pdf": "/assets/print/booth/banner/v1.pdf",
-     "pdfKb": 55,
+     "note": "The hook up top so it reads over heads, the punchline on yellow, the offer, a big QR, then where to go.",
+     "pdf": "/assets/print/booth/pullup/v1.pdf",
+     "pdfKb": 130,
      "jpg": [
-      "/assets/print/booth/banner/v1-1.jpg"
+      "/assets/print/booth/pullup/v1-1.jpg"
      ],
      "m": [
-      "/assets/print/booth/banner/v1-1.m.jpg"
+      "/assets/print/booth/pullup/v1-1.m.jpg"
      ],
      "t": [
-      "/assets/print/booth/banner/v1-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v2",
-     "look": "v2",
-     "note": "Says where to go: our booth on Red Brick Road. The roamer points the way; the banner backs it up.",
-     "pdf": "/assets/print/booth/banner/v2.pdf",
-     "pdfKb": 385,
-     "jpg": [
-      "/assets/print/booth/banner/v2-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/banner/v2-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/banner/v2-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v3",
-     "look": "v3",
-     "note": "A big QR, so people can sign up on the spot, even before they reach the booth.",
-     "pdf": "/assets/print/booth/banner/v3.pdf",
-     "pdfKb": 374,
-     "jpg": [
-      "/assets/print/booth/banner/v3-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/banner/v3-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/banner/v3-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v4",
-     "look": "v4",
-     "note": "V1 on white. The white box around “Sign up at our booth” is gone; it is now the one blue line.",
-     "pdf": "/assets/print/booth/banner/v4.pdf",
-     "pdfKb": 54,
-     "jpg": [
-      "/assets/print/booth/banner/v4-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/banner/v4-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/banner/v4-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v5",
-     "look": "v5",
-     "note": "V2 on solid blue, so it stands out in a crowd. No grid and no box.",
-     "pdf": "/assets/print/booth/banner/v5.pdf",
-     "pdfKb": 48,
-     "jpg": [
-      "/assets/print/booth/banner/v5-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/banner/v5-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/banner/v5-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v6",
-     "look": "v6",
-     "note": "V3 without the grid. The QR tile now spans the full width, edge to edge with the words.",
-     "pdf": "/assets/print/booth/banner/v6.pdf",
-     "pdfKb": 24,
-     "jpg": [
-      "/assets/print/booth/banner/v6-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/banner/v6-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/banner/v6-1.t.jpg"
+      "/assets/print/booth/pullup/v1-1.t.jpg"
      ]
     }
    ]
@@ -498,9 +418,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same as the model, with a real QR to the sign-up section of the site. Test it on 2 phones before you print.",
+     "note": "One job: get the scan. A big QR, a nudge, and a joke that says how quick it is.",
      "pdf": "/assets/print/booth/regqr/v1.pdf",
-     "pdfKb": 23,
+     "pdfKb": 228,
      "jpg": [
       "/assets/print/booth/regqr/v1-1.jpg"
      ],
@@ -610,9 +530,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same as the model, with the right facts: Nov 10 to 13, 5:30 to 7:00 PM, and “Limited seats” like the site.",
+     "note": "The 4 sessions in plain words, when and where, and all three tickets. The Full Pass shows it works out to ₱200 a session.",
      "pdf": "/assets/print/booth/card/v1.pdf",
-     "pdfKb": 46,
+     "pdfKb": 136,
      "jpg": [
       "/assets/print/booth/card/v1-1.jpg"
      ],
@@ -642,9 +562,9 @@
     {
      "id": "v3",
      "look": "v3",
-     "note": "Shows the two tickets and the deadline. Big prices answer the first question people ask.",
+     "note": "Shows the three tickets and the deadline. Big prices answer the first question people ask.",
      "pdf": "/assets/print/booth/card/v3.pdf",
-     "pdfKb": 312,
+     "pdfKb": 59,
      "jpg": [
       "/assets/print/booth/card/v3-1.jpg"
      ],
@@ -690,9 +610,9 @@
     {
      "id": "v6",
      "look": "v6",
-     "note": "V3 without the grid and the pill. Two big prices, and the deadline as plain text.",
+     "note": "V3 without the grid and the pill. Three big prices, and the deadline as plain text.",
      "pdf": "/assets/print/booth/card/v6.pdf",
-     "pdfKb": 54,
+     "pdfKb": 56,
      "jpg": [
       "/assets/print/booth/card/v6-1.jpg"
      ],
@@ -722,9 +642,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same as the model. The QR is a stand-in: put the QR from our GCash app in before you print.",
+     "note": "Pay with GCash, big. Put our real QR and account name in before printing.",
      "pdf": "/assets/print/booth/gcash/v1.pdf",
-     "pdfKb": 36,
+     "pdfKb": 238,
      "jpg": [
       "/assets/print/booth/gcash/v1-1.jpg"
      ],
@@ -738,9 +658,9 @@
     {
      "id": "v2",
      "look": "v2",
-     "note": "Adds the two prices, so the buyer knows what to send. The QR is a stand-in.",
+     "note": "Adds the three prices, so the buyer knows what to send. The QR is a stand-in.",
      "pdf": "/assets/print/booth/gcash/v2.pdf",
-     "pdfKb": 308,
+     "pdfKb": 309,
      "jpg": [
       "/assets/print/booth/gcash/v2-1.jpg"
      ],
@@ -786,9 +706,9 @@
     {
      "id": "v5",
      "look": "v5",
-     "note": "V2 on solid blue, with the two prices in plain type. The QR is a stand-in.",
+     "note": "V2 on solid blue, with the three prices in plain type. The QR is a stand-in.",
      "pdf": "/assets/print/booth/gcash/v5.pdf",
-     "pdfKb": 55,
+     "pdfKb": 66,
      "jpg": [
       "/assets/print/booth/gcash/v5-1.jpg"
      ],
@@ -818,9 +738,9 @@
    ]
   },
   {
-   "id": "aaa",
-   "piece": "aaa",
-   "name": "AAA try-out card",
+   "id": "bingo",
+   "piece": "bingo",
+   "name": "Red Flag Bingo card",
    "size": "A6, 105 × 148 mm",
    "mm": [
     105,
@@ -830,120 +750,25 @@
     "Front",
     "Back"
    ],
-   "print": "Card stock, 2 sides. Print 4 on one A4 sheet, then cut.",
+   "print": "Card stock, 2 sides. Print 4 on one A4 sheet, then cut. Pens on the table so people can tick boxes.",
    "versions": [
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same as the model. Each A now has its prompt from the site and two lines to write on. The back says when and where.",
-     "pdf": "/assets/print/booth/aaa/v1.pdf",
-     "pdfKb": 83,
+     "note": "People tick the resume red flags that are true for them. 3 in a row gets candy. The back sends them to sign up.",
+     "pdf": "/assets/print/booth/bingo/v1.pdf",
+     "pdfKb": 196,
      "jpg": [
-      "/assets/print/booth/aaa/v1-1.jpg",
-      "/assets/print/booth/aaa/v1-2.jpg"
+      "/assets/print/booth/bingo/v1-1.jpg",
+      "/assets/print/booth/bingo/v1-2.jpg"
      ],
      "m": [
-      "/assets/print/booth/aaa/v1-1.m.jpg",
-      "/assets/print/booth/aaa/v1-2.m.jpg"
+      "/assets/print/booth/bingo/v1-1.m.jpg",
+      "/assets/print/booth/bingo/v1-2.m.jpg"
      ],
      "t": [
-      "/assets/print/booth/aaa/v1-1.t.jpg",
-      "/assets/print/booth/aaa/v1-2.t.jpg"
-     ]
-    },
-    {
-     "id": "v2",
-     "look": "v2",
-     "note": "The grid doubles as writing lines. The back has the site’s two lines and the dates.",
-     "pdf": "/assets/print/booth/aaa/v2.pdf",
-     "pdfKb": 332,
-     "jpg": [
-      "/assets/print/booth/aaa/v2-1.jpg",
-      "/assets/print/booth/aaa/v2-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/aaa/v2-1.m.jpg",
-      "/assets/print/booth/aaa/v2-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/aaa/v2-1.t.jpg",
-      "/assets/print/booth/aaa/v2-2.t.jpg"
-     ]
-    },
-    {
-     "id": "v3",
-     "look": "v3",
-     "note": "Bigger words to write under. The back is one big QR, so the card leads straight to sign-up.",
-     "pdf": "/assets/print/booth/aaa/v3.pdf",
-     "pdfKb": 120,
-     "jpg": [
-      "/assets/print/booth/aaa/v3-1.jpg",
-      "/assets/print/booth/aaa/v3-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/aaa/v3-1.m.jpg",
-      "/assets/print/booth/aaa/v3-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/aaa/v3-1.t.jpg",
-      "/assets/print/booth/aaa/v3-2.t.jpg"
-     ]
-    },
-    {
-     "id": "v4",
-     "look": "v4",
-     "note": "V1 on white with no blue band. The back is white too, with one blue line.",
-     "pdf": "/assets/print/booth/aaa/v4.pdf",
-     "pdfKb": 89,
-     "jpg": [
-      "/assets/print/booth/aaa/v4-1.jpg",
-      "/assets/print/booth/aaa/v4-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/aaa/v4-1.m.jpg",
-      "/assets/print/booth/aaa/v4-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/aaa/v4-1.t.jpg",
-      "/assets/print/booth/aaa/v4-2.t.jpg"
-     ]
-    },
-    {
-     "id": "v5",
-     "look": "v5",
-     "note": "V2 with a solid blue band and white lines to write on. The back is solid blue.",
-     "pdf": "/assets/print/booth/aaa/v5.pdf",
-     "pdfKb": 95,
-     "jpg": [
-      "/assets/print/booth/aaa/v5-1.jpg",
-      "/assets/print/booth/aaa/v5-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/aaa/v5-1.m.jpg",
-      "/assets/print/booth/aaa/v5-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/aaa/v5-1.t.jpg",
-      "/assets/print/booth/aaa/v5-2.t.jpg"
-     ]
-    },
-    {
-     "id": "v6",
-     "look": "v6",
-     "note": "V3 without the grid. A navy band on top, white lines to write on, and a QR back.",
-     "pdf": "/assets/print/booth/aaa/v6.pdf",
-     "pdfKb": 79,
-     "jpg": [
-      "/assets/print/booth/aaa/v6-1.jpg",
-      "/assets/print/booth/aaa/v6-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/aaa/v6-1.m.jpg",
-      "/assets/print/booth/aaa/v6-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/aaa/v6-1.t.jpg",
-      "/assets/print/booth/aaa/v6-2.t.jpg"
+      "/assets/print/booth/bingo/v1-1.t.jpg",
+      "/assets/print/booth/bingo/v1-2.t.jpg"
      ]
     }
    ]
@@ -965,9 +790,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same as the model. The columns now match the site form: name, email, mobile, course and year.",
+     "note": "Same fields as the site form, plus which ticket. A line at the bottom says what happens next.",
      "pdf": "/assets/print/booth/signup/v1.pdf",
-     "pdfKb": 30,
+     "pdfKb": 266,
      "jpg": [
       "/assets/print/booth/signup/v1-1.jpg"
      ],
@@ -1078,9 +903,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Same front as the model, dates fixed. The back lists the 4 sessions, the prices, and a QR to sign up.",
+     "note": "Front: a joke people screenshot and send to a friend. Back: the 4 sessions, all three tickets, and the QR.",
      "pdf": "/assets/print/booth/flyer/v1.pdf",
-     "pdfKb": 133,
+     "pdfKb": 184,
      "jpg": [
       "/assets/print/booth/flyer/v1-1.jpg",
       "/assets/print/booth/flyer/v1-2.jpg"
@@ -1099,7 +924,7 @@
      "look": "v2",
      "note": "The site’s two lines with the selection box on the front. Back: sessions, prices, and the web address.",
      "pdf": "/assets/print/booth/flyer/v2.pdf",
-     "pdfKb": 385,
+     "pdfKb": 384,
      "jpg": [
       "/assets/print/booth/flyer/v2-1.jpg",
       "/assets/print/booth/flyer/v2-2.jpg"
@@ -1156,7 +981,7 @@
      "look": "v5",
      "note": "V2 on solid blue, both sides. No grid and no box; the web address is plain text.",
      "pdf": "/assets/print/booth/flyer/v5.pdf",
-     "pdfKb": 104,
+     "pdfKb": 107,
      "jpg": [
       "/assets/print/booth/flyer/v5-1.jpg",
       "/assets/print/booth/flyer/v5-2.jpg"
@@ -1187,6 +1012,70 @@
      "t": [
       "/assets/print/booth/flyer/v6-1.t.jpg",
       "/assets/print/booth/flyer/v6-2.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "candy",
+   "piece": "candy",
+   "name": "Candy jar sign",
+   "size": "A6, 105 × 148 mm",
+   "mm": [
+    105,
+    148
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Card stock, 1 side. Print 2 (one spare). Tape it to the jar or lean it on the jar.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Yellow, like every freebie on the booth. Free candy is the oldest booth trick because it works.",
+     "pdf": "/assets/print/booth/candy/v1.pdf",
+     "pdfKb": 36,
+     "jpg": [
+      "/assets/print/booth/candy/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/candy/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/candy/v1-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "frame",
+   "piece": "frame",
+   "name": "Photo frame prop",
+   "size": "60 × 80 cm, 5 mm sintra, circle cut out",
+   "mm": [
+    600,
+    800
+   ],
+   "pages": [
+    "Front"
+   ],
+   "print": "Cheap way (about ₱150): print it on tarp, glue it flat onto a big carton from the supermarket, and cut the circle with a cutter. Nicer way (about ₱1,100): 5 mm sintra; ask the shop to cut out the circle along the magenta dashed line (38 cm across).",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "A fake profile page with the photo circle cut out. People put their face in it. The ring says #NOTDELULU, like the open-to-work ring.",
+     "pdf": "/assets/print/booth/frame/v1.pdf",
+     "pdfKb": 116,
+     "jpg": [
+      "/assets/print/booth/frame/v1-1.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/frame/v1-1.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/frame/v1-1.t.jpg"
      ]
     }
    ]

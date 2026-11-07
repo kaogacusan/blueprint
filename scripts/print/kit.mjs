@@ -24,8 +24,10 @@ export const F = {
   room: 'FA Annex 104',
   seats: 'Limited seats',
   regBy: 'Register by Nov 9',
-  full: '₱1,999', fullLabel: 'Full Pass, all four sessions',
-  single: '₱699', singleLabel: 'Single Session, per session',
+  // pilot prices from Nov 7 (api/_lib.js PRICE)
+  full: '₱799', fullLabel: 'Full Pass, all four sessions',
+  single: '₱299', singleLabel: 'Single Session, per session',
+  barkada: '₱1,999', barkadaLabel: 'Barkada: 3 Full Passes',
   pay: 'Sign up in a minute, then pay by GCash.',
   url: 'ateneoblueprint.vercel.app',
   sessions: [
@@ -153,7 +155,7 @@ export const sel = (text, { size = '', cls = '' } = {}) =>
   `<span class="sel ${cls}">${text}<i class="sel__h tl"></i><i class="sel__h tr"></i><i class="sel__h bl"></i><i class="sel__h br"></i>${size ? `<b class="sel__size">${size}</b>` : ''}</span>`;
 
 // ---------- fonts + base CSS for every print page ----------
-export const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600&display=block';
+export const FONTS = 'https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;600&display=block';
 
 export const BASE_CSS = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}

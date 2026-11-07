@@ -93,7 +93,7 @@ async function buildPage(browser, pageId) {
     console.log(`  ${pageId}/${asset.id}: ${versions.length} versions, ${asset.pages.length} page(s)`);
   }
   await mkdir(`${OUT}${pageId}`, { recursive: true });
-  await writeFile(manifestPath, `${JSON.stringify({ page: pageId, looks: LOOKS, assets }, null, 1)}\n`);
+  await writeFile(manifestPath, `${JSON.stringify({ page: pageId, looks: def.looks || LOOKS, assets }, null, 1)}\n`);
 }
 
 const browser = await chromium.launch();

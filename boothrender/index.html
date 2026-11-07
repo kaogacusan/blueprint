@@ -32,7 +32,7 @@
     <section class="rhero wrap">
       <p class="mono"><i></i>Render 02 · Booth</p>
       <h1 class="display">The booth, <span class="blue">in 3D.</span></h1>
-      <p class="lede">Our half of a shared tent on Red Brick Road, for the LAS 50 bazaar. Drag to turn it. The numbers on the model match the list.</p>
+      <p class="lede">Our half of a shared tent on Red Brick Road, for the LAS 50 bazaar. Drag to turn it. The numbers on the model match the list. A pull-up banner out front, a cheap glow-up inside, and a game that gets people to the table.</p>
       <ul class="facts">
         <li><b>1.5 × 3 m</b><span>our half of the tent</span></li>
         <li><b>3 × 3 m</b><span>one tent, two groups</span></li>
@@ -40,7 +40,7 @@
         <li><b>Nov 9–13</b><span>bazaar week</span></li>
         <li><b>Always manned</b><span>a panel grades the booth</span></li>
       </ul>
-      <a class="btn rhero__go" href="#assets">Print files, 6 versions each ↓</a>
+      <div class="rhero__btns"><a class="btn rhero__go" href="#shop">Order list with links ↓</a> <a class="btn btn--ghost rhero__go" href="#assets">Print files ↓</a></div>
     </section>
 
     <section class="viewer wrap" aria-label="3D booth">
@@ -58,7 +58,7 @@
           <div class="lookpick">Print <div class="seg seg--sm" data-looks role="group" aria-label="Print look on the model"></div></div>
           <div class="toggles" id="toggles"></div>
         </div>
-        <p class="caption">Orthographic, in metres. Our half is on the left. The grey floor on the right is the other group. The roof and curtains are see-through so you can see inside. The eave is drawn at 2.0 m, the height we ask for. The 3.05 m peak is assumed. Print on the tarps is draft copy from the site.</p>
+        <p class="caption">Orthographic, in metres. Our half is on the left. The grey floor on the right is the other group. The roof and curtains are see-through so you can see inside. The eave is drawn at 2.0 m, the height we ask for. The 3.05 m peak is assumed. “Glow-up” turns the cheap decor (tablecloth, lights, balloons, candy, photo frame) on and off. The print on the model is V1, the campaign look.</p>
       </div>
 
       <aside class="parts">
@@ -70,8 +70,8 @@
     <section class="sec wrap rise" id="assets">
       <div class="sec__head">
         <div>
-          <h2 class="display">Print files. <span class="muted">Six versions each.</span></h2>
-          <p class="sec__sub">Every printed piece on the booth. Pick a version and the model above changes. Download the PDF for the print shop, or the JPG to share.</p>
+          <h2 class="display">Print files. <span class="muted">V1 is the pick.</span></h2>
+          <p class="sec__sub">Every printed piece on the booth. V1 is the campaign: “Delulu is not a career plan. Blueprint is.”, red-pen roast notes, yellow freebie stickers, Red Flag Bingo, and a photo frame. The older looks (V2 to V6) are still there for the pieces that had them. Pick a version and the model above changes. Download the PDF for the print shop, or the JPG to share.</p>
         </div>
       </div>
       <div class="looks">
@@ -82,11 +82,22 @@
       <div class="assets" id="assetList"></div>
     </section>
 
+    <section class="sec wrap rise" id="shop">
+      <div class="sec__head">
+        <div>
+          <h2 class="display">Order it. <span class="muted">One link per item.</span></h2>
+          <p class="sec__sub">A quote and an order link for everything we buy, picked so it can be in hand by Monday morning. Total to buy: <b data-shop-total></b>. Prices as listed on <span data-shop-asof></span>; check the link before you pay.</p>
+        </div>
+      </div>
+      <ol class="shop__plan" id="shopPlan"></ol>
+      <div id="shopList"></div>
+    </section>
+
     <section class="sec wrap rise" id="materials">
       <div class="sec__head">
         <div>
           <h2 class="display">Materials.</h2>
-          <p class="sec__sub">What we can price so far: <b data-total></b>. Tarp prices use the rate in Gelo’s plan (₱15 to ₱20 per sq ft). Rental is not in the sum.</p>
+          <p class="sec__sub">All pieces: <b data-total></b>. “Quoted” prices come from the order list above; the rest are guesses (tarps at ₱15 to ₱20 per sq ft, from Gelo’s plan). Rental is not in the sum.</p>
         </div>
       </div>
       <div class="table-wrap">
@@ -104,16 +115,16 @@
           <h3>Seller</h3>
           <ul>
             <li>At the table the whole time the booth is open.</li>
-            <li>Runs the 1-minute AAA demo. Signs people up on the QR or the sheet.</li>
-            <li>Wears the cash pouch, if we take cash.</li>
+            <li>Hands out Red Flag Bingo cards and pens. 3 in a row gets candy. Uses the chat to pitch the Barkada deal (3 for ₱1,999).</li>
+            <li>Signs people up on the QR, or hands over the clipboard. Wears the cash pouch, if we take cash.</li>
           </ul>
         </div>
         <div class="card">
           <h3>Roamer</h3>
           <ul>
-            <li>In the aisle and around campus with the banner, at class breaks.</li>
-            <li>Gives out flyers. Sends people to the booth.</li>
-            <li>Rolls the banner and keeps it by the back table when not out.</li>
+            <li>In the aisle with flyers and candy, at class breaks. Sends people to the booth.</li>
+            <li>Takes photos of people in the photo frame (on their phone) and asks them to post it.</li>
+            <li>Opens the pull-up out front at 9 am, ties its pole to the tent leg, and brings it in at 4 pm or when it gets windy.</li>
           </ul>
         </div>
       </div>
@@ -141,7 +152,9 @@
             <li>The leg setting. Ask for 2.0 m or more at the eave.</li>
             <li>Do we take payment at the booth? If no, drop the GCash QR and the cash pouch.</li>
             <li>Can the tarps stay in the tent overnight?</li>
-            <li>Final tarp text. The print on the model is a draft.</li>
+            <li>Can the pull-up stand outside the tent, at the front edge? Keep it out of the e-jeep lane either way.</li>
+            <li>Balloons, lights, and candy: any bazaar rule against them?</li>
+            <li>Final tarp text. The print on the model is V1.</li>
           </ul>
         </div>
       </div>

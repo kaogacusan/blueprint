@@ -13,13 +13,14 @@ export function costText(p) {
   if (p.basis === 'print') return 'to print, not quoted yet';
   if (p.basis === 'buy') return 'to buy, not quoted yet';
   if (p.basis === 'unquoted' || !p.cost) return 'not quoted yet';
+  if (p.basis === 'quote') { const [lo, hi] = p.cost; return lo === hi ? `${peso(lo)}, quoted` : `${peso(lo)} to ${peso(hi)}, quoted`; }
   const [lo, hi] = p.cost;
   return lo === hi ? `${peso(lo)}, ${p.basis}` : `${peso(lo)} to ${peso(hi)}, ${p.basis}`;
 }
 
 export function total(pieces) {
   let lo = 0, hi = 0;
-  pieces.forEach((p) => { if (p.cost && (p.basis === 'assumed' || p.basis === 'listing')) { lo += p.cost[0]; hi += p.cost[1]; } });
+  pieces.forEach((p) => { if (p.cost && (p.basis === 'assumed' || p.basis === 'listing' || p.basis === 'quote')) { lo += p.cost[0]; hi += p.cost[1]; } });
   return [lo, hi];
 }
 
@@ -118,7 +119,7 @@ export async function mountPage({ pieces, groups, views, layers = [], build, sha
     },
     onSelect(id) {
       const p = byId.get(id);
-      if (p && p.view) { selectTab(null); stage.setView(p.view); }
+      if (p && p.view) { selectTab(null); stage.setView(p.view); applyLayers(p.view); }
     },
   });
   host.addEventListener('pointermove', (e) => { lastPointer = { x: e.clientX, y: e.clientY }; });
@@ -131,7 +132,7 @@ export async function mountPage({ pieces, groups, views, layers = [], build, sha
     const li = e.target.closest('.part');
     if (!li) return;
     const p = byId.get(li.dataset.item);
-    if (p && p.view) { selectTab(null); stage.setView(p.view); }
+    if (p && p.view) { selectTab(null); stage.setView(p.view); applyLayers(p.view); }
     if (window.matchMedia('(max-width: 1020px)').matches) host.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
   if (tableEl) {
@@ -149,7 +150,7 @@ export async function mountPage({ pieces, groups, views, layers = [], build, sha
     b.dataset.view = v.id;
     b.textContent = v.label;
     b.setAttribute('aria-selected', String(i === 0));
-    b.addEventListener('click', () => { selectTab(v.id); stage.setView(v); });
+    b.addEventListener('click', () => { selectTab(v.id); stage.setView(v); applyLayers(v); });
     tabs.appendChild(b);
   });
   const params = new URLSearchParams(location.search);
@@ -172,26 +173,36 @@ export async function mountPage({ pieces, groups, views, layers = [], build, sha
   tilt.addEventListener('input', () => { selectTab(null); stage.tween = null; stage.view.el = Math.max(0.02, (tilt.value * Math.PI) / 180); stage.dirty = true; });
 
   // ----- layer toggles -----
+  // userOn = what the buttons say. A view can also hide layers while it is shown (view.hide = ['people']).
   const tg = document.getElementById('toggles');
+  const userOn = {};
+  let viewHide = startView.hide || [];
+  const setL = (L) => {
+    const on = userOn[L.name] && !viewHide.includes(L.name);
+    stage.setLayer(L.name, on);
+    // a swap layer shows one of two states (for example "room as found" vs our setup)
+    if (L.swap) stage.setLayer(L.swap, !on);
+  };
+  function applyLayers(v) { viewHide = (v && v.hide) || []; layers.forEach(setL); }
   layers.forEach((L) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'toggle';
     b.textContent = L.label;
     if (L.mobileOff && window.matchMedia('(max-width: 640px)').matches) L.on = false;
-    b.setAttribute('aria-pressed', String(L.on !== false));
+    userOn[L.name] = L.on !== false;
+    b.setAttribute('aria-pressed', String(userOn[L.name]));
     b.addEventListener('click', () => {
-      const on = b.getAttribute('aria-pressed') !== 'true';
-      b.setAttribute('aria-pressed', String(on));
-      stage.setLayer(L.name, on);
-      // a swap layer shows one of two states (for example "room as found" vs our setup)
-      if (L.swap) stage.setLayer(L.swap, !on);
+      userOn[L.name] = !userOn[L.name];
+      b.setAttribute('aria-pressed', String(userOn[L.name]));
+      setL(L);
     });
     tg.appendChild(b);
   });
+  stage.onDragStart = () => { selectTab(null); host.classList.add('was-dragged'); if (viewHide.length) applyLayers(null); };
 
   await build(stage);
-  layers.forEach((L) => { stage.setLayer(L.name, L.on !== false); if (L.swap) stage.setLayer(L.swap, L.on === false); });
+  applyLayers(startView);
   stage.resize();
   stage.dirty = true;
   host.classList.add('is-ready');
