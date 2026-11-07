@@ -36,7 +36,7 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 
 Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in six versions:
 
-- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's standing banner, Red Flag Bingo card, resume check sign, and its team guide are built on it and exist in V1 only.
+- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's standing banner, Red Flag Bingo card, resume check sign, its team guide, and the calling card (90 × 54 mm, with a 10-on-A4 sheet for printing at home) are built on it and exist in V1 only.
 - **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
 - **V3 Big type**: fewer words, bigger. Reads from far away.
 - **V4 Clean white**: V1 cleaned up. White paper, navy type, one blue.
@@ -45,7 +45,7 @@ Every printed piece on the two models (tarps, banners, signs, cards, sheets, the
 
 V4 to V6 have no grid, no selection box, and no gradient text. They share one margin and the colors in `CLEAN` in `scripts/print/kit.mjs`.
 
-Each version has a print **PDF** (vector, for the print shop) and a **JPG** (to share). They are in `assets/print/venue/` and `assets/print/booth/`, and the pages list them in the "Print files" section.
+Each version has a print **PDF** (vector, for the print shop) and a **JPG** (to share). A piece with `bleed` (mm) gets a PDF that much bigger on every side, with the background running into it, so the shop can trim without a white edge; its JPGs show the trimmed size. They are in `assets/print/venue/` and `assets/print/booth/`, and the pages list them in the "Print files" section.
 
 To change a design, edit `scripts/print/venue.mjs` or `scripts/print/booth.mjs` (one entry per piece) and rebuild. The facts (dates, time, room, prices) are in `F` in `scripts/print/kit.mjs`. Change them there once.
 

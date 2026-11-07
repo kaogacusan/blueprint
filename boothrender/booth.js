@@ -43,7 +43,7 @@ const pieces = [
     view: { az: 0.1, el: 0.1, tx: 0.45, ty: 0.45, tz: -0.25, size: 1.1, width: 1.5 } },
   { id: 'pullup', num: 4, cat: 'tarp', name: 'Standing banner + stand', size: '60 × 160 cm, roll-up or X-stand', where: 'Outside the booth, just left of the front-left tent leg, angled up the road',
     cost: [650, 1300], basis: 'assumed', flag: PRINCE,
-    note: `${PRINCE} Prince’s banner is 60 × 160 cm too, so one seller prints both; we also need a stand (theirs is borrowed). Zip-tie the stand’s pole to the tent leg: it tips over in wind. Keep it out of the e-jeep lane. Bring it in every night.`,
+    note: `${PRINCE} Prince’s banner is 60 × 160 cm too, so one shop prints both; we also need a stand (theirs is borrowed). Zip-tie the stand’s pole to the tent leg: it tips over in wind. Keep it out of the e-jeep lane. Bring it in every night.`,
     view: { az: -0.3, el: 0.1, tx: -0.3, ty: 0.85, tz: 0.3, size: 1.9, width: 2.2 } },
 
   { id: 'check', num: 5, cat: 'activity', name: 'Resume check sign in an A4 acrylic stand', size: 'A4 print (210 × 297 mm) + A4 stand', where: 'Table, back row, middle',
@@ -55,9 +55,9 @@ const pieces = [
   { id: 'regqr', num: 6, cat: 'table', name: 'Sign-up QR in an A5 acrylic stand', size: 'A5 print (148 × 210 mm) + A5 stand', where: 'Table, back row, left',
     cost: [139, 159], basis: 'assumed', flag: PRINCE,
     note: `${PRINCE} The stand is Prince’s ₱119 A5 acrylic stand. The QR opens the register form on the site, which takes the payment, so no GCash sign is needed. Test it on 2 phones.`, view: zoomTable },
-  { id: 'card', num: 7, cat: 'table', name: 'Workshop card in an A4 acrylic stand', size: 'A4 print (210 × 297 mm) + A4 stand', where: 'Table, back row, right',
-    cost: [170, 260], basis: 'assumed',
-    note: 'Dates, time, room, and the three tickets: Full Pass ₱799, Single ₱299, Barkada of 3 ₱1,999. Ask the same seller for an A4 stand.', view: zoomTable },
+  { id: 'card', num: 7, cat: 'table', name: 'Calling cards', size: '90 × 54 mm, 2 sides, 100–200 pcs', where: 'Table, front row, right corner. Hand one to everyone who stops',
+    cost: [150, 500], basis: 'assumed', flag: PRINCE,
+    note: `${PRINCE} The workshop card, small enough to take home. Front: logo, dates, time, room, and the QR. Back: three resume fixes to make tonight, then the pitch and the three tickets. Same size as Prince’s pass cards, so one shop prints both. No shop in time? The “10 on A4” file prints at home on card stock.`, view: zoomTable },
   { id: 'bingo', num: 8, cat: 'table', name: 'Red Flag Bingo cards + pens', size: 'A6 cards, 2 sides, 4 per A4 sheet. 3 pens in a cup', where: 'Table, front row, left',
     cost: [150, 300], basis: 'assumed',
     note: 'Replaces the AAA try-out cards. People tick the resume red flags that are true for them while they wait; 3 in a row leads into the resume check. The back has the dates, prices, and QR.', view: zoomTable },
@@ -128,6 +128,7 @@ function makeTextures() {
     flyer: art.tex('flyer', { w: 384 }),       // front of the flyer
     regqr: art.tex('regqr', { w: 512 }),
     card: art.tex('card', { w: 512 }),
+    cardBack: art.tex('card', { page: 1, w: 512 }),   // the white side: “Fix these tonight.”
     bingo: art.tex('bingo', { w: 384 }),       // front of the card
     signup: art.tex('signup', { w: 512 }),
   };
@@ -280,9 +281,8 @@ async function build(S) {
     g.position.set(x, TOP, z);
     S.put(id, g);
   };
-  sign('regqr', 0.148, 0.21, 0.11, -0.69, tx.regqr);
-  sign('check', 0.21, 0.297, 0.41, -0.71, tx.check);
-  sign('card', 0.21, 0.297, 0.73, -0.71, tx.card);
+  sign('regqr', 0.148, 0.21, 0.27, -0.69, tx.regqr);
+  sign('check', 0.21, 0.297, 0.6, -0.71, tx.check);
 
   // front row, flat
   const flat = (w, d, x, z, map, y = TOP, t = 0.003) => {
@@ -320,6 +320,14 @@ async function build(S) {
   clip.add(S.box(0.61, TOP + 0.006, -0.6, 0.68, TOP + 0.02, -0.57, S.mat(0xb8c0cc)));
   clip.rotation.y = 0.05;
   S.put('signup', clip);
+  // 7 calling cards, front row right corner: a small fanned stack, white side up so it shows on the navy cloth
+  const cards = new THREE.Group();
+  for (let i = 0; i < 5; i++) {
+    const c = flat(0.09, 0.054, 0.835, -0.4, i % 2 ? tx.card : tx.cardBack, TOP + i * 0.0012, 0.0012);
+    c.rotation.y = 0.1 - i * 0.05;
+    cards.add(c);
+  }
+  S.put('card', cards);
 
   // 10 stool
   const stool = new THREE.Group();
@@ -362,7 +370,7 @@ async function build(S) {
   // ---------- pins (numbers match the list) ----------
   const pins = {
     header: [1.25, EAVE + 0.45, 0.04], backdrop: [1.25, 1.75, -DEPTH + 0.05], skirt: [0.78, 0.22, T.z1 + 0.03], pullup: [PU.x + 0.22, 1.35, PU.z + 0.16],
-    regqr: [0.11, TOP + 0.26, -0.69], check: [0.41, TOP + 0.35, -0.71], card: [0.73, TOP + 0.35, -0.71], bingo: [0.1, TOP + 0.05, -0.35],
+    regqr: [0.27, TOP + 0.26, -0.69], check: [0.6, TOP + 0.35, -0.71], card: [0.835, TOP + 0.03, -0.37], bingo: [0.1, TOP + 0.05, -0.35],
     flyers: [0.42, TOP + 0.05, -0.33], signup: [0.68, TOP + 0.04, -0.31],
     cloth: [0.05, 0.3, T.z1 + 0.02], table: [T.x1, 0.42, T.z0], stool: [0.78, 0.45, -1.3], box: [0.45, 0.2, T.z0 - 0.02],
     kit: [0.06, EAVE + 0.1, 0.02], tent: [3, EAVE - 0.25, 0],

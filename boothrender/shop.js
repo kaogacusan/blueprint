@@ -3,37 +3,40 @@
 // Prices are what we saw on the date in asOf. Check before paying: prices move.
 const IM = 'https://intermatrix.com.ph/products/';
 const LZ = 'https://www.lazada.com.ph/products/';
-const ARKI = { where: 'Arkishop Citimall, Philcoa · open Sun 9:30–6:30 · (02) 922-0626', link: 'https://www.arkishop.com/corporate/diliman-quezon-city' };
 const IMK = 'InterMatrix, across Ateneo, or the AShop in MVP (Mon 8 am)';
-const PRINCE = 'Prince’s FB Marketplace seller';
+const PRINCE = 'Where Prince gets his ₱119 A5 stand';
 const MAG = 'Robinsons Magnolia';
+// The rush shop for both booths, and the Monday walk-in across Ateneo (research, Sun Nov 8 early morning)
+const JJ = { where: 'JJ Pick & Print, Holy Spirit QC. Its FB says open Sun 8–5 (Waze says closed): call first. 0918 595 9997', link: 'https://www.facebook.com/JJPicknPrint' };
+const YZA = { where: 'YZA, Prince David Condo, across Ateneo. Mon–Sat 8–5, closed Sun. 0917 574 1449', link: 'http://www.yzacoloured.com/' };
+const FB = 'https://www.facebook.com/marketplace/item/';
 
 export const SHOP = {
-  asOf: 'Sat, Nov 7, 2026',
+  asOf: 'Sun, Nov 8, 2026',
   items: {
-    header: { qty: '1', total: [136, 316],
-      pick: { name: 'Tarp 1.4 × 0.6 m, hem + grommets every 30 cm', where: `${PRINCE}, if they print tarps`, eta: 'Ask when Prince sends the banner order', note: 'One order with the banner is cheapest' },
-      backup: { name: 'Same tarp, walk-in', ...ARKI, price: [136, 316], unit: '≈9 sq ft at ₱15–35', eta: 'Call Sun morning' } },
-    backdrop: { qty: '1', total: [363, 847],
-      pick: { name: 'Tarp 1.5 × 1.5 m, grommets every 30 cm on the top edge + 2 bottom corners', where: `${PRINCE}, with the header`, eta: 'Same order' },
-      backup: { name: 'Same tarp, walk-in', ...ARKI, price: [363, 847], unit: '≈24 sq ft at ₱15–35', eta: 'Call Sun morning' } },
-    skirt: { qty: '1', total: [102, 237],
-      pick: { name: 'Tarp 0.9 × 0.7 m, 4 corner grommets', where: `${PRINCE}, with the header`, eta: 'Same order' },
-      backup: { name: 'Same tarp, walk-in', ...ARKI, price: [102, 237], unit: '≈7 sq ft', eta: 'Call Sun morning' } },
-    pullup: { qty: '1 print + 1 stand', total: [650, 1300],
-      pick: { name: 'Tarp 60 × 160 cm + a stand that takes it', where: PRINCE, price: [650, 1300], unit: 'print ₱350–700 (Prince’s quotes) + stand', eta: 'Same order as Prince’s banner' },
-      backup: { name: 'X-banner stand 2 × 5 ft with tarp', where: IMK, link: `${IM}x-banner-stand`, price: 1200, unit: '61 × 152 cm: ask them to print 60 × 160', eta: 'Mon 9 am, ask for same day' } },
-    check: { qty: '1 stand + 1 print', total: [170, 260],
-      pick: { name: 'A4 acrylic sign stand (2nd one)', where: PRINCE, eta: 'Ask for 2 A4 stands with Prince’s order', note: 'Print the A4 sign in colour at a copy shop (₱20–40)' },
-      backup: { name: 'Table-top sintra stand 11 × 8 in, printed', where: IMK, link: `${IM}table-top-stands`, price: 132, eta: 'Mon 8 am' } },
+    header: { qty: '1', total: [136, 271],
+      pick: { name: 'Tarp 1.4 × 0.6 m, hem + grommets every 30 cm', ...JJ, eta: 'Call Sun 8 am. Send both booths’ files on Messenger, ask for same day + Lalamove to Katipunan', note: 'One order with both banners and both card runs' },
+      backup: { name: 'Same tarp, walk-in', ...YZA, price: 271, unit: '≈9 sq ft at ₱30', eta: 'Walk in Mon 8 am, ask for rush' } },
+    backdrop: { qty: '1', total: [363, 726],
+      pick: { name: 'Tarp 1.5 × 1.5 m, grommets every 30 cm on the top edge + 2 bottom corners', ...JJ, eta: 'Same order' },
+      backup: { name: 'Same tarp, walk-in', ...YZA, price: 726, unit: '≈24 sq ft at ₱30', eta: 'Mon 8 am' } },
+    skirt: { qty: '1', total: [102, 203],
+      pick: { name: 'Tarp 0.9 × 0.7 m, 4 corner grommets', ...JJ, eta: 'Same order' },
+      backup: { name: 'Same tarp, walk-in', ...YZA, price: 203, unit: '≈7 sq ft at ₱30', eta: 'Mon 8 am' } },
+    pullup: { qty: '1 print + 1 stand', total: [410, 1300],
+      pick: { name: 'Tarp 60 × 160 cm + an X-stand or roll-up that takes it', ...JJ, eta: 'Same order as Prince’s banner', note: 'JJ lists roll-up and X-stand banners; ask the price of each' },
+      backup: { name: 'X-stand ₱100 (fits 60 × 180: ask if it adjusts to 160) + tarp at YZA (₱310)', where: 'FB Marketplace, Marikina', link: `${FB}2201167447130659/`, price: 410, eta: 'Message Sun; pickup or Lalamove' } },
+    check: { qty: '1 stand + 1 print', total: [170, 290],
+      pick: { name: 'A4 acrylic sign stand', where: 'Where Prince got his ₱119 A5 stand, if they have A4', eta: 'Ask Prince Sun morning', note: 'Print the A4 sign in colour with the cards, or at a copy shop (₱20–40)' },
+      backup: { name: 'Acrylic holder A4, L-shape, vertical', where: 'National Book Store (Katipunan or Magnolia), walk-in', link: 'https://nationalbookstore.com/products/acrylic-holder-21x297mm-l-shape-vertical-home-office-supplies-brochure-holders', price: 250, eta: 'Sun walk-in' } },
     guide: { qty: '3 sheets', total: [5, 25],
       pick: { name: 'Print at home, black and white', where: 'From home', note: 'One for each person on shift' } },
     regqr: { qty: '1 stand + 1 print', total: [139, 159],
       pick: { name: 'A5 acrylic sign stand', where: PRINCE, price: 119, unit: 'Prince’s price', eta: 'Order with Prince’s stand', note: 'Print the A5 sign in colour at any copy shop (₱20–40)' },
       backup: { name: 'Table-top sintra stand ≈A5, printed', where: IMK, link: `${IM}table-top-stands`, price: 66, eta: 'Mon 8 am' } },
-    card: { qty: '1 stand + 1 print', total: [170, 260],
-      pick: { name: 'A4 acrylic sign stand', where: PRINCE, eta: 'Ask for the A4 size with Prince’s order', note: 'Print the A4 card in colour at a copy shop (₱20–40)' },
-      backup: { name: 'Table-top sintra stand 11 × 8 in, printed', where: IMK, link: `${IM}table-top-stands`, price: 132, eta: 'Mon 8 am' } },
+    card: { qty: '100–150, 2 sides', total: [250, 750],
+      pick: { name: 'Calling cards 90 × 54 mm, 2 sides, 300 gsm matte, from the 96 × 60 mm PDF (3 mm bleed)', ...JJ, eta: 'Same order, with Prince’s pass cards', note: 'Also on FB Marketplace: 100 for ₱250, 250 gsm laminated, same-day Lalamove from Novaliches' },
+      backup: { name: 'Business cards, back to back, 300 gsm', ...YZA, price: [600, 750], unit: '₱600 for 120, ₱750 for 150', eta: 'Mon 8 am. No shop in time? The 10-on-A4 file, on card stock at home' } },
     bingo: { qty: '60 cards (15 A4 sheets)', total: [150, 300],
       pick: { name: 'Print at home: colour, both sides, on A4 card stock, cut 4 per sheet', where: `Card stock from National Book Store, ${MAG}`, eta: 'Sun; print more mid-week if they run out', note: 'Same as Prince’s team, who print their flyers at home' },
       backup: { name: 'A6, back to back, 180 gsm, 4 per set', where: IMK, link: `${IM}flyers-brochures`, price: 80, unit: 'per set of 4 (₱1,200 for 60)', eta: 'Mon 8 am' } },
@@ -43,9 +46,9 @@ export const SHOP = {
     signup: { qty: '5 sheets', total: [10, 25],
       pick: { name: 'Print at home, black and white', where: 'From home' },
       backup: { name: 'B&W A4, ₱5 a page', where: IMK, link: `${IM}document-printing`, price: 25, eta: 'Mon 8 am' } },
-    cloth: { qty: '1', total: [105, 379],
-      pick: { name: 'Tablecloth, navy or black, about 150 × 230 cm', where: PRINCE, eta: 'Order 2: one for each booth', note: 'Prince’s plan budgets ₱379' },
-      backup: { name: 'Plain tablecloth 229 × 147 cm, royal blue', where: 'Monalisa Curtain (Lazada)', link: `${LZ}pdp-i3397671685.html`, price: 105, eta: 'Arrives Tue–Wed' } },
+    cloth: { qty: '1', total: [190, 379],
+      pick: { name: 'Rectangular tablecloth 142 × 218 cm: ask for navy or black', where: 'FB Marketplace, Quezon City', link: `${FB}1050749884375587/`, price: 190, eta: 'Message Sun; get 2, one for each booth', note: 'Prince’s plan budgets ₱379' },
+      backup: { name: 'Plain tablecloth 229 × 147 cm, royal blue', where: 'Monalisa Curtain (Lazada)', link: `${LZ}pdp-i3397671685.html`, price: 105, eta: 'Arrives Tue–Wed: only for later in the week' } },
     kit: { qty: '1 set', total: [100, 200],
       pick: { name: '100 zip ties (8 in), 5–10 m rope, duct tape', where: 'Mr. DIY Katipunan (walk from Ateneo)', eta: 'Sun walk-in', note: 'Prince’s team is buying the same; split a pack' },
       backup: { name: 'Nylon cable ties, 8 in, 100 pcs', where: 'Niolin Industrial (Lazada)', link: `${LZ}pdp-i591918428.html`, price: 30, eta: 'Arrives Tue–Wed' } },
@@ -55,15 +58,17 @@ export const SHOP = {
     box: { qty: '1', free: 'from home', pick: { name: 'Any box, about 45 × 30 × 30 cm', where: 'From home' } },
   },
   extras: [],
-  // The same things on both booths: one order from Prince's seller covers both.
+  // The same things on both booths: one print shop and one order cover both.
   shared: [
-    ['Standing banner print', '60 × 160 cm tarp, full colour, from our PDF', '1', '1'],
-    ['Banner stand', 'Roll-up or X-stand that takes 60 × 160 cm', 'borrowed', '1'],
+    ['Standing banner print', '60 × 160 cm tarp, full colour, each booth’s own PDF', '1', '1'],
+    ['Calling cards', '90 × 54 mm, 2 sides, 300 gsm. His are the pass cards with codes', '1 run', '100–150'],
+    ['Colour prints', 'A5 QR sign each; A4: his price list, our resume check sign', 'A5 + A4', 'A5 + A4'],
+    ['Banner stand', 'X-stand or roll-up that takes 60 × 160 cm', 'borrowed', '1'],
     ['Acrylic sign stand, A5', 'Clear, upright, for a 148 × 210 mm print', '1', '1'],
-    ['Acrylic sign stand, A4', 'Clear, upright, for a 210 × 297 mm print', '—', '2'],
+    ['Acrylic sign stand, A4', 'Clear, upright, for a 210 × 297 mm print', '—', '1'],
     ['Tablecloth', 'Navy or black, about 150 × 230 cm', '1', '1'],
     ['Zip ties + tape', '8 in zip ties (100), duct tape', '1', 'share'],
-    ['Tarps (if they print them)', 'Header 1.4 × 0.6 m, backdrop 1.5 × 1.5 m, skirt 0.9 × 0.7 m, with grommets', '—', '3'],
+    ['Tarps (ours only)', 'Header 1.4 × 0.6 m, backdrop 1.5 × 1.5 m, skirt 0.9 × 0.7 m, with grommets', '—', '3'],
   ],
 };
 

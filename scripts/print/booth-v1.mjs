@@ -195,21 +195,69 @@ export const guide = {
   }],
 };
 
-// 6 Workshop card, A4, in an acrylic stand. Dates big, then when and where, then the three tickets.
+// 6 Calling card, 90 × 54 mm: the workshop card made small enough to take home. Same size as Prince's pass
+// cards, so one shop can print both. Front: who, when, where, and the QR. Back: three resume fixes worth keeping
+// (the top three from the resume check), then the pitch and the prices.
+const cardFront = async () => {
+  const M = 4.5;
+  return `
+  ${navyGrid(90, 54, 6, 0.06)}
+  ${at(M, M, lockup(7.4, { markColor: '#fff', wordColor: '#fff' }))}
+  ${at(90 - M - 40, M + 0.6, 'Career workshop', `width:40mm;text-align:right;font-size:2mm;color:${C.ice}`, 'm nw')}
+  ${atb(M, M - 0.2, `<div class="d nw" style="font-size:9.6mm;color:#fff;margin-left:-0.5mm">${DATES}</div>
+    <div class="nw" style="font-size:2.45mm;font-weight:600;letter-spacing:-0.01em;color:${C.ice};margin-top:1.8mm;line-height:1.35">${F.days} · ${TIME}<br>${F.room}</div>`)}
+  ${atb(90 - M - 17.5, M, `<div class="m nw" style="font-size:1.9mm;color:${C.ice};text-align:center;margin-bottom:1.4mm">Sign up</div>${tile(17.5, 1.3, await qr(undefined, 14.9))}`)}`;
+};
+const CARD_FIXES = [
+  ['01', 'Cut the objective.', 'One line on what you do goes on top.'],
+  ['02', 'Start each bullet with a verb.', 'Led, built, ran, wrote.'],
+  ['03', 'Add one number.', 'How many people, how much, how often.'],
+];
+const cardBack = () => {
+  const M = 4.5, W = 90 - 2 * M;
+  return `
+  ${fill('#fff')}
+  ${at(M, M, 'Fix these tonight.', `font-size:4.9mm;color:${C.navy}`, 'd nw')}
+  ${at(90 - M - 30, M + 1.1, '3 resume fixes', `width:30mm;text-align:right;font-size:1.9mm;color:${C.core}`, 'm nw')}
+  ${at(M, 12.6, CARD_FIXES.map(([n, a, b]) => `<div style="display:grid;grid-template-columns:5.2mm 1fr;align-items:baseline;padding:2.25mm 0;border-top:0.2mm solid ${C.line}">
+      <span class="m" style="font-size:1.9mm;color:${C.core}">${n}</span>
+      <span class="nw" style="font-size:2.45mm;line-height:1.25;letter-spacing:-0.01em;color:${C.ink2};font-weight:500"><b style="font-weight:700;color:${C.navy}">${a}</b> ${b}</span></div>`).join(''), `width:${W}mm`)}
+  ${atb(M, M - 0.2, `<div style="display:flex;justify-content:space-between;align-items:baseline">
+      <span class="nw" style="font-size:2.6mm;font-weight:700;letter-spacing:-0.015em;color:${C.navy}">The rest takes 4 sessions.</span>${word(2.5, C.navy)}</div>
+    <div class="m nw" style="font-size:1.85mm;color:${C.ink3};margin-top:1.4mm">Full ${F.full} · Single ${F.single} · Barkada of 3 ${F.barkada}</div>`,
+    `width:${W}mm;padding-top:1.8mm;border-top:0.25mm solid ${C.navy}`)}`;
+};
 export const card = {
-  id: 'v1',
-  note: 'The original: dates big on navy. Adds the three tickets under the facts, and keeps “Limited seats”.',
-  html: () => {
-    const M = m(210, 297), W = 210 - 2 * M;   // 17, 176
-    return `
-    ${navyGrid(210, 297, 10, 0.25)}
-    ${at(M, M, mark(26, '#fff'))}
-    ${at(210 - M - 60, M + 6, `<div style="text-align:right">${pill(F.seats, 4.6)}</div>`, 'width:60mm')}
-    ${at(M, 58, 'Career workshop', `font-size:4.2mm;color:${C.ice}`, 'm nw')}
-    ${at(M - 2.5, 68, 'Nov 10<br>to 13', 'font-size:46mm;color:#fff;line-height:0.95', 'd nw')}
-    ${at(M, 168, `${F.days}<br>${TIME}<br>${F.room}`, 'font-size:11.5mm;color:#fff;font-weight:600;letter-spacing:-0.025em;line-height:1.32', 'nw')}
-    ${at(M, 226, tickets(W, 12.5, true), `padding-top:7mm;border-top:0.4mm solid rgba(185,238,255,0.35)`)}`;
-  },
+  id: 'card', piece: 'card', name: 'Calling card', size: '90 × 54 mm, 2 sides', mm: [90, 54], bleed: 3, pages: ['Front', 'Back'],
+  print: 'Calling card, 2 sides, 300 gsm or thicker, matte. 100–200 pcs. The PDF is 96 × 60 mm: 3 mm bleed on every side, trim to 90 × 54 (the same size as Prince’s pass cards). No shop? The “10 on A4” file prints at home.',
+  versions: [{
+    id: 'v1',
+    note: 'The workshop card, small enough to keep. Front: logo, dates, time, room, and the QR. Back: three resume fixes people can use tonight, then the pitch and all three tickets.',
+    html: async (i) => (i === 0 ? cardFront() : cardBack()),
+  }],
+};
+
+// The calling card, 10 on an A4 sheet, for printing at home on card stock. No gaps, so one cut separates two
+// cards; the crop marks in the margin show where to cut. The grid is centred, so the backs line up when the
+// printer flips on the long edge.
+export const cardsheet = {
+  id: 'cardsheet', piece: 'card', name: 'Calling cards, 10 on A4 (home print)', size: 'A4, 2 sides, 10 cards', mm: [210, 297], pages: ['Front', 'Back'],
+  print: 'Only if no shop can print the calling cards in time. A4 card stock (200 gsm or more), both sides, flip on the long edge, at 100% (no “fit to page”). Cut on the crop marks: 3 cuts down, 6 across.',
+  versions: [{
+    id: 'v1',
+    note: 'The calling card, 2 across and 5 down, with crop marks.',
+    html: async (i) => {
+      const one = i === 0 ? await cardFront() : cardBack();
+      const x0 = (210 - 180) / 2, y0 = (297 - 270) / 2;
+      let cards = '';
+      for (let r = 0; r < 5; r++) for (let c = 0; c < 2; c++) cards += `<div style="position:absolute;left:${x0 + c * 90}mm;top:${y0 + r * 54}mm;width:90mm;height:54mm;overflow:hidden">${one}</div>`;
+      const tick = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+      let marks = '';
+      for (const x of [x0, x0 + 90, x0 + 180]) marks += tick(x, y0 - 8, x, y0 - 2) + tick(x, y0 + 272, x, y0 + 278);
+      for (let r = 0; r <= 5; r++) { const y = y0 + r * 54; marks += tick(x0 - 8, y, x0 - 2, y) + tick(x0 + 182, y, x0 + 188, y); }
+      return `${fill('#fff')}${cards}<svg class="fill" viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg"><g stroke="#000" stroke-width="0.2">${marks}</g></svg>`;
+    },
+  }],
 };
 
 // 9 Red Flag Bingo, A6 card, 2 sides. Built like the AAA card it replaces: a blue band, white body, gradient back.

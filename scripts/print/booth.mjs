@@ -352,100 +352,6 @@ const regqr = {
   ],
 };
 
-const card = {
-  id: 'card', piece: 'card', name: 'Workshop card', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'], print: STAND('A4'),
-  versions: [
-    {
-      id: 'v1',
-      note: 'Same as the model, with the right facts: Nov 10 to 13, 5:30 to 7:00 PM, and “Limited seats” like the site.',
-      html: () => `
-        <div class="fill bg-navy"></div>
-        ${at(19, 19, mark(30, '#fff'))}
-        ${at(19, 66, 'Career workshop', `font-size:9.5mm;color:${C.ice};font-weight:600;text-transform:uppercase;letter-spacing:0.02em`, 'nw')}
-        ${at(16, 84, 'Nov 10<br>to 13', 'font-size:48mm;color:#fff;line-height:0.95', 'd nw')}
-        ${at(19, 190, `${F.days}<br>${F.time}<br>${F.room}`, 'font-size:14.5mm;color:#fff;font-weight:600;letter-spacing:-0.025em;line-height:1.38', 'nw')}
-        ${at(19, 255, F.seats, `font-size:13mm;color:#fff;font-weight:700;letter-spacing:-0.025em;background:${C.electric};padding:4mm 7mm`, 'nw')}`,
-    },
-    {
-      id: 'v2',
-      note: 'Lists the 4 sessions and their days, so people can pick the ones they need.',
-      html: () => `
-        ${paper(210, 297, 5, 0.15)}
-        ${at(16, 16, lockup(15))}
-        ${at(15, 44, `4 sessions.<br>One ${sel('<span class="g">blueprint.</span>', { size: 'A4 · 210 × 297' })}`, `font-size:22mm;color:${C.ink};line-height:1.02`, 'd nw')}
-        ${at(16, 106, F.sessions.map((s) => `<div style="display:grid;grid-template-columns:20mm 1fr;align-items:baseline;padding:8.4mm 0;border-top:0.5mm solid ${C.navy}">
-            <span class="d g" style="font-size:13mm">${s.n}</span>
-            <span><span class="d nw" style="display:block;font-size:12.5mm;color:${C.ink}">${s.title}</span>
-            <span class="m" style="display:block;font-size:4.2mm;margin-top:3mm;color:${C.ink3}">${s.day}</span></span></div>`).join(''), 'width:178mm')}
-        ${at(16, 262, `<span>${F.time} · ${F.room}</span><span style="color:${C.core}">${F.regBy}</span>`, `width:178mm;display:flex;justify-content:space-between;font-size:3.8mm;color:${C.navy};border-top:0.5mm solid ${C.navy};padding-top:5mm`, 'm nw')}`,
-    },
-    {
-      id: 'v3',
-      note: 'Shows the three tickets and the deadline. Big prices answer the first question people ask.',
-      html: () => `
-        ${navy(210, 297, 5, 0.15)}
-        ${at(17, 17, mark(24, '#fff'))}
-        ${at(17, 50, `Career workshop · ${F.dates}`, `font-size:4.2mm;color:${C.ice}`, 'm nw')}
-        ${at(14, 62, F.full, 'font-size:44mm', 'd nw gl')}
-        ${at(17, 109, F.fullLabel, 'font-size:6.5mm;color:#fff;font-weight:600;letter-spacing:-0.02em', 'nw')}
-        ${at(14, 124, F.single, 'font-size:44mm;color:#fff', 'd nw')}
-        ${at(17, 171, F.singleLabel, 'font-size:6.5mm;color:#fff;font-weight:600;letter-spacing:-0.02em', 'nw')}
-        ${at(14, 186, F.barkada, 'font-size:44mm;color:#fff', 'd nw')}
-        ${at(17, 233, F.barkadaLabel, 'font-size:6.5mm;color:#fff;font-weight:600;letter-spacing:-0.02em', 'nw')}
-        ${at(17, 249, F.regBy, `font-size:9mm;font-weight:700;letter-spacing:-0.025em;color:${C.navy};background:${C.cyan};padding:3mm 6mm;border-radius:10mm`, 'nw')}
-        ${at(17, 272, `${F.time} · ${F.room}`, `font-size:4.2mm;color:${C.ice}`, 'm nw')}`,
-    },
-    {
-      id: 'v4',
-      note: 'V1 on white. “Limited seats” is the one blue line now, not a blue box.',
-      html: () => {
-        const k = K.v4, m = margin(210, 297);
-        return `
-        ${flat('v4')}
-        ${at(m, m, logo('v4', 14))}
-        ${at(m, 66, 'Career workshop', `font-size:14.5mm;font-weight:600;letter-spacing:-0.025em;color:${k.sub}`, 'nw')}
-        ${at(m, 92, 'Nov 10<br>to 13', `font-size:48mm;color:${k.ink};line-height:0.95`, 'd nw')}
-        ${atb(m, m, `<div>${F.days}</div><div>${F.time}</div><div>${F.room}</div><div style="color:${k.hi};font-weight:700;margin-top:6mm">${F.seats}</div>`,
-          `font-size:14.5mm;color:${k.ink};font-weight:600;letter-spacing:-0.025em;line-height:1.3`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v5',
-      note: 'V2 on solid blue. Same 4 sessions, in plain type with no code letters.',
-      html: () => {
-        const k = K.v5, m = margin(210, 297), cw = 210 - 2 * m;
-        return `
-        ${flat('v5')}
-        ${at(m, m, logo('v5', 15))}
-        ${at(m, 46, `4 sessions.<br>One <span style="color:${k.hi}">blueprint.</span>`, `font-size:22mm;color:${k.ink};line-height:1.02`, 'd nw')}
-        ${at(m, 106, F.sessions.map((s) => `<div style="display:grid;grid-template-columns:22mm 1fr;align-items:baseline;padding:7.5mm 0;border-top:0.5mm solid ${k.rule}">
-            <span class="d" style="font-size:12.5mm;color:${k.sub}">${s.n}</span>
-            <span><span class="d nw" style="display:block;font-size:12.5mm;color:${k.ink}">${s.title}</span>
-            <span class="nw" style="display:block;font-size:5.5mm;font-weight:600;margin-top:3mm;color:${k.sub}">${s.day}</span></span></div>`).join(''), `width:${cw}mm`)}
-        ${atb(m, m, `<span>${F.time} · ${F.room}</span><span>${F.regBy}</span>`,
-          `width:${cw}mm;display:flex;justify-content:space-between;font-size:5.5mm;font-weight:600;color:${k.ink};border-top:0.5mm solid ${k.rule};padding-top:5mm`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v6',
-      note: 'V3 without the grid and the pill. Three big prices, and the deadline as plain text.',
-      html: () => {
-        const k = K.v6, m = margin(210, 297);
-        return `
-        ${flat('v6')}
-        ${at(m, m, word(11, k.word))}
-        ${at(m, 40, `Career workshop · ${F.dates}`, `font-size:7mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}`, 'nw')}
-        ${at(m, 60, `<div class="d" style="font-size:42mm;line-height:1;color:${k.hi}">${F.full}</div><div style="margin-top:4mm">${F.fullLabel}</div>
-          <div class="d" style="font-size:42mm;line-height:1;margin-top:10mm">${F.single}</div><div style="margin-top:4mm">${F.singleLabel}</div>
-          <div class="d" style="font-size:42mm;line-height:1;margin-top:10mm">${F.barkada}</div><div style="margin-top:4mm">${F.barkadaLabel}</div>`,
-          `font-size:7mm;font-weight:600;letter-spacing:-0.02em;color:${k.ink}`, 'nw')}
-        ${atb(m, m, `<div style="font-weight:700;color:${k.ink}">${F.regBy}</div><div style="color:${k.sub}">${F.time} · ${F.room}</div>`,
-          'font-size:7mm;font-weight:600;letter-spacing:-0.02em;line-height:1.4', 'nw')}`;
-      },
-    },
-  ],
-};
-
 // sign-up sheet table: fields from the site form
 const FIELDS = [['Name', 52], ['Email', 58], ['Mobile', 34], ['Course & year', 38]];
 // left / width move and scale the table (the columns keep their ratio). numCls / numStyle set the look of the row numbers.
@@ -654,10 +560,10 @@ const flyer = {
 
 // V1 is the original design, refined (booth-v1.mjs). It replaces the first version of each piece.
 // The standing banner, the bingo card, the resume-check sign and its team guide are new and have V1 only.
-for (const a of [header, backdrop, skirt, regqr, card, signup, flyer]) a.versions[0] = V1[a.id];
+for (const a of [header, backdrop, skirt, regqr, signup, flyer]) a.versions[0] = V1[a.id];
 
 export default {
   page: 'booth',
   looks: LOOKS.map((L) => (L.id === 'v1' ? { ...L, about: 'The pick. The design on the 3D model, refined: one margin, one type scale, all three tickets. The banner and the bingo card follow it.' } : L)),
-  assets: [header, backdrop, skirt, V1.pullup, regqr, V1.check, card, V1.bingo, flyer, signup, V1.guide],
+  assets: [header, backdrop, skirt, V1.pullup, regqr, V1.check, V1.card, V1.cardsheet, V1.bingo, flyer, signup, V1.guide],
 };

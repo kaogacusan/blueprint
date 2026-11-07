@@ -548,111 +548,72 @@
   {
    "id": "card",
    "piece": "card",
-   "name": "Workshop card",
-   "size": "A4, 210 × 297 mm",
+   "name": "Calling card",
+   "size": "90 × 54 mm, 2 sides",
+   "mm": [
+    90,
+    54
+   ],
+   "bleed": 3,
+   "pages": [
+    "Front",
+    "Back"
+   ],
+   "print": "Calling card, 2 sides, 300 gsm or thicker, matte. 100–200 pcs. The PDF is 96 × 60 mm: 3 mm bleed on every side, trim to 90 × 54 (the same size as Prince’s pass cards). No shop? The “10 on A4” file prints at home.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "The workshop card, small enough to keep. Front: logo, dates, time, room, and the QR. Back: three resume fixes people can use tonight, then the pitch and all three tickets.",
+     "pdf": "/assets/print/booth/card/v1.pdf",
+     "pdfKb": 135,
+     "jpg": [
+      "/assets/print/booth/card/v1-1.jpg",
+      "/assets/print/booth/card/v1-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/card/v1-1.m.jpg",
+      "/assets/print/booth/card/v1-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/card/v1-1.t.jpg",
+      "/assets/print/booth/card/v1-2.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cardsheet",
+   "piece": "card",
+   "name": "Calling cards, 10 on A4 (home print)",
+   "size": "A4, 2 sides, 10 cards",
    "mm": [
     210,
     297
    ],
    "pages": [
-    "Front"
+    "Front",
+    "Back"
    ],
-   "print": "Paper or card stock, colour, printed at a shop (home printers leave a white edge). Slides into an A4 acrylic stand, the same kind as Prince’s booth.",
+   "print": "Only if no shop can print the calling cards in time. A4 card stock (200 gsm or more), both sides, flip on the long edge, at 100% (no “fit to page”). Cut on the crop marks: 3 cuts down, 6 across.",
    "versions": [
     {
      "id": "v1",
      "look": "v1",
-     "note": "The original: dates big on navy. Adds the three tickets under the facts, and keeps “Limited seats”.",
-     "pdf": "/assets/print/booth/card/v1.pdf",
-     "pdfKb": 74,
+     "note": "The calling card, 2 across and 5 down, with crop marks.",
+     "pdf": "/assets/print/booth/cardsheet/v1.pdf",
+     "pdfKb": 145,
      "jpg": [
-      "/assets/print/booth/card/v1-1.jpg"
+      "/assets/print/booth/cardsheet/v1-1.jpg",
+      "/assets/print/booth/cardsheet/v1-2.jpg"
      ],
      "m": [
-      "/assets/print/booth/card/v1-1.m.jpg"
+      "/assets/print/booth/cardsheet/v1-1.m.jpg",
+      "/assets/print/booth/cardsheet/v1-2.m.jpg"
      ],
      "t": [
-      "/assets/print/booth/card/v1-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v2",
-     "look": "v2",
-     "note": "Lists the 4 sessions and their days, so people can pick the ones they need.",
-     "pdf": "/assets/print/booth/card/v2.pdf",
-     "pdfKb": 433,
-     "jpg": [
-      "/assets/print/booth/card/v2-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/card/v2-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/card/v2-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v3",
-     "look": "v3",
-     "note": "Shows the three tickets and the deadline. Big prices answer the first question people ask.",
-     "pdf": "/assets/print/booth/card/v3.pdf",
-     "pdfKb": 59,
-     "jpg": [
-      "/assets/print/booth/card/v3-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/card/v3-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/card/v3-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v4",
-     "look": "v4",
-     "note": "V1 on white. “Limited seats” is the one blue line now, not a blue box.",
-     "pdf": "/assets/print/booth/card/v4.pdf",
-     "pdfKb": 48,
-     "jpg": [
-      "/assets/print/booth/card/v4-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/card/v4-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/card/v4-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v5",
-     "look": "v5",
-     "note": "V2 on solid blue. Same 4 sessions, in plain type with no code letters.",
-     "pdf": "/assets/print/booth/card/v5.pdf",
-     "pdfKb": 66,
-     "jpg": [
-      "/assets/print/booth/card/v5-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/card/v5-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/card/v5-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v6",
-     "look": "v6",
-     "note": "V3 without the grid and the pill. Three big prices, and the deadline as plain text.",
-     "pdf": "/assets/print/booth/card/v6.pdf",
-     "pdfKb": 55,
-     "jpg": [
-      "/assets/print/booth/card/v6-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/card/v6-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/card/v6-1.t.jpg"
+      "/assets/print/booth/cardsheet/v1-1.t.jpg",
+      "/assets/print/booth/cardsheet/v1-2.t.jpg"
      ]
     }
    ]

@@ -26,12 +26,17 @@ const sizes = (asset) => {
   return { full, m: Math.min(1200, full), t: 480 };
 };
 
+// asset.bleed (mm): the PDF grows by that much on every side and solid backgrounds (div.fill) run into it, so a
+// shop can trim to asset.mm without a white edge. The JPGs show the trimmed card.
 async function docFor(asset, version) {
-  const [w, h] = asset.mm;
+  const [w, h] = asset.mm, b = asset.bleed || 0;
   const pages = await Promise.all(asset.pages.map((_, i) => version.html(i)));
-  const body = pages.map((p) => `<section class="pg" style="width:${w}mm;height:${h}mm">${p}</section>`).join('');
+  const body = pages.map((p) => (b
+    ? `<section class="pg" style="width:${w + 2 * b}mm;height:${h + 2 * b}mm"><div class="trim" style="position:absolute;left:${b}mm;top:${b}mm;width:${w}mm;height:${h}mm">${p}</div></section>`
+    : `<section class="pg" style="width:${w}mm;height:${h}mm">${p}</section>`)).join('');
+  const bleedCss = b ? `.trim>div.fill{inset:-${b}mm;width:auto;height:auto}` : '';
   return `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}">
-<style>@page{size:${w}mm ${h}mm;margin:0}${BASE_CSS}${asset.css || ''}</style></head><body>${body}</body></html>`;
+<style>@page{size:${w + 2 * b}mm ${h + 2 * b}mm;margin:0}${BASE_CSS}${bleedCss}${asset.css || ''}</style></head><body>${body}</body></html>`;
 }
 
 async function buildVersion(browser, pageId, asset, version) {
@@ -42,16 +47,16 @@ async function buildVersion(browser, pageId, asset, version) {
   await tab.setContent(await docFor(asset, version), { waitUntil: 'networkidle' });
   await tab.evaluate(() => document.fonts.ready);
 
-  const [w, h] = asset.mm;
-  await tab.pdf({ path: `${dir}${version.id}.pdf`, width: `${w}mm`, height: `${h}mm`, printBackground: true, preferCSSPageSize: true });
+  const [w, h] = asset.mm, b = asset.bleed || 0;
+  await tab.pdf({ path: `${dir}${version.id}.pdf`, width: `${w + 2 * b}mm`, height: `${h + 2 * b}mm`, printBackground: true, preferCSSPageSize: true });
 
   const S = sizes(asset);
   const out = { jpg: [], m: [], t: [] };
   for (const [key, px, q] of [['jpg', S.full, 88], ['m', S.m, 84], ['t', S.t, 80]]) {
     const zoom = px / (Math.max(w, h) * PX_PER_MM);
-    await tab.setViewportSize({ width: Math.ceil(w * PX_PER_MM * zoom) + 2, height: Math.ceil(h * PX_PER_MM * zoom) + 2 });
+    await tab.setViewportSize({ width: Math.ceil((w + 2 * b) * PX_PER_MM * zoom) + 2, height: Math.ceil((h + 2 * b) * PX_PER_MM * zoom) + 2 });
     await tab.evaluate((z) => { document.documentElement.style.zoom = z; }, zoom);
-    const els = await tab.$$('.pg');
+    const els = await tab.$$(b ? '.trim' : '.pg');
     for (let i = 0; i < els.length; i++) {
       const name = `${version.id}-${i + 1}${key === 'jpg' ? '' : `.${key}`}.jpg`;
       await els[i].screenshot({ path: `${dir}${name}`, type: 'jpeg', quality: q });
