@@ -4,11 +4,12 @@
 import { C, F, CLEAN as K, LOOKS, margin, grid, word, mark, lockup, qr, sampleQR, sel } from './kit.mjs';
 import * as V1 from './booth-v1.mjs';
 
-const TARP = 'Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.';
+const TARP = 'Tarp. Print at 100 dpi or more. Colour to the edge: no white border. Grommets every 30 cm on the top edge. No hem.';
 const PAPER = 'Paper. Print at 100% (no “fit to page”).';
 
 const header = {
-  id: 'header', piece: 'header', name: 'Header tarp', size: '1.4 m × 0.6 m', mm: [1400, 600], pages: ['Front'], print: TARP,
+  id: 'header', piece: 'header', name: 'Header tarp', size: '1.4 m × 0.6 m', mm: [1400, 600], bleed: 10, pages: ['Front'],
+  print: `${TARP} The PDF has 1 cm of extra background on every side, to trim off (cutting at the print edge works too).`,
   versions: [
     {
       id: 'v1',
@@ -211,73 +212,6 @@ const backdrop = {
   ],
 };
 
-const skirt = {
-  id: 'skirt', piece: 'skirt', name: 'Table skirt tarp', size: '0.9 m × 0.7 m', mm: [900, 700], pages: ['Front'], print: 'Tarp. Print at 100 dpi or more. Ask for grommets in the 4 corners for the cable ties.',
-  versions: [
-    {
-      id: 'v1',
-      note: 'Same as the model: logo and what it is. The date is now Nov 10 to 13, on its own line so the text stays 6 cm tall.',
-      html: () => `
-        <div class="fill bg-navy"></div>
-        ${grid(900, 700, { step: 70, major: 1000, color: C.ice, minor: 0.08, width: 1.5 })}
-        ${at(0, 170, word(150, '#fff', 'margin:0 auto'), 'width:900mm')}
-        ${at(0, 410, `Career workshop<br>${F.dates}`, `width:900mm;text-align:center;font-size:66mm;font-weight:600;letter-spacing:-0.03em;line-height:1.14;color:${C.ice}`, 'nw')}`,
-    },
-    {
-      id: 'v2',
-      note: 'The deadline is the biggest thing on it. It gives people a reason to sign up today.',
-      html: () => `
-        ${paper(900, 700, 20, 1)}
-        ${at(66, 56, lockup(150, { markColor: 'grad' }))}
-        ${at(60, 278, 'Register by', `font-size:120mm;color:${C.ink}`, 'd nw')}
-        ${at(60, 410, sel('<span class="g">Nov 9.</span>', { size: 'W 900 × H 700 mm' }), `font-size:180mm;color:${C.ink}`, 'd nw')}`,
-    },
-    {
-      id: 'v3',
-      note: 'Shows the prices, like the site does now. People at the aisle know the cost before they ask.',
-      html: () => `
-        ${navy(900, 700, 20, 1)}
-        ${at(70, 56, word(150, '#fff'))}
-        ${at(64, 196, F.full, 'font-size:200mm', 'd nw gl')}
-        ${at(70, 410, `all four sessions,<br>or ${F.single} a session.<br>Barkada of 3: ${F.barkada}`, 'font-size:62mm;line-height:1.14;color:#fff;font-weight:600;letter-spacing:-0.03em', 'nw')}`,
-    },
-    {
-      id: 'v4',
-      note: 'V1 on white, with the logo in the corner and the words at the bottom, so it is easy to read below the table edge.',
-      html: () => {
-        const k = K.v4, m = margin(900, 700);
-        return `
-        ${flat('v4')}
-        ${at(m, m, logo('v4', 180))}
-        ${atb(m, m, `<div class="d" style="font-size:96mm;color:${k.ink}">Career workshop</div>
-          <div style="font-size:66mm;font-weight:600;letter-spacing:-0.03em;margin-top:26mm;color:${k.hi}">${F.dates}</div>`, '', 'nw')}`;
-      },
-    },
-    {
-      id: 'v5',
-      note: 'V2 on solid blue. The deadline is still the biggest thing, now with no grid and no box.',
-      html: () => {
-        const k = K.v5, m = margin(900, 700);
-        return `
-        ${flat('v5')}
-        ${at(m, m, logo('v5', 150))}
-        ${atb(m, m, `<div>Register by</div><div style="font-size:180mm;color:${k.hi}">Nov 9.</div>`, `font-size:120mm;color:${k.ink};line-height:1`, 'd nw')}`;
-      },
-    },
-    {
-      id: 'v6',
-      note: 'V3 without the grid. One big price in light blue, and the other two in plain lines under it.',
-      html: () => {
-        const k = K.v6, m = margin(900, 700);
-        return `
-        ${flat('v6')}
-        ${at(m, m, word(150, k.word))}
-        ${atb(m, m, `<div class="d" style="font-size:200mm;line-height:1;margin-bottom:26mm;color:${k.hi}">${F.full}</div><div>all four sessions,<br>or ${F.single} a session.<br>Barkada of 3: ${F.barkada}</div>`,
-          `font-size:62mm;line-height:1.14;color:${k.ink};font-weight:600;letter-spacing:-0.03em`, 'nw')}`;
-      },
-    },
-  ],
-};
 
 // sign-up sheet table: fields from the site form
 const FIELDS = [['Name', 52], ['Email', 58], ['Mobile', 34], ['Course & year', 38]];
@@ -488,10 +422,10 @@ const flyer = {
 
 // V1 is the original design, refined (booth-v1.mjs). It replaces the first version of each piece.
 // The standing banner, the sign-up QR (A4 now), the calling card and the bingo card are V1 only.
-for (const a of [header, backdrop, skirt, signup, flyer]) a.versions[0] = V1[a.id];
+for (const a of [header, backdrop, signup, flyer]) a.versions[0] = V1[a.id];
 
 export default {
   page: 'booth',
   looks: LOOKS.map((L) => (L.id === 'v1' ? { ...L, about: 'The pick. The design on the 3D model, refined: one margin, one type scale, all three tickets. The banner and the bingo card follow it.' } : L)),
-  assets: [header, backdrop, skirt, V1.pullup, V1.card, flyer, V1.regqr, V1.bingo, signup],
+  assets: [header, backdrop, V1.skirt, V1.pullup, V1.card, flyer, V1.regqr, V1.bingo, signup],
 };

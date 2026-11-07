@@ -8,14 +8,47 @@ const OURS = (id, page = 1) => ({ pdf: `/assets/print/booth/${id}/v1.pdf`, img: 
 const HIS = (id) => ({ pdf: `https://profstopick-booth.vercel.app/assets/print/booth/${id}/v1.pdf`, img: `https://profstopick-booth.vercel.app/assets/print/booth/${id}/v1-1.t.jpg` });
 const FB = (n) => `https://www.facebook.com/marketplace/item/${n}/`;
 
-// One print shop for both booths. JJ's own FB lists everything we print; acrylic stands and cloth are bought.
+// One print shop for both booths. Keira's pick: the Holy Spirit rush shop on FB Marketplace (it lists tarps, calling
+// cards and flyers). JJ is closed on Sundays. Nothing is booked until the replies are in and compared.
 export const SHOP = {
-  name: 'JJ Pick & Print', where: '20 Sto. Domingo St, Holy Spirit, QC (off Commonwealth)', phone: '0918 595 9997',
-  fb: 'https://www.facebook.com/JJPicknPrint', email: 'jewelle.printing.services@gmail.com',
-  does: 'Tarps, roll-up and X-stand banners, calling cards, flyers, sticker on sintra. “One day process”, takes rush orders.',
-  hours: 'Its FB says open Sun 8 am–5 pm; Waze says closed Sundays. Call first.',
-  backup: { name: 'YZA', where: '209 Prince David Condo, Katipunan, across Ateneo', phone: '0917 574 1449', hours: 'Mon–Sat 8–5, closed Sun', prices: 'Tarp ₱30/sq ft · cards ₱600 for 120' },
+  name: 'Rush Tarpaulin Printing', who: 'John Mark, on FB Marketplace', where: 'Holy Spirit, Commonwealth, QC',
+  link: FB(1639033827622521), chat: 'https://www.facebook.com/messages/t/1072607599164388',
+  does: 'Tarps (up to 10.5 ft), calling cards, flyers, signages, sticker on sintra. Rush, same-day release.',
 };
+export const BACKUPS = [
+  { name: 'JJ Pick n Print', where: '20 Sto. Domingo St, Holy Spirit, QC', phone: '0918 595 9997', link: 'https://www.facebook.com/JJPicknPrint', note: 'Open Mon–Sat from 8 am, closed Sundays. One-day process, rush orders. Not messaged yet.' },
+  { name: 'Rush Tarp w/ Stand', where: '225 Tandang Sora Ave, QC', phone: '0993 689 7649', link: FB(1301755045402746), note: 'Same-day delivery. Tarps, roll-ups, calling cards, flyers. Messaged.' },
+  { name: 'YZA', where: '209 Prince David Condo, Katipunan', phone: '0917 574 1449', note: 'Mon–Sat 8–5, closed Sun. Tarp ₱30/sq ft, cards ₱600 for 120.' },
+];
+
+// Everyone messaged from Keira's FB on Sun Nov 8, all on Marketplace. Compare replies before saying yes to anyone.
+// status: waiting | replied | yes | no. Update `reply` with what they said.
+export const MESSAGED = [
+  { id: 'holyspirit', prio: true, for: 'Printing', name: 'Rush Tarpaulin Printing', where: 'Holy Spirit, Commonwealth', link: FB(1639033827622521), sent: '6:53 am', status: 'waiting', note: 'Your pick. Lists calling cards and flyers too.' },
+  { id: 'stand', prio: true, for: 'Roll-up stand', name: 'Roll Up Banner Stand 80 × 200, complete set', where: 'Quezon City · ₱420', link: FB(1077659547946343), sent: '6:54 am', status: 'waiting', note: 'Your pick. Asked: top rail, pole, bag; today?' },
+  { id: 'tandangsora', for: 'Printing', name: 'Rush Tarp w/ Stand / Roll-up banners', where: 'Tandang Sora, QC', link: FB(1301755045402746), sent: '7:00 am', status: 'waiting', note: 'Does everything: tarps, roll-ups, cards, flyers. Same-day delivery.' },
+  { id: 'ninja', for: 'Printing', name: 'Mr. NinjaPrints: roll-up with print', where: 'Quezon City', link: FB(4473634312888152), sent: '7:00 am', status: 'waiting', note: 'Tarps, roll-ups, calling cards, flyers.' },
+  { id: 'standprint', for: 'Printing + stand', name: 'Roll-up stand with print, rush', where: 'Quezon City · ₱1,800', link: FB(1514858010309756), sent: '6:54 am', status: 'waiting', note: 'Stand and print in one. Asked if they do tarps, cards, flyers.' },
+  { id: 'tarp25', for: 'Printing', name: 'Tarpaulin Printing', where: 'Quezon City', link: FB(984916557480815), sent: '6:54 am', status: 'waiting', note: 'Tarps only? Asked about cards and flyers.' },
+  { id: 'romeo', for: 'Cards + flyers', name: 'Calling card / business card printing', where: 'Quezon City', link: FB(1036931945574668), sent: '7:00 am', status: 'waiting', note: 'Cards and flyers, rush. Asked about tarps.' },
+  { id: 'stand2', for: 'Roll-up stand', name: 'Roll up Banner', where: 'Quezon City · ₱420–550', link: FB(1043575711793871), sent: '6:55 am', status: 'waiting', note: 'Backup stand. Asked the size.' },
+  { id: 'a4', for: 'A4 acrylic stand', name: 'Acrylic display stand / menu holder', where: 'Quezon City · ₱270', link: FB(1070631269179446), sent: '6:55 am', status: 'waiting', note: 'Asked for A4 portrait.' },
+  { id: 'a4t', for: 'A4 acrylic stand', name: 'A4 T-type acrylic stand, 2-sided', where: 'Pasig · ₱350', link: FB(2242082256368134), sent: '6:55 am', status: 'waiting', note: 'Backup. Or walk in at National Book Store (₱250).' },
+  { id: 'cloth', for: 'Tablecloth', name: 'Table cloth 142 × 218 cm', where: 'Quezon City · ₱190', link: FB(1050749884375587), sent: '6:55 am', status: 'waiting', note: 'Asked for navy or black. Or a bedsheet from home.' },
+];
+
+// For Nate and Amber: how the booth looks, and what they could bring from home.
+export const TEAM_MSG = `Hi Nate, Amber! This is how the booth looks so far: https://ateneoblueprint.vercel.app/boothrender/ (drag to look around). Anything you'd change or add?
+
+If you have any of these at home, could you bring them on Monday? Nothing to buy:
+- a navy, black or white tablecloth or flat bedsheet
+- warm fairy lights, battery-powered (there might be no socket)
+- a small plant, or a nice jar or cup for the pens
+- a clipboard, scissors
+- a power bank, or a laptop to demo the site
+- anything else that makes it look nice but still clean (our colours are navy and blue)
+
+Tell me what you can bring so we don't double up. Thank you!`;
 
 // Printing. ours / prince: what each booth sends to the same shop.
 export const PRINT = [
@@ -40,13 +73,13 @@ export const PRINT = [
     prince: { qty: '2', size: 'A5: QR sign · A4: price list', ...HIS('qr') },
     cost: [20, 40] },
 
-  { id: 'header', piece: 'header', name: 'Header tarp', spec: '1.4 × 0.6 m tarp. Hem, grommets every 30 cm.',
+  { id: 'header', piece: 'header', name: 'Header tarp', spec: '1.4 × 0.6 m tarp, colour to the edge: no white border. The PDF has 1 cm extra on every side: trim it off. Grommets every 30 cm on the top edge. No hem.',
     ours: { qty: '1', ...OURS('header') }, cost: [136, 271], costNote: '9 sq ft' },
-  { id: 'backdrop', piece: 'backdrop', name: 'Backdrop tarp', spec: '1.5 × 1.5 m tarp. Grommets every 30 cm on the top edge, plus the 2 bottom corners.',
+  { id: 'backdrop', piece: 'backdrop', name: 'Backdrop tarp', spec: '1.5 × 1.5 m tarp. Cut at the print edge. Grommets every 30 cm on the top edge, plus the 2 bottom corners. No hem.',
     ours: { qty: '1', ...OURS('backdrop') }, cost: [363, 726], costNote: '24 sq ft' },
-  { id: 'skirt', piece: 'skirt', name: 'Table skirt tarp', spec: '0.9 × 0.7 m tarp. 4 corner grommets.',
-    ours: { qty: '1', ...OURS('skirt') }, cost: [102, 203], costNote: '7 sq ft' },
-  { id: 'bingo', piece: 'bingo', name: 'Red Flag Bingo cards', optional: true, spec: 'A6, colour, 2 sides, card stock 200 gsm or more. 4 per A4, trimmed. PDF has 3 mm bleed.',
+  { id: 'skirt', piece: 'skirt', name: 'Table skirt tarp', spec: '1.2 × 0.7 m tarp, navy to the edge: no white border. The PDF has 1 cm extra on every side: trim it off. 4 corner grommets. No hem.',
+    ours: { qty: '1', size: 'The full front of a 4 ft table', ...OURS('skirt') }, cost: [136, 271], costNote: '9 sq ft' },
+  { id: 'bingo', piece: 'bingo', name: 'Blend-In Bingo cards', optional: true, spec: 'A6, colour, 2 sides, card stock 200 gsm or more. 4 per A4, trimmed. PDF has 3 mm bleed.',
     ours: { qty: '60', size: 'If the budget allows', ...OURS('bingo') }, cost: [150, 450], costNote: '15 A4 sheets' },
   { id: 'signup', piece: 'signup', name: 'Sign-up sheet', spec: 'A4, black and white, regular paper.',
     ours: { qty: '5', ...OURS('signup') }, cost: [25, 25] },
@@ -95,6 +128,7 @@ export const BRING = [
   { id: 'phone', piece: 'phone', name: 'Phone + power bank', who: 'Whoever is on shift', note: 'The sign-up page open. Don’t count on a socket.' },
   { id: 'laptop', piece: 'phone', name: 'Laptop to demo the site', who: 'Members, if someone has one', note: 'Optional. On the back-right of the table, screen to the aisle.' },
   { id: 'box', piece: 'box', name: 'Supply box', who: 'Keira', note: 'About 45 × 30 × 30 cm, under the table.' },
+  { id: 'decor', name: 'Decor from home (optional)', who: 'Nate, Amber', note: 'Battery fairy lights, a small plant, a nice pen jar. Clean, navy and blue. The message to send them is below.' },
 ];
 
 // What our booth pays for one piece of the 3D model: every print and buy row for that piece.

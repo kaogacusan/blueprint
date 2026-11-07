@@ -1,5 +1,5 @@
 // V1 for the booth: the original "as rendered" designs, refined, and used as the system for the newer pieces
-// (the standing banner and the Red Flag Bingo card).
+// (the standing banner and the Blend-In Bingo card).
 //
 // The system, so every piece looks like one set:
 //   Grounds   brand gradient (outward-facing: header, banner, flyer front, the bingo card's back), navy (table pieces:
@@ -9,7 +9,7 @@
 //   Type      Inter display for headlines (.d), Inter 600 for facts, JetBrains Mono caps for small labels (.m).
 //   Colour    one accent per ground: core blue on light, ice/cyan on dark. No gradient text, no extra colours.
 //   QR        on a white tile on dark grounds. Prices always show all three tickets, Barkada included.
-// Sizes in mm. booth.mjs puts these in as V1 of each piece; pullup (the standing banner), regqr, card and bingo are V1 only.
+// Sizes in mm. booth.mjs puts these in as V1 of each piece; skirt, pullup (the standing banner), regqr, card and bingo are V1 only.
 import { C, F, word, mark, lockup, qr, grid } from './kit.mjs';
 
 const m = (w, h) => Math.round(Math.min(w, h) * 0.08);
@@ -79,15 +79,21 @@ export const backdrop = {
   },
 };
 
-// 3 Table skirt, 0.9 × 0.7 m. Knee height: logo, what, when, and the price to start.
+// 3 Table skirt, 1.2 × 0.7 m: the whole aisle face of a 4 ft (122 cm) table, from the top edge to 4 cm off the floor.
+// Navy to the edge with 10 mm bleed, so no white border shows however the shop cuts it. Nothing sits within 60 mm of
+// an edge, so the 4 corner grommets miss the type.
 export const skirt = {
-  id: 'v1',
-  note: 'The original: logo and what it is, centred on navy. Adds the room and a line with the prices.',
-  html: () => `
-    ${navyGrid(900, 700, 70, 1.5)}
-    ${at(0, 120, word(140, '#fff', 'margin:0 auto'), 'width:900mm')}
-    ${at(0, 352, `Career workshop<br><span style="color:${C.ice}">${DATES} · ${F.room}</span>`, 'width:900mm;text-align:center;font-size:60mm;font-weight:600;letter-spacing:-0.03em;line-height:1.18;color:#fff', 'nw')}
-    ${at(0, 545, `<div style="display:flex;justify-content:center">${pill(`From ${F.single} · Barkada of 3: ${F.barkada}`, 34, { bg: C.electric })}</div>`, 'width:900mm')}`,
+  id: 'skirt', piece: 'skirt', name: 'Table skirt tarp', size: '1.2 m × 0.7 m', mm: [1200, 700], bleed: 10, pages: ['Front'],
+  print: 'Tarp, 1.2 × 0.7 m, colour to the edge: no white border. The PDF is 1.22 × 0.72 m: 1 cm of extra navy on every side, to trim off (cutting at the print edge works too). 4 corner grommets for the zip ties. No hem.',
+  versions: [{
+    id: 'v1',
+    note: 'The original: logo and what it is, centred on navy, now the full width of a 4 ft table. Adds the room and a line with the prices.',
+    html: () => `
+    ${navyGrid(1200, 700, 75, 1.5)}
+    ${at(0, 118, word(150, '#fff', 'margin:0 auto'), 'width:1200mm')}
+    ${at(0, 350, `Career workshop<br><span style="color:${C.ice}">${DATES} · ${F.room}</span>`, 'width:1200mm;text-align:center;font-size:62mm;font-weight:600;letter-spacing:-0.03em;line-height:1.18;color:#fff', 'nw')}
+    ${at(0, 548, `<div style="display:flex;justify-content:center">${pill(`From ${F.single} · Barkada of 3: ${F.barkada}`, 34, { bg: C.electric })}</div>`, 'width:1200mm')}`,
+  }],
 };
 
 // 4 Standing banner: a roll-up (pull-up) stand, 80 × 200 cm, the most common size, and the one the stand we found takes.
@@ -181,40 +187,42 @@ export const card = {
   }],
 };
 
-// 9 Red Flag Bingo, A6 card, 2 sides. Built like the AAA card it replaces: a blue band, white body, gradient back.
+// 9 Blend-In Bingo, A6 card, 2 sides. Built like the AAA card it replaces: a blue band, white body, gradient back.
+// The squares are not mistakes. Most resumes we see are decent; they just say the same things as everyone else's,
+// so every square is something a good student's resume really has. The fix is on the back: make it stand out.
 const SQUARES = [
-  'Objective: “to obtain a challenging position”',
-  'Proficient in MS Word',
-  'Email is xX_gamer_Xx @yahoo.com',
-  'Skill bars. Excel: ●●●○○',
+  'An objective at the top',
+  '“Responsible for…”',
+  'Skills: MS Office, Canva',
+  '“Hardworking team player, fast learner”',
   null,
-  '“Very detail-oreinted”',
-  'LinkedIn photo cropped from a group pic',
-  'Hobbies: sleeping, eating',
-  'Only connection is your tita',
+  'Same Canva template as your blockmates',
+  'Org: “Member.” That’s the whole bullet.',
+  '“References available upon request”',
+  'LinkedIn headline: “Student at Ateneo”',
 ];
 export const bingo = {
-  id: 'bingo', piece: 'bingo', name: 'Red Flag Bingo card', size: 'A6, 105 × 148 mm, 2 sides', mm: [105, 148], bleed: 3, pages: ['Front', 'Back'],
+  id: 'bingo', piece: 'bingo', name: 'Blend-In Bingo card', size: 'A6, 105 × 148 mm, 2 sides', mm: [105, 148], bleed: 3, pages: ['Front', 'Back'],
   print: 'Print shop: A6, colour, both sides, card stock (200 gsm or more), 60 pcs. The PDF has 3 mm bleed: the shop prints 4 per A4 and trims to 105 × 148. Pens on the table so people can tick.',
   versions: [{
     id: 'v1',
-    note: 'Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. 3 in a row sends them to the back: the workshop, the dates, and the QR.',
+    note: 'Replaces the AAA try-out card, in the same layout: a blue band, then nine things every decent resume says. 3 in a row means yours blends in; the back says how to make it stand out: the workshop, the dates, and the QR.',
     html: async (i) => {
       const M = m(105, 148);   // 8
       return i === 0 ? `
       ${fill('#fff')}
       <div class="abs" style="left:-3mm;top:-3mm;width:111mm;height:30mm;background:${C.core}"></div>
       ${at(M, 6.4, 'Resume edition', `font-size:2.7mm;color:${C.ice}`, 'm nw')}
-      ${at(M - 0.4, 11, 'Red Flag Bingo', 'font-size:10.4mm;color:#fff', 'd nw')}
-      ${at(M, 32.5, 'Tick every one that’s true for you.', `font-size:3.3mm;color:${C.ink2};font-weight:600;letter-spacing:-0.01em`, 'nw')}
+      ${at(M - 0.4, 11, 'Blend-In Bingo', 'font-size:10.4mm;color:#fff', 'd nw')}
+      ${at(M, 32.5, 'Tick what’s on yours. None of it is wrong.', `font-size:3.3mm;color:${C.ink2};font-weight:600;letter-spacing:-0.01em`, 'nw')}
       ${at(M, 39, `<div style="display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:26.5mm;gap:1.5mm;width:${105 - 2 * M}mm">
         ${SQUARES.map((s) => s ? `<div style="border:0.35mm solid rgba(6,26,77,0.22);border-radius:1.4mm;display:flex;align-items:center;justify-content:center;text-align:center;padding:1.8mm;font-size:2.95mm;line-height:1.22;font-weight:600;color:${C.navy};letter-spacing:-0.01em">${s}</div>`
-          : `<div style="background:${C.navy};border-radius:1.4mm;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:1.6mm"><div class="m" style="font-size:2.4mm;color:${C.cyan}">Free space</div><div style="font-size:3.1mm;font-weight:700;line-height:1.2;margin-top:1mm">No LinkedIn yet</div></div>`).join('')}</div>`)}
-      ${atb(M, M - 1, `<span>3 in a row? Don’t panic.<br>Flip this card.</span>${word(4.4, C.navy)}`,
+          : `<div style="background:${C.navy};border-radius:1.4mm;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:1.6mm"><div class="m" style="font-size:2.4mm;color:${C.cyan}">Free space</div><div style="font-size:3.1mm;font-weight:700;line-height:1.2;margin-top:1mm">Not one number in it</div></div>`).join('')}</div>`)}
+      ${atb(M, M - 1, `<span>3 in a row? It’s not bad.<br>It blends in. Flip this card.</span>${word(4.4, C.navy)}`,
         `display:flex;justify-content:space-between;align-items:flex-end;width:${105 - 2 * M}mm;font-size:3.4mm;font-weight:650;letter-spacing:-0.015em;line-height:1.3;color:${C.navy}`, 'nw')}` : `
       ${gradBg}
       ${at(M + 1, 12, word(13, '#fff'))}
-      ${at(M + 0.6, 38, 'A hands-on<br>career workshop<br>in 4 sessions.', 'font-size:10.4mm;color:#fff;line-height:1.08', 'd nw')}
+      ${at(M + 0.6, 38, 'Make yours<br>stand out<br>in 4 sessions.', 'font-size:10.4mm;color:#fff;line-height:1.08', 'd nw')}
       ${at(M + 1, 77, `${DATES} · ${F.days}<br>${TIME}<br>${F.room}`, 'font-size:4.4mm;color:#fff;font-weight:600;letter-spacing:-0.02em;line-height:1.35', 'nw')}
       ${atb(M + 1, M + 1, `${tile(30, 2.6, await qr(undefined, 24.8))}<div><div class="d nw" style="font-size:6mm;color:#fff;line-height:1.02">Scan to<br>sign up.</div>
           <div class="m nw" style="font-size:2.3mm;color:${C.ice};margin-top:2.2mm;line-height:1.5">${F.full} · ${F.single}<br>Barkada of 3 ${F.barkada}</div></div>`,

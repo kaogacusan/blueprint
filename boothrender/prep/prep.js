@@ -1,6 +1,6 @@
 // /boothrender/prep: the booth's print, buy, and bring tables, ours next to Prince's. Not linked from the site.
 // Data: ../prep-data.js. Ticks are saved in this browser only.
-import { ASOF, BUDGET, SHOP, PRINT, BUY, BRING, totals } from '/boothrender/prep-data.js';
+import { ASOF, BUDGET, SHOP, BACKUPS, MESSAGED, TEAM_MSG, PRINT, BUY, BRING, totals } from '/boothrender/prep-data.js';
 
 const SITE = 'https://ateneoblueprint.vercel.app';
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -42,7 +42,7 @@ function printTable() {
 function orderText() {
   const ours = PRINT.filter((r) => r.ours);
   const line = (r, i) => `${i + 1}. ${r.name}${r.ours.os ? `, ${r.ours.os}` : ''}: ${r.ours.qty} pc${r.ours.qty === '1' ? '' : 's'}. ${r.id === 'banner' ? 'Tarp or PP film, full colour, cut exact.' : r.spec}\n   File: ${SITE}${r.ours.pdf}`;
-  return `Hi! Rush order for today, please, for two booths at Ateneo. Same-day pickup or Lalamove to Katipunan. Separate receipts for each booth, please.
+  return `Hi! Rush order, please, for two booths at Ateneo. Pickup or Lalamove to Katipunan. Separate receipts for each booth, please. Tarps: colour to the edge, no white border.
 
 BOOTH 1 (Blueprint):
 ${ours.map(line).join('\n')}
@@ -50,6 +50,22 @@ ${ours.map(line).join('\n')}
 BOOTH 2 (profstopick) will send their own files in this chat: a 60 × 160 cm banner, pass cards (90 × 54 mm), flyers (A6), an A5 QR sign, and an A4 price list.
 
 Can you send the total for each booth and when it will be ready? Thank you!`;
+}
+
+// ---------- messaged ----------
+const STATUS = { waiting: 'Waiting', replied: 'Replied: compare', yes: 'Going with them', no: 'No / not now' };
+function messagedTable() {
+  const rows = [...MESSAGED].sort((a, b) => (b.prio ? 1 : 0) - (a.prio ? 1 : 0));
+  return `<div class="table-wrap"><table class="mat pt pt--msg">
+    <thead><tr><th></th><th>Who</th><th>For</th><th>Sent</th><th>Status</th><th>Note</th></tr></thead>
+    <tbody>${rows.map((r) => `<tr${r.prio ? ' class="pt__prio"' : ''}>
+      <td>${tick(`msg-${r.id}`)}</td>
+      <td class="pt__what"><a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.name)} ↗</a><span class="pt__where">${esc(r.where)}</span></td>
+      <td><b>${esc(r.for)}</b>${r.prio ? '<em>your pick</em>' : ''}</td>
+      <td class="nw">${esc(r.sent)}</td>
+      <td><span class="pt__st pt__st--${esc(r.status)}">${esc(STATUS[r.status] || r.status)}</span>${r.reply ? `<small>${esc(r.reply)}</small>` : ''}</td>
+      <td class="pt__spec">${esc(r.note)}</td></tr>`).join('')}</tbody>
+  </table></div>`;
 }
 
 // ---------- buy ----------
@@ -95,10 +111,14 @@ function budget() {
 document.querySelectorAll('[data-asof]').forEach((el) => { el.textContent = ASOF; });
 document.querySelectorAll('[data-est]').forEach((el) => { el.textContent = range(totals().all); });
 document.getElementById('shop').innerHTML = `
-  <div><b>${esc(SHOP.name)}</b> · <a href="tel:${SHOP.phone.replace(/\s/g, '')}">${esc(SHOP.phone)}</a> · <a href="${esc(SHOP.fb)}" target="_blank" rel="noopener">Messenger ↗</a> · ${esc(SHOP.email)}
-    <br><span>${esc(SHOP.where)}. ${esc(SHOP.does)} ${esc(SHOP.hours)}</span>
-    <br><span><b>If not:</b> ${esc(SHOP.backup.name)}, ${esc(SHOP.backup.where)}. ${esc(SHOP.backup.hours)}. ${esc(SHOP.backup.phone)}. ${esc(SHOP.backup.prices)}.</span></div>
-  <button type="button" class="btn btn--pri" data-copy>Copy the order <small>both booths</small></button>`;
+  <div><b>${esc(SHOP.name)}</b> · ${esc(SHOP.who)} · <a href="${esc(SHOP.link)}" target="_blank" rel="noopener">Listing ↗</a> · <a href="${esc(SHOP.chat)}" target="_blank" rel="noopener">Our chat ↗</a>
+    <br><span>${esc(SHOP.where)}. ${esc(SHOP.does)}</span>
+    ${BACKUPS.map((b) => `<br><span><b>${esc(b.name)}</b>, ${esc(b.where)}${b.phone ? ` · ${esc(b.phone)}` : ''}${b.link ? ` · <a href="${esc(b.link)}" target="_blank" rel="noopener">FB ↗</a>` : ''}. ${esc(b.note)}</span>`).join('')}</div>
+  <button type="button" class="btn btn--pri" data-copy="order">Copy the order <small>both booths</small></button>`;
+document.getElementById('msgTable').innerHTML = messagedTable();
+document.querySelectorAll('[data-msgcount]').forEach((el) => { el.textContent = MESSAGED.length; });
+document.getElementById('team').innerHTML = `<pre class="prep__msg">${esc(TEAM_MSG)}</pre>
+  <button type="button" class="btn btn--pri" data-copy="team">Copy the message <small>Nate + Amber</small></button>`;
 document.getElementById('printTable').innerHTML = printTable();
 document.getElementById('buyTable').innerHTML = buyTable();
 document.getElementById('bringTable').innerHTML = bringTable();
@@ -110,16 +130,17 @@ document.addEventListener('change', (e) => {
   done[b.dataset.tick] = b.checked;
   save(done);
 });
-const copyBtn = document.querySelector('[data-copy]');
-copyBtn.addEventListener('click', async () => {
+const TEXTS = { order: orderText, team: () => TEAM_MSG };
+document.querySelectorAll('[data-copy]').forEach((copyBtn) => copyBtn.addEventListener('click', async () => {
   const small = copyBtn.querySelector('small');
-  const text = orderText();
+  const was = small.textContent;
+  const text = TEXTS[copyBtn.dataset.copy]();
   try { await navigator.clipboard.writeText(text); small.textContent = 'copied ✓'; } catch {
     const ta = Object.assign(document.createElement('textarea'), { value: text });
     document.body.append(ta); ta.select();
     try { document.execCommand('copy'); small.textContent = 'copied ✓'; } catch { small.textContent = 'copy failed'; }
     ta.remove();
   }
-  setTimeout(() => { small.textContent = 'both booths'; }, 2500);
-});
+  setTimeout(() => { small.textContent = was; }, 2500);
+}));
 export { orderText };

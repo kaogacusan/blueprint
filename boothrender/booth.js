@@ -37,9 +37,9 @@ const pieces = [
     cost: [363, 726], basis: 'assumed',
     note: 'What Blueprint is, in big words, with the dates and the Barkada deal on a navy strip. Hangs from the back bar on zip ties; the bottom-left corner is tied to the back leg and a water bottle weighs down the right one. Bottom edge 0.5 m off the floor. Steps in “Set it up” below.',
     view: { az: 0.05, el: 0.08, tx: 0.75, ty: 1.25, tz: -2.9, size: 1.9, width: 2.2 } },
-  { id: 'skirt', num: 3, cat: 'tarp', name: 'Table skirt tarp', size: '0.9 m × 0.7 m', where: 'Aisle face of the table, centred, over the tablecloth',
+  { id: 'skirt', num: 3, cat: 'tarp', name: 'Table skirt tarp', size: '1.2 m × 0.7 m', where: 'Aisle face of the table, the full width, over the tablecloth',
     cost: [102, 203], basis: 'assumed',
-    note: 'Logo, what and when, and the prices. Zip-tied to the table’s front edge and legs through its 4 corner grommets.',
+    note: 'Logo, what and when, and the prices, navy to the edge (no white border). The full front of a 4 ft table, from the top edge to 4 cm off the floor. Zip-tied to the table’s front edge and legs through its 4 corner grommets.',
     view: { az: 0.1, el: 0.1, tx: 0.61, ty: 0.45, tz: -0.25, size: 1.2, width: 1.7 } },
   { id: 'pullup', num: 4, cat: 'tarp', name: 'Roll-up banner + stand', size: '80 × 200 cm print on a roll-up stand', where: 'Outside the booth, just left of the front-left tent leg, angled up the road',
     cost: [680, 1220], basis: 'assumed',
@@ -55,9 +55,9 @@ const pieces = [
   { id: 'flyers', num: 7, cat: 'table', name: 'Flyers', size: 'A6 (105 × 148 mm), 2 sides, 100 pcs', where: 'Table, front row, middle. The floater carries a stack',
     cost: [250, 500], basis: 'assumed', flag: PRINCE,
     note: `${PRINCE} Front: “A hands-on career workshop.” and the dates. Back: the 4 sessions, all three tickets, and the QR. Printed at the shop with Prince’s flyers.`, view: zoomTable },
-  { id: 'bingo', num: 8, cat: 'table', name: 'Red Flag Bingo cards + pens', size: 'A6 cards, 2 sides, card stock, 60 pcs. 3 pens in a cup', where: 'Table, front row, left',
+  { id: 'bingo', num: 8, cat: 'table', name: 'Blend-In Bingo cards + pens', size: 'A6 cards, 2 sides, card stock, 60 pcs. 3 pens in a cup', where: 'Table, front row, left',
     cost: [150, 450], basis: 'assumed',
-    note: 'If the budget allows (Thomas). People tick the resume red flags that are true for them; 3 in a row says “Don’t panic. Flip this card.”, and the back has the workshop, dates, prices, and QR.', view: zoomTable },
+    note: 'If the budget allows (Thomas). Nine things every decent resume says (an objective, “Responsible for…”, MS Office). People tick what’s on theirs; 3 in a row says “It’s not bad. It blends in.”, and the back says how to stand out: the workshop, dates, prices, and QR.', view: zoomTable },
   { id: 'signup', num: 9, cat: 'table', name: 'Sign-up sheet on a clipboard', size: 'A4 sheet: name, email, mobile, course, ticket', where: 'Table, front row, right',
     cost: [25, 25], basis: 'assumed',
     note: 'For people who do not want to scan. Same fields as the site form, plus which ticket. 5 sheets, black and white, at the shop. A member brings the clipboard.', view: zoomTable },
@@ -251,7 +251,7 @@ async function build(S) {
   S.put('cloth', cloth);
   const TOP = T.h + 0.004;   // things on the table sit on the cloth
   // 2 skirt, on the aisle face, over the cloth
-  const skirt = S.panel({ w: 0.9, h: 0.7, map: tx.skirt });
+  const skirt = S.panel({ w: 1.2, h: 0.7, map: tx.skirt });
   skirt.position.set(T.x1 / 2, 0.04 + 0.35, T.z1 + o + 0.006);
   S.put('skirt', skirt);
   // 11 supply box, under the table (the cloth hides it)

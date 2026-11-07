@@ -42,10 +42,11 @@
     1400,
     600
    ],
+   "bleed": 10,
    "pages": [
     "Front"
    ],
-   "print": "Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.",
+   "print": "Tarp. Print at 100 dpi or more. Colour to the edge: no white border. Grommets every 30 cm on the top edge. No hem. The PDF has 1 cm of extra background on every side, to trim off (cutting at the print edge works too).",
    "versions": [
     {
      "id": "v1",
@@ -68,7 +69,7 @@
      "look": "v2",
      "note": "White tarp with the site’s grid. The selection box sits on “paper.”, like the site. Logo is a sharp vector shape.",
      "pdf": "/assets/print/booth/header/v2.pdf",
-     "pdfKb": 359,
+     "pdfKb": 358,
      "jpg": [
       "/assets/print/booth/header/v2-1.jpg"
      ],
@@ -84,7 +85,7 @@
      "look": "v3",
      "note": "The name fills the tarp, so it reads from far down the road. Adds what it is and when.",
      "pdf": "/assets/print/booth/header/v3.pdf",
-     "pdfKb": 353,
+     "pdfKb": 329,
      "jpg": [
       "/assets/print/booth/header/v3-1.jpg"
      ],
@@ -261,20 +262,21 @@
    "id": "skirt",
    "piece": "skirt",
    "name": "Table skirt tarp",
-   "size": "0.9 m × 0.7 m",
+   "size": "1.2 m × 0.7 m",
    "mm": [
-    900,
+    1200,
     700
    ],
+   "bleed": 10,
    "pages": [
     "Front"
    ],
-   "print": "Tarp. Print at 100 dpi or more. Ask for grommets in the 4 corners for the cable ties.",
+   "print": "Tarp, 1.2 × 0.7 m, colour to the edge: no white border. The PDF is 1.22 × 0.72 m: 1 cm of extra navy on every side, to trim off (cutting at the print edge works too). 4 corner grommets for the zip ties. No hem.",
    "versions": [
     {
      "id": "v1",
      "look": "v1",
-     "note": "The original: logo and what it is, centred on navy. Adds the room and a line with the prices.",
+     "note": "The original: logo and what it is, centred on navy, now the full width of a 4 ft table. Adds the room and a line with the prices.",
      "pdf": "/assets/print/booth/skirt/v1.pdf",
      "pdfKb": 45,
      "jpg": [
@@ -285,86 +287,6 @@
      ],
      "t": [
       "/assets/print/booth/skirt/v1-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v2",
-     "look": "v2",
-     "note": "The deadline is the biggest thing on it. It gives people a reason to sign up today.",
-     "pdf": "/assets/print/booth/skirt/v2.pdf",
-     "pdfKb": 365,
-     "jpg": [
-      "/assets/print/booth/skirt/v2-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/skirt/v2-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/skirt/v2-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v3",
-     "look": "v3",
-     "note": "Shows the prices, like the site does now. People at the aisle know the cost before they ask.",
-     "pdf": "/assets/print/booth/skirt/v3.pdf",
-     "pdfKb": 382,
-     "jpg": [
-      "/assets/print/booth/skirt/v3-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/skirt/v3-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/skirt/v3-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v4",
-     "look": "v4",
-     "note": "V1 on white, with the logo in the corner and the words at the bottom, so it is easy to read below the table edge.",
-     "pdf": "/assets/print/booth/skirt/v4.pdf",
-     "pdfKb": 29,
-     "jpg": [
-      "/assets/print/booth/skirt/v4-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/skirt/v4-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/skirt/v4-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v5",
-     "look": "v5",
-     "note": "V2 on solid blue. The deadline is still the biggest thing, now with no grid and no box.",
-     "pdf": "/assets/print/booth/skirt/v5.pdf",
-     "pdfKb": 27,
-     "jpg": [
-      "/assets/print/booth/skirt/v5-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/skirt/v5-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/skirt/v5-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v6",
-     "look": "v6",
-     "note": "V3 without the grid. One big price in light blue, and the other two in plain lines under it.",
-     "pdf": "/assets/print/booth/skirt/v6.pdf",
-     "pdfKb": 32,
-     "jpg": [
-      "/assets/print/booth/skirt/v6-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/skirt/v6-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/skirt/v6-1.t.jpg"
      ]
     }
    ]
@@ -605,7 +527,7 @@
   {
    "id": "bingo",
    "piece": "bingo",
-   "name": "Red Flag Bingo card",
+   "name": "Blend-In Bingo card",
    "size": "A6, 105 × 148 mm, 2 sides",
    "mm": [
     105,
@@ -621,9 +543,9 @@
     {
      "id": "v1",
      "look": "v1",
-     "note": "Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. 3 in a row sends them to the back: the workshop, the dates, and the QR.",
+     "note": "Replaces the AAA try-out card, in the same layout: a blue band, then nine things every decent resume says. 3 in a row means yours blends in; the back says how to make it stand out: the workshop, the dates, and the QR.",
      "pdf": "/assets/print/booth/bingo/v1.pdf",
-     "pdfKb": 173,
+     "pdfKb": 167,
      "jpg": [
       "/assets/print/booth/bingo/v1-1.jpg",
       "/assets/print/booth/bingo/v1-2.jpg"

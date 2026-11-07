@@ -18,7 +18,7 @@ Use the server. The 3D will not load if you double-click `index.html`.
 Two extra pages. They are not linked from the landing page.
 
 - http://localhost:5180/venuerender/ — FA Annex 104 set up for the Nov 10 workshop (5:00–7:30 pm, 26 people): 3D room, numbered checklist, run sheet, who stands where, what to check.
-- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth (kept lean: header, backdrop and skirt tarps, an 80 × 200 cm roll-up banner, the sign-up QR in an A4 acrylic stand, calling cards, flyers, and Red Flag Bingo cards), numbered parts list, and the set-up steps. The ordering lives on the unlinked prep page.
+- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth (kept lean: header, backdrop and skirt tarps, an 80 × 200 cm roll-up banner, the sign-up QR in an A4 acrylic stand, calling cards, flyers, and Blend-In Bingo cards), numbered parts list, and the set-up steps. The ordering lives on the unlinked prep page.
 
 Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `?view=top` (or any tab id) to open a view.
 
@@ -37,7 +37,7 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 
 Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in six versions:
 
-- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's roll-up banner, A4 sign-up QR, calling card (90 × 54 mm), and Red Flag Bingo card are built on it and exist in V1 only. The calling card, flyer, and bingo card have 3 mm bleed for the print shop.
+- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's roll-up banner, A4 sign-up QR, calling card (90 × 54 mm), Blend-In Bingo card, and the 1.2 × 0.7 m table skirt are built on it and exist in V1 only. The calling card, flyer, and bingo card have 3 mm bleed for the print shop; the skirt and header tarps have 10 mm, so no white border shows.
 - **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
 - **V3 Big type**: fewer words, bigger. Reads from far away.
 - **V4 Clean white**: V1 cleaned up. White paper, navy type, one blue.
