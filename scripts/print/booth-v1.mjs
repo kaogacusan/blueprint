@@ -3,13 +3,13 @@
 //
 // The system, so every piece looks like one set:
 //   Grounds   brand gradient (outward-facing: header, banner, flyer front, the bingo card's back), navy (table pieces:
-//             skirt, workshop card), paper + the site's grid (backdrop), white (things people use: the QR sign, the
-//             resume-check sign, the sign-up sheet, the bingo card).
+//             skirt, calling card), paper + the site's grid (backdrop), white (things people use: the QR sign, the
+//             sign-up sheet, the bingo card).
 //   Margin    8% of the short edge, the same on all four sides (m()).
 //   Type      Inter display for headlines (.d), Inter 600 for facts, JetBrains Mono caps for small labels (.m).
 //   Colour    one accent per ground: core blue on light, ice/cyan on dark. No gradient text, no extra colours.
 //   QR        on a white tile on dark grounds. Prices always show all three tickets, Barkada included.
-// Sizes in mm. booth.mjs puts these in as V1 of each piece; pullup (the standing banner), bingo, check and guide are V1 only.
+// Sizes in mm. booth.mjs puts these in as V1 of each piece; pullup (the standing banner), regqr, card and bingo are V1 only.
 import { C, F, word, mark, lockup, qr, grid } from './kit.mjs';
 
 const m = (w, h) => Math.round(Math.min(w, h) * 0.08);
@@ -90,114 +90,58 @@ export const skirt = {
     ${at(0, 545, `<div style="display:flex;justify-content:center">${pill(`From ${F.single} · Barkada of 3: ${F.barkada}`, 34, { bg: C.electric })}</div>`, 'width:900mm')}`,
 };
 
-// 4 Standing banner, 60 × 160 cm: the same size as Prince's booth banner, so both can be printed by one seller.
-// The roaming banner's look, stretched tall: logo and headline up top (seen over heads), the sessions,
-// then the QR at chest height and the three tickets. Keep the bottom 120 mm clear for the stand.
+// 4 Standing banner: a roll-up (pull-up) stand, 80 × 200 cm, the most common size, and the one the stand we found takes.
+// Top to bottom: logo, headline (seen over heads), then the QR at chest height (about 1.1–1.4 m off the floor),
+// then the line from the site, the 4 sessions, when and where, and the tickets. Roll-ups hide the bottom of the print
+// in the base and grip the top in a rail, so nothing sits in the top 40 mm or the bottom 160 mm.
 export const pullup = {
-  id: 'pullup', piece: 'pullup', name: 'Standing banner', size: '60 × 160 cm, on a stand', mm: [600, 1600], pages: ['Front'],
-  print: 'Tarp, 60 × 160 cm, the same size as Prince’s banner: order both from one seller. Ask for the stand too (roll-up or X-stand that takes 60 × 160). The bottom 12 cm may sit in the stand.',
+  id: 'pullup', piece: 'pullup', name: 'Standing banner (roll-up)', size: '80 × 200 cm, for a roll-up stand', mm: [800, 2000], pages: ['Front'],
+  print: 'Tarp (or PP film if the shop has it: it curls less), 80 × 200 cm, for a roll-up stand: no grommets, no hem, cut exact. Measure the stand’s top rail first: if it is 85 cm, ask for an 85 × 200 file. The bottom 16 cm hides in the base.',
   versions: [{
     id: 'v1',
-    note: 'Built from the roaming banner: logo, headline, the line from the site, the 4 sessions, then the QR and all three tickets at chest height.',
+    note: 'Built from the roaming banner, re-laid for a roll-up: logo and headline up top, the QR at chest height, then the sessions, dates, and all three tickets.',
     html: async () => {
-      const M = m(600, 1600), W = 600 - 2 * M;   // 48, 504
+      const M = m(800, 2000), W = 800 - 2 * M;   // 64, 672
       return `
       ${fill(`linear-gradient(168deg, ${C.core} 0%, ${C.electric} 55%, ${C.sky} 100%)`)}
-      ${at(M, 64, lockup(86, { markColor: '#fff', wordColor: '#fff' }))}
-      ${at(M - 3, 214, 'A hands-on<br>career<br>workshop.', 'font-size:95mm;color:#fff;line-height:0.96', 'd nw')}
-      ${at(M, 512, `${F.tagline[0]}<br>${F.tagline[1]}`, `font-size:36mm;color:${C.ice};font-weight:600;letter-spacing:-0.03em;line-height:1.16`, 'nw')}
-      ${at(M, 646, sessions(W, 30, true))}
-      ${at(M, 900, `${DATES} · ${F.days}<br><span style="color:${C.ice}">${TIME} · ${F.room}</span>`, 'font-size:31mm;color:#fff;font-weight:650;letter-spacing:-0.025em;line-height:1.22', 'nw')}
-      ${at(M, 1026, `<div style="display:flex;align-items:center;gap:26mm">${tile(200, 15, await qr(undefined, 170))}
-          <div><div class="d nw" style="font-size:50mm;color:#fff;line-height:1">Scan to<br>sign up.</div>
-          <div style="font-size:22mm;color:${C.ice};font-weight:600;margin-top:12mm;letter-spacing:-0.02em">It takes a minute.</div></div></div>`)}
-      ${at(M, 1268, tickets(W, 36, true))}`;
+      ${at(M, 80, lockup(104, { markColor: '#fff', wordColor: '#fff' }))}
+      ${at(M - 4, 250, 'A hands-on<br>career<br>workshop.', 'font-size:118mm;color:#fff;line-height:0.96', 'd nw')}
+      ${at(M, 640, `<div style="display:flex;align-items:center;gap:36mm">${tile(270, 20, await qr(undefined, 230))}
+          <div><div class="d nw" style="font-size:66mm;color:#fff;line-height:1">Scan to<br>sign up.</div>
+          <div style="font-size:29mm;color:${C.ice};font-weight:600;margin-top:16mm;letter-spacing:-0.02em">It takes a minute.</div></div></div>`)}
+      ${at(M, 990, `${F.tagline[0]}<br>${F.tagline[1]}`, `font-size:44mm;color:${C.ice};font-weight:600;letter-spacing:-0.03em;line-height:1.16`, 'nw')}
+      ${at(M, 1150, sessions(W, 38, true))}
+      ${at(M, 1470, `${DATES} · ${F.days}<br><span style="color:${C.ice}">${TIME} · ${F.room}</span>`, 'font-size:40mm;color:#fff;font-weight:650;letter-spacing:-0.025em;line-height:1.22', 'nw')}
+      ${at(M, 1640, tickets(W, 46, true), `padding-top:22mm;border-top:1.6mm solid rgba(185,238,255,0.35)`)}`;
     },
   }],
 };
 
-// 5 Sign-up QR, A5, in an acrylic stand.
+// 5 Sign-up QR, A4, in the A4 acrylic stand (Thomas's list has one A4 standee). The QR is big enough to scan from
+// about 1.3 m; the three tickets sit under it, since the workshop card is now the take-home calling card.
 export const regqr = {
-  id: 'v1',
-  note: 'The original, with the logo on top and the web address under the QR, on the same margin as the rest.',
-  html: async () => `
-    ${fill('#fff')}
-    ${at(0, 13, `<div style="display:flex;justify-content:center">${lockup(9)}</div>`, 'width:148mm')}
-    ${at(0, 31, 'Sign up', `width:148mm;text-align:center;font-size:21mm;color:${C.navy}`, 'd nw')}
-    ${at(24, 64, await qr(undefined, 100))}
-    ${at(0, 172, 'It takes a minute.', `width:148mm;text-align:center;font-size:9.5mm;font-weight:600;letter-spacing:-0.02em;color:${C.core}`, 'nw')}
-    ${at(0, 190, F.url, `width:148mm;text-align:center;font-size:3.2mm;color:${C.ink3}`, 'm nw')}`,
-};
-
-// The activity: a free 60-second resume check at the table. The sign, A4, in an acrylic stand.
-const STEPS3 = [['01', 'Open your resume or LinkedIn on your phone.'], ['02', 'We read it the way a recruiter does.'], ['03', 'You leave with one fix you can make today.']];
-export const check = {
-  id: 'check', piece: 'check', name: 'Resume check sign', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'],
-  print: 'Paper or card stock, colour, printed at a shop. Slides into an A4 acrylic stand.',
+  id: 'regqr', piece: 'regqr', name: 'Sign-up QR sign', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'],
+  print: 'Print shop: A4, colour, one side, card stock or photo paper. Slides into the A4 acrylic stand. Scan it with 2 phones before you leave the shop.',
   versions: [{
     id: 'v1',
-    note: 'The booth’s one activity: a free 60-second resume check. Three steps, and no sign-up needed.',
-    html: () => {
+    note: 'The original QR sign, made A4: logo, “Sign up”, a 13 cm QR, then all three tickets and the web address.',
+    html: async () => {
       const M = m(210, 297), W = 210 - 2 * M;   // 17, 176
       return `
       ${fill('#fff')}
-      ${at(M, M, lockup(10))}
-      ${at(210 - M - 70, M + 3, 'At this table', `width:70mm;text-align:right;font-size:3.2mm;color:${C.core}`, 'm nw')}
-      ${at(M - 1.5, 52, `Free<br>60-second<br><span style="color:${C.core}">resume check.</span>`, `font-size:31mm;color:${C.navy};line-height:0.98`, 'd nw')}
-      ${at(M, 152, 'Show us your resume or LinkedIn on your phone. We’ll give you one fix you can make today.', `width:${W}mm;font-size:7.2mm;color:${C.ink2};font-weight:600;letter-spacing:-0.02em;line-height:1.3`)}
-      ${at(M, 196, `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;width:${W}mm;padding-top:7mm;border-top:0.4mm solid ${C.line}">
-          ${STEPS3.map(([n, t]) => `<div><div class="m" style="font-size:3.6mm;color:${C.core}">${n}</div><div style="font-size:4.6mm;font-weight:600;color:${C.navy};line-height:1.3;margin-top:2mm;letter-spacing:-0.01em">${t}</div></div>`).join('')}</div>`)}
-      ${atb(M, M, `<span>No sign-up needed.</span><span style="color:${C.ink3};font-weight:500">${DATES} · ${F.room}</span>`,
-        `display:flex;justify-content:space-between;align-items:baseline;width:${W}mm;font-size:5.4mm;font-weight:700;letter-spacing:-0.02em;color:${C.navy};padding-top:5mm;border-top:0.4mm solid ${C.line}`, 'nw')}`;
-    },
-  }],
-};
-
-// The team guide for the resume check, A4 paper. Not for the table: whoever runs the check keeps it.
-const FIXES = [
-  ['Objective statement', 'Cut it. One line on what you do goes at the top instead.'],
-  ['Bullets start with “Responsible for”', 'Start with a verb: led, built, ran, wrote, organised.'],
-  ['No numbers', 'Add one: how many people, how much money, how often.'],
-  ['“Proficient in MS Word”', 'Cut basic tools. List what the role asks for.'],
-  ['Email like xX_gamer_Xx', 'Use the school email or firstname.lastname.'],
-  ['Two pages or more', 'One page. Cut the oldest and the least related first.'],
-  ['LinkedIn headline “Student at ADMU”', 'Say what you do: course, plus the 2 things you want to be known for.'],
-  ['LinkedIn photo cropped from a group pic', 'A clear photo of just you, face filling the frame.'],
-];
-export const guide = {
-  id: 'guide', piece: 'guide', name: 'Resume check guide (team)', size: 'A4, 210 × 297 mm', mm: [210, 297], pages: ['Front'],
-  print: 'Paper, black and white is fine. One for each person on shift. Not for the table.',
-  versions: [{
-    id: 'v1',
-    note: 'How to run the 60-second check: what to say, the 8 most common fixes (the same red flags as the bingo card), the AAA rewrite, and the pitch. A tally at the bottom counts checks per day.',
-    html: () => {
-      const M = 14, W = 182;
-      const h = (n, t) => `<div style="display:flex;align-items:baseline;gap:3mm;margin:0 0 2.4mm"><span class="m" style="font-size:3mm;color:${C.core}">${n}</span><span class="d" style="font-size:5.4mm;color:${C.navy}">${t}</span></div>`;
-      const say = (t) => `<div style="font-size:3.8mm;line-height:1.4;color:${C.ink};font-weight:500;padding:2.4mm 3.4mm;background:${C.paper};border-left:0.8mm solid ${C.core};margin-bottom:5mm">“${t}”</div>`;
-      return `
-      ${fill('#fff')}
-      ${at(M, M, lockup(8))}
-      ${at(210 - M - 90, M + 1.5, 'For the team · not for the table', `width:90mm;text-align:right;font-size:2.7mm;color:${C.ink3}`, 'm nw')}
-      ${at(M - 0.5, 28, 'Resume check. <span style="color:' + C.core + '">60 seconds.</span>', `font-size:11mm;color:${C.navy}`, 'd nw')}
-      ${at(M, 42, 'One fix, one rewritten bullet, then the pitch. Keep it friendly and quick.', `font-size:3.8mm;color:${C.ink2};font-weight:500`, 'nw')}
-      ${at(M, 54, `
-        ${h('01', 'Ask')}${say('Want a free 60-second resume check? Open your resume or your LinkedIn on your phone.')}
-        ${h('02', 'Read the top third, about 10 seconds')}
-        <div style="font-size:3.6mm;color:${C.ink2};line-height:1.4;margin:-1mm 0 5mm">That is about how long a recruiter looks first. Then give <b>one</b> fix, the first one that applies:</div>
-        <div style="display:grid;grid-template-columns:62mm 1fr;border-top:0.3mm solid ${C.line};margin-bottom:5mm">
-          ${FIXES.map(([a, b]) => `<div style="font-size:3.4mm;font-weight:650;color:${C.navy};padding:1.8mm 3mm 1.8mm 0;border-bottom:0.3mm solid ${C.line}">${a}</div><div style="font-size:3.4mm;color:${C.ink2};padding:1.8mm 0;border-bottom:0.3mm solid ${C.line}">${b}</div>`).join('')}</div>
-        ${h('03', 'Rewrite one bullet together, with AAA')}
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin-bottom:5mm">${F.aaa.map(([a, b]) => `<div style="border:0.3mm solid ${C.line};border-radius:1.6mm;padding:2.4mm 3mm"><div class="d" style="font-size:4.2mm;color:${C.core}">${a}</div><div style="font-size:3.3mm;color:${C.ink2};margin-top:1mm">${b}</div></div>`).join('')}</div>
-        ${h('04', 'Close')}${say(`That was one bullet in a minute. In 4 sessions we do your whole resume, LinkedIn, and intro. Here’s a flyer, and the QR is right here. With friends? Barkada of 3 is ${F.barkada}, ${'₱666'} each.`)}`, `width:${W}mm`)}
-      ${atb(M, M, `<div class="m" style="font-size:2.8mm;color:${C.ink3};margin-bottom:2mm">Tally: one line per check</div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);border:0.3mm solid ${C.line};border-radius:1.6mm">${['Mon 9', 'Tue 10', 'Wed 11', 'Thu 12', 'Fri 13'].map((d, i) => `<div style="height:16mm;padding:1.6mm 2.4mm;${i ? `border-left:0.3mm solid ${C.line}` : ''}"><span class="m" style="font-size:2.6mm;color:${C.ink3}">${d}</span></div>`).join('')}</div>`, `width:${W}mm`)}`;
+      ${at(0, 15, `<div style="display:flex;justify-content:center">${lockup(11)}</div>`, 'width:210mm')}
+      ${at(0, 36, 'Sign up', `width:210mm;text-align:center;font-size:27mm;color:${C.navy}`, 'd nw')}
+      ${at(40, 72, await qr(undefined, 130))}
+      ${at(0, 209, 'It takes a minute.', `width:210mm;text-align:center;font-size:9mm;font-weight:600;letter-spacing:-0.02em;color:${C.core}`, 'nw')}
+      ${at(M, 230, tickets(W, 10.5, false), `padding-top:6mm;border-top:0.4mm solid ${C.line}`)}
+      ${atb(0, 11, F.url, `width:210mm;text-align:center;font-size:3.4mm;color:${C.ink3}`, 'm nw')}`;
     },
   }],
 };
 
 // 6 Calling card, 90 × 54 mm: the workshop card made small enough to take home. Same size as Prince's pass
-// cards, so one shop can print both. Front: who, when, where, and the QR. Back: three resume fixes worth keeping
-// (the top three from the resume check), then the pitch and the prices.
+// cards, so one shop can print both. Front: who, when, where, and the QR. Back: three resume fixes
+// people can use tonight, then the pitch and the prices.
 const cardFront = async () => {
   const M = 4.5;
   return `
@@ -229,7 +173,7 @@ const cardBack = () => {
 };
 export const card = {
   id: 'card', piece: 'card', name: 'Calling card', size: '90 × 54 mm, 2 sides', mm: [90, 54], bleed: 3, pages: ['Front', 'Back'],
-  print: 'Calling card, 2 sides, 300 gsm or thicker, matte. 100–200 pcs. The PDF is 96 × 60 mm: 3 mm bleed on every side, trim to 90 × 54 (the same size as Prince’s pass cards). No shop? The “10 on A4” file prints at home.',
+  print: 'Print shop: calling card, 2 sides, 300 gsm or thicker, matte. 100–150 pcs. The PDF is 96 × 60 mm: 3 mm bleed on every side, trim to 90 × 54 (the same size as Prince’s pass cards).',
   versions: [{
     id: 'v1',
     note: 'The workshop card, small enough to keep. Front: logo, dates, time, room, and the QR. Back: three resume fixes people can use tonight, then the pitch and all three tickets.',
@@ -250,23 +194,23 @@ const SQUARES = [
   'Only connection is your tita',
 ];
 export const bingo = {
-  id: 'bingo', piece: 'bingo', name: 'Red Flag Bingo card', size: 'A6, 105 × 148 mm', mm: [105, 148], pages: ['Front', 'Back'],
-  print: 'Card stock, 2 sides. Print 4 on one A4 sheet, then cut. Pens on the table so people can tick boxes.',
+  id: 'bingo', piece: 'bingo', name: 'Red Flag Bingo card', size: 'A6, 105 × 148 mm, 2 sides', mm: [105, 148], bleed: 3, pages: ['Front', 'Back'],
+  print: 'Print shop: A6, colour, both sides, card stock (200 gsm or more), 60 pcs. The PDF has 3 mm bleed: the shop prints 4 per A4 and trims to 105 × 148. Pens on the table so people can tick.',
   versions: [{
     id: 'v1',
-    note: 'Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. It leads into the free resume check. The back is the AAA back, with the QR.',
+    note: 'Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. 3 in a row sends them to the back: the workshop, the dates, and the QR.',
     html: async (i) => {
       const M = m(105, 148);   // 8
       return i === 0 ? `
       ${fill('#fff')}
-      <div class="abs" style="left:0;top:0;width:105mm;height:27mm;background:${C.core}"></div>
+      <div class="abs" style="left:-3mm;top:-3mm;width:111mm;height:30mm;background:${C.core}"></div>
       ${at(M, 6.4, 'Resume edition', `font-size:2.7mm;color:${C.ice}`, 'm nw')}
       ${at(M - 0.4, 11, 'Red Flag Bingo', 'font-size:10.4mm;color:#fff', 'd nw')}
       ${at(M, 32.5, 'Tick every one that’s true for you.', `font-size:3.3mm;color:${C.ink2};font-weight:600;letter-spacing:-0.01em`, 'nw')}
       ${at(M, 39, `<div style="display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:26.5mm;gap:1.5mm;width:${105 - 2 * M}mm">
         ${SQUARES.map((s) => s ? `<div style="border:0.35mm solid rgba(6,26,77,0.22);border-radius:1.4mm;display:flex;align-items:center;justify-content:center;text-align:center;padding:1.8mm;font-size:2.95mm;line-height:1.22;font-weight:600;color:${C.navy};letter-spacing:-0.01em">${s}</div>`
           : `<div style="background:${C.navy};border-radius:1.4mm;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:1.6mm"><div class="m" style="font-size:2.4mm;color:${C.cyan}">Free space</div><div style="font-size:3.1mm;font-weight:700;line-height:1.2;margin-top:1mm">No LinkedIn yet</div></div>`).join('')}</div>`)}
-      ${atb(M, M - 1, `<span>3 in a row? Get a free 60-second<br>resume check at our table.</span>${word(4.4, C.navy)}`,
+      ${atb(M, M - 1, `<span>3 in a row? Don’t panic.<br>Flip this card.</span>${word(4.4, C.navy)}`,
         `display:flex;justify-content:space-between;align-items:flex-end;width:${105 - 2 * M}mm;font-size:3.4mm;font-weight:650;letter-spacing:-0.015em;line-height:1.3;color:${C.navy}`, 'nw')}` : `
       ${gradBg}
       ${at(M + 1, 12, word(13, '#fff'))}
@@ -324,49 +268,3 @@ export const flyer = {
       'display:flex;align-items:flex-end;gap:5mm')}`;
   },
 };
-
-// ---------- home-print sheets: several copies of a 2-sided piece on A4, ready for a home printer ----------
-// The grid is centred and every copy is the same, so the backs line up when the printer flips on the long edge.
-// Copies touch (one cut separates two). Pieces shrink a little if needed to keep 5 mm clear for the printer.
-// Crop marks go in the margin when there is room for them.
-const sheetOf = ({ id, piece, name, size, print, note, cell: [cw, ch], cols, rows, html }) => ({
-  id, piece, name, size, mm: [210, 297], pages: ['Front', 'Back'], print,
-  versions: [{
-    id: 'v1', note,
-    html: async (i) => {
-      const one = await html(i);
-      const k = Math.min(1, 200 / (cols * cw), 287 / (rows * ch));
-      const w = cw * k, h = ch * k, x0 = (210 - cols * w) / 2, y0 = (297 - rows * h) / 2;
-      let cells = '';
-      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-        cells += `<div style="position:absolute;left:${x0 + c * w}mm;top:${y0 + r * h}mm;width:${w}mm;height:${h}mm;overflow:hidden">
-          <div style="position:absolute;left:0;top:0;width:${cw}mm;height:${ch}mm;transform:scale(${k});transform-origin:0 0">${one}</div></div>`;
-      }
-      let marks = '';
-      const t = (a, b, c, d) => { marks += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}"/>`; };
-      if (y0 >= 8) for (let c = 0; c <= cols; c++) { const x = x0 + c * w; t(x, y0 - 7, x, y0 - 2); t(x, 297 - y0 + 2, x, 297 - y0 + 7); }
-      if (x0 >= 8) for (let r = 0; r <= rows; r++) { const y = y0 + r * h; t(x0 - 7, y, x0 - 2, y); t(210 - x0 + 2, y, 210 - x0 + 7, y); }
-      return `${fill('#fff')}${cells}${marks ? `<svg class="fill" viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg"><g stroke="#000" stroke-width="0.2">${marks}</g></svg>` : ''}`;
-    },
-  }],
-});
-const HOME = 'Both sides, flip on the long edge, at 100% (no “fit to page”).';
-
-export const cardsheet = sheetOf({
-  id: 'cardsheet', piece: 'card', name: 'Calling cards, 10 on A4 (home print)', size: 'A4, 2 sides, 10 cards', cell: [90, 54], cols: 2, rows: 5,
-  print: `Only if no shop can print the calling cards in time. A4 card stock, 200 gsm or more. ${HOME} Cut on the crop marks: 3 cuts down, 6 across.`,
-  note: 'The calling card, 2 across and 5 down, with crop marks.',
-  html: (i) => (i === 0 ? cardFront() : cardBack()),
-});
-export const flyersheet = sheetOf({
-  id: 'flyersheet', piece: 'flyers', name: 'Flyers, 4 on A4 (home print)', size: 'A4, 2 sides, 4 flyers', cell: [105, 148], cols: 2, rows: 2,
-  print: `Regular paper or light card stock, colour. ${HOME} Trim the white edge, then cut once down and once across. 25 sheets = 100 flyers.`,
-  note: 'The flyer, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.',
-  html: (i) => flyer.html(i),
-});
-export const bingosheet = sheetOf({
-  id: 'bingosheet', piece: 'bingo', name: 'Bingo cards, 4 on A4 (home print)', size: 'A4, 2 sides, 4 cards', cell: [105, 148], cols: 2, rows: 2,
-  print: `A4 card stock, colour. ${HOME} Trim the white edge, then cut once down and once across. 15 sheets = 60 cards.`,
-  note: 'The Red Flag Bingo card, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.',
-  html: (i) => bingo.versions[0].html(i),
-});

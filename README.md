@@ -18,16 +18,16 @@ Use the server. The 3D will not load if you double-click `index.html`.
 Two extra pages. They are not linked from the landing page.
 
 - http://localhost:5180/venuerender/ — FA Annex 104 set up for the Nov 10 workshop (5:00–7:30 pm, 26 people): 3D room, numbered checklist, run sheet, who stands where, what to check.
-- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth (kept lean: header, backdrop and skirt tarps, a 60 × 160 cm standing banner, signs in acrylic stands, flyers, and one activity: a free 60-second resume check), numbered parts list, a set-up plan and schedule, and an order list, including the items to order together with Prince's booth.
+- http://localhost:5180/boothrender/ — our half (1.5 × 3 m) of a shared 3 × 3 m tent on Red Brick Road for the LAS 50 bazaar: 3D booth (kept lean: header, backdrop and skirt tarps, an 80 × 200 cm roll-up banner, the sign-up QR in an A4 acrylic stand, calling cards, flyers, and Red Flag Bingo cards), numbered parts list, and the set-up steps. The ordering lives on the unlinked prep page.
 
 Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `?view=top` (or any tab id) to open a view.
 
 | File | What it is |
 |---|---|
 | `venuerender/venue.js` | The room: sizes at the top (`W`, `D`, `H`), the checklist, run sheet, posts, and the 3D model. **The room size is an estimate.** Change `W`, `D`, `H` after you measure. |
-| `boothrender/booth.js` | The booth: sizes at the top, the parts list with costs, and the 3D model. Costs come from `shop.js` when it has a quote; otherwise they are guesses. |
-| `boothrender/todo.js` | “Get it made”, at the top of the booth page: what to print at a shop, buy, print at home, and bring, one row each with spec, price and PDF, plus a “Copy the order” button that writes the message for the print shop. Ticks are saved in the browser. |
-| `boothrender/shop.js` | The order list: per item, what to get, where (walk-in or link), price, and a backup. Prices as seen on the date in `asOf`. |
+| `boothrender/booth.js` | The booth: sizes at the top, the parts list with costs, and the 3D model. Costs come from `prep-data.js` when it has a price; otherwise they are guesses. |
+| `boothrender/prep-data.js` | What each booth prints, buys, and brings (ours next to Prince's), with sizes, shops, links, and prices. The booth page's costs come from it (`costOf`). |
+| `boothrender/prep/` | The prep page, `/boothrender/prep/`: the print table (Keira's booth and Prince's booth side by side, with both designs), the roll-up banner sizing, buy and bring tables, the ₱3,000 budget, and a “Copy the order” button for the print shop. Not linked from the site and `noindex`, but not password-locked. |
 | `render/stage.js` | Shared 3D engine (camera, pins, size lines, highlight). |
 | `render/page.js` | Shared page wiring (tabs, sliders, toggles, list, table). |
 | `render/render.css` | Shared styles for both pages. |
@@ -37,7 +37,7 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 
 Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in six versions:
 
-- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's standing banner, Red Flag Bingo card, resume check sign, its team guide, and the calling card (90 × 54 mm). The flyer, bingo card and calling card also come as A4 sheets for printing at home (4, 4 and 10 per sheet; `sheetOf` in booth-v1.mjs) are built on it and exist in V1 only.
+- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's roll-up banner, A4 sign-up QR, calling card (90 × 54 mm), and Red Flag Bingo card are built on it and exist in V1 only. The calling card, flyer, and bingo card have 3 mm bleed for the print shop.
 - **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
 - **V3 Big type**: fewer words, bigger. Reads from far away.
 - **V4 Clean white**: V1 cleaned up. White paper, navy type, one blue.

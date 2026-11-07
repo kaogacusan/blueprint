@@ -372,21 +372,21 @@
   {
    "id": "pullup",
    "piece": "pullup",
-   "name": "Standing banner",
-   "size": "60 × 160 cm, on a stand",
+   "name": "Standing banner (roll-up)",
+   "size": "80 × 200 cm, for a roll-up stand",
    "mm": [
-    600,
-    1600
+    800,
+    2000
    ],
    "pages": [
     "Front"
    ],
-   "print": "Tarp, 60 × 160 cm, the same size as Prince’s banner: order both from one seller. Ask for the stand too (roll-up or X-stand that takes 60 × 160). The bottom 12 cm may sit in the stand.",
+   "print": "Tarp (or PP film if the shop has it: it curls less), 80 × 200 cm, for a roll-up stand: no grommets, no hem, cut exact. Measure the stand’s top rail first: if it is 85 cm, ask for an 85 × 200 file. The bottom 16 cm hides in the base.",
    "versions": [
     {
      "id": "v1",
      "look": "v1",
-     "note": "Built from the roaming banner: logo, headline, the line from the site, the 4 sessions, then the QR and all three tickets at chest height.",
+     "note": "Built from the roaming banner, re-laid for a roll-up: logo and headline up top, the QR at chest height, then the sessions, dates, and all three tickets.",
      "pdf": "/assets/print/booth/pullup/v1.pdf",
      "pdfKb": 141,
      "jpg": [
@@ -397,150 +397,6 @@
      ],
      "t": [
       "/assets/print/booth/pullup/v1-1.t.jpg"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "regqr",
-   "piece": "regqr",
-   "name": "Sign-up QR",
-   "size": "A5, 148 × 210 mm",
-   "mm": [
-    148,
-    210
-   ],
-   "pages": [
-    "Front"
-   ],
-   "print": "Paper or card stock, colour, printed at a shop (home printers leave a white edge). Slides into an A5 acrylic stand, the same kind as Prince’s booth.",
-   "versions": [
-    {
-     "id": "v1",
-     "look": "v1",
-     "note": "The original, with the logo on top and the web address under the QR, on the same margin as the rest.",
-     "pdf": "/assets/print/booth/regqr/v1.pdf",
-     "pdfKb": 237,
-     "jpg": [
-      "/assets/print/booth/regqr/v1-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/regqr/v1-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/regqr/v1-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v2",
-     "look": "v2",
-     "note": "Adds the web address under the QR, for phones that will not scan.",
-     "pdf": "/assets/print/booth/regqr/v2.pdf",
-     "pdfKb": 292,
-     "jpg": [
-      "/assets/print/booth/regqr/v2-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/regqr/v2-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/regqr/v2-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v3",
-     "look": "v3",
-     "note": "Navy board with the QR on a white tile. Four words, big enough to read from the aisle.",
-     "pdf": "/assets/print/booth/regqr/v3.pdf",
-     "pdfKb": 141,
-     "jpg": [
-      "/assets/print/booth/regqr/v3-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/regqr/v3-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/regqr/v3-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v4",
-     "look": "v4",
-     "note": "V1 with everything on one left edge. The QR is as wide as the card allows, so it scans faster.",
-     "pdf": "/assets/print/booth/regqr/v4.pdf",
-     "pdfKb": 29,
-     "jpg": [
-      "/assets/print/booth/regqr/v4-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/regqr/v4-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/regqr/v4-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v5",
-     "look": "v5",
-     "note": "V2 on solid blue. The web address is plain text now, not small code letters.",
-     "pdf": "/assets/print/booth/regqr/v5.pdf",
-     "pdfKb": 40,
-     "jpg": [
-      "/assets/print/booth/regqr/v5-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/regqr/v5-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/regqr/v5-1.t.jpg"
-     ]
-    },
-    {
-     "id": "v6",
-     "look": "v6",
-     "note": "V3 without the grid. The white tile lines up with the words on both sides.",
-     "pdf": "/assets/print/booth/regqr/v6.pdf",
-     "pdfKb": 31,
-     "jpg": [
-      "/assets/print/booth/regqr/v6-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/regqr/v6-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/regqr/v6-1.t.jpg"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "check",
-   "piece": "check",
-   "name": "Resume check sign",
-   "size": "A4, 210 × 297 mm",
-   "mm": [
-    210,
-    297
-   ],
-   "pages": [
-    "Front"
-   ],
-   "print": "Paper or card stock, colour, printed at a shop. Slides into an A4 acrylic stand.",
-   "versions": [
-    {
-     "id": "v1",
-     "look": "v1",
-     "note": "The booth’s one activity: a free 60-second resume check. Three steps, and no sign-up needed.",
-     "pdf": "/assets/print/booth/check/v1.pdf",
-     "pdfKb": 301,
-     "jpg": [
-      "/assets/print/booth/check/v1-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/check/v1-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/check/v1-1.t.jpg"
      ]
     }
    ]
@@ -559,7 +415,7 @@
     "Front",
     "Back"
    ],
-   "print": "Calling card, 2 sides, 300 gsm or thicker, matte. 100–200 pcs. The PDF is 96 × 60 mm: 3 mm bleed on every side, trim to 90 × 54 (the same size as Prince’s pass cards). No shop? The “10 on A4” file prints at home.",
+   "print": "Print shop: calling card, 2 sides, 300 gsm or thicker, matte. 100–150 pcs. The PDF is 96 × 60 mm: 3 mm bleed on every side, trim to 90 × 54 (the same size as Prince’s pass cards).",
    "versions": [
     {
      "id": "v1",
@@ -583,127 +439,20 @@
    ]
   },
   {
-   "id": "cardsheet",
-   "piece": "card",
-   "name": "Calling cards, 10 on A4 (home print)",
-   "size": "A4, 2 sides, 10 cards",
-   "mm": [
-    210,
-    297
-   ],
-   "pages": [
-    "Front",
-    "Back"
-   ],
-   "print": "Only if no shop can print the calling cards in time. A4 card stock, 200 gsm or more. Both sides, flip on the long edge, at 100% (no “fit to page”). Cut on the crop marks: 3 cuts down, 6 across.",
-   "versions": [
-    {
-     "id": "v1",
-     "look": "v1",
-     "note": "The calling card, 2 across and 5 down, with crop marks.",
-     "pdf": "/assets/print/booth/cardsheet/v1.pdf",
-     "pdfKb": 142,
-     "jpg": [
-      "/assets/print/booth/cardsheet/v1-1.jpg",
-      "/assets/print/booth/cardsheet/v1-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/cardsheet/v1-1.m.jpg",
-      "/assets/print/booth/cardsheet/v1-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/cardsheet/v1-1.t.jpg",
-      "/assets/print/booth/cardsheet/v1-2.t.jpg"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "bingo",
-   "piece": "bingo",
-   "name": "Red Flag Bingo card",
-   "size": "A6, 105 × 148 mm",
-   "mm": [
-    105,
-    148
-   ],
-   "pages": [
-    "Front",
-    "Back"
-   ],
-   "print": "Card stock, 2 sides. Print 4 on one A4 sheet, then cut. Pens on the table so people can tick boxes.",
-   "versions": [
-    {
-     "id": "v1",
-     "look": "v1",
-     "note": "Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. It leads into the free resume check. The back is the AAA back, with the QR.",
-     "pdf": "/assets/print/booth/bingo/v1.pdf",
-     "pdfKb": 178,
-     "jpg": [
-      "/assets/print/booth/bingo/v1-1.jpg",
-      "/assets/print/booth/bingo/v1-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/bingo/v1-1.m.jpg",
-      "/assets/print/booth/bingo/v1-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/bingo/v1-1.t.jpg",
-      "/assets/print/booth/bingo/v1-2.t.jpg"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "bingosheet",
-   "piece": "bingo",
-   "name": "Bingo cards, 4 on A4 (home print)",
-   "size": "A4, 2 sides, 4 cards",
-   "mm": [
-    210,
-    297
-   ],
-   "pages": [
-    "Front",
-    "Back"
-   ],
-   "print": "A4 card stock, colour. Both sides, flip on the long edge, at 100% (no “fit to page”). Trim the white edge, then cut once down and once across. 15 sheets = 60 cards.",
-   "versions": [
-    {
-     "id": "v1",
-     "look": "v1",
-     "note": "The Red Flag Bingo card, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.",
-     "pdf": "/assets/print/booth/bingosheet/v1.pdf",
-     "pdfKb": 244,
-     "jpg": [
-      "/assets/print/booth/bingosheet/v1-1.jpg",
-      "/assets/print/booth/bingosheet/v1-2.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/bingosheet/v1-1.m.jpg",
-      "/assets/print/booth/bingosheet/v1-2.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/bingosheet/v1-1.t.jpg",
-      "/assets/print/booth/bingosheet/v1-2.t.jpg"
-     ]
-    }
-   ]
-  },
-  {
    "id": "flyer",
    "piece": "flyers",
    "name": "Flyer",
-   "size": "A6, 105 × 148 mm",
+   "size": "A6, 105 × 148 mm, 2 sides",
    "mm": [
     105,
     148
    ],
+   "bleed": 3,
    "pages": [
     "Front",
     "Back"
    ],
-   "print": "Paper or card stock, 2 sides. Print 4 on one A4 sheet, then cut.",
+   "print": "Print shop: A6, colour, both sides, 120–160 gsm, 100 pcs. The PDF has 3 mm bleed on every side: the shop prints 4 per A4 and trims to 105 × 148.",
    "versions": [
     {
      "id": "v1",
@@ -729,7 +478,7 @@
      "look": "v2",
      "note": "The site’s two lines with the selection box on the front. Back: sessions, prices, and the web address.",
      "pdf": "/assets/print/booth/flyer/v2.pdf",
-     "pdfKb": 384,
+     "pdfKb": 387,
      "jpg": [
       "/assets/print/booth/flyer/v2-1.jpg",
       "/assets/print/booth/flyer/v2-2.jpg"
@@ -748,7 +497,7 @@
      "look": "v3",
      "note": "Fewest words, biggest type. The back is a QR plus the dates, nothing else.",
      "pdf": "/assets/print/booth/flyer/v3.pdf",
-     "pdfKb": 117,
+     "pdfKb": 238,
      "jpg": [
       "/assets/print/booth/flyer/v3-1.jpg",
       "/assets/print/booth/flyer/v3-2.jpg"
@@ -805,7 +554,7 @@
      "look": "v6",
      "note": "V3 without the grid. One light-blue line on the front; the back is a QR and the dates.",
      "pdf": "/assets/print/booth/flyer/v6.pdf",
-     "pdfKb": 69,
+     "pdfKb": 68,
      "jpg": [
       "/assets/print/booth/flyer/v6-1.jpg",
       "/assets/print/booth/flyer/v6-2.jpg"
@@ -822,37 +571,70 @@
    ]
   },
   {
-   "id": "flyersheet",
-   "piece": "flyers",
-   "name": "Flyers, 4 on A4 (home print)",
-   "size": "A4, 2 sides, 4 flyers",
+   "id": "regqr",
+   "piece": "regqr",
+   "name": "Sign-up QR sign",
+   "size": "A4, 210 × 297 mm",
    "mm": [
     210,
     297
    ],
    "pages": [
-    "Front",
-    "Back"
+    "Front"
    ],
-   "print": "Regular paper or light card stock, colour. Both sides, flip on the long edge, at 100% (no “fit to page”). Trim the white edge, then cut once down and once across. 25 sheets = 100 flyers.",
+   "print": "Print shop: A4, colour, one side, card stock or photo paper. Slides into the A4 acrylic stand. Scan it with 2 phones before you leave the shop.",
    "versions": [
     {
      "id": "v1",
      "look": "v1",
-     "note": "The flyer, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.",
-     "pdf": "/assets/print/booth/flyersheet/v1.pdf",
-     "pdfKb": 193,
+     "note": "The original QR sign, made A4: logo, “Sign up”, a 13 cm QR, then all three tickets and the web address.",
+     "pdf": "/assets/print/booth/regqr/v1.pdf",
+     "pdfKb": 267,
      "jpg": [
-      "/assets/print/booth/flyersheet/v1-1.jpg",
-      "/assets/print/booth/flyersheet/v1-2.jpg"
+      "/assets/print/booth/regqr/v1-1.jpg"
      ],
      "m": [
-      "/assets/print/booth/flyersheet/v1-1.m.jpg",
-      "/assets/print/booth/flyersheet/v1-2.m.jpg"
+      "/assets/print/booth/regqr/v1-1.m.jpg"
      ],
      "t": [
-      "/assets/print/booth/flyersheet/v1-1.t.jpg",
-      "/assets/print/booth/flyersheet/v1-2.t.jpg"
+      "/assets/print/booth/regqr/v1-1.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bingo",
+   "piece": "bingo",
+   "name": "Red Flag Bingo card",
+   "size": "A6, 105 × 148 mm, 2 sides",
+   "mm": [
+    105,
+    148
+   ],
+   "bleed": 3,
+   "pages": [
+    "Front",
+    "Back"
+   ],
+   "print": "Print shop: A6, colour, both sides, card stock (200 gsm or more), 60 pcs. The PDF has 3 mm bleed: the shop prints 4 per A4 and trims to 105 × 148. Pens on the table so people can tick.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "Replaces the AAA try-out card, in the same layout: a blue band, then nine resume red flags to tick. 3 in a row sends them to the back: the workshop, the dates, and the QR.",
+     "pdf": "/assets/print/booth/bingo/v1.pdf",
+     "pdfKb": 173,
+     "jpg": [
+      "/assets/print/booth/bingo/v1-1.jpg",
+      "/assets/print/booth/bingo/v1-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/bingo/v1-1.m.jpg",
+      "/assets/print/booth/bingo/v1-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/bingo/v1-1.t.jpg",
+      "/assets/print/booth/bingo/v1-2.t.jpg"
      ]
     }
    ]
@@ -965,38 +747,6 @@
      ],
      "t": [
       "/assets/print/booth/signup/v6-1.t.jpg"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "guide",
-   "piece": "guide",
-   "name": "Resume check guide (team)",
-   "size": "A4, 210 × 297 mm",
-   "mm": [
-    210,
-    297
-   ],
-   "pages": [
-    "Front"
-   ],
-   "print": "Paper, black and white is fine. One for each person on shift. Not for the table.",
-   "versions": [
-    {
-     "id": "v1",
-     "look": "v1",
-     "note": "How to run the 60-second check: what to say, the 8 most common fixes (the same red flags as the bingo card), the AAA rewrite, and the pitch. A tally at the bottom counts checks per day.",
-     "pdf": "/assets/print/booth/guide/v1.pdf",
-     "pdfKb": 407,
-     "jpg": [
-      "/assets/print/booth/guide/v1-1.jpg"
-     ],
-     "m": [
-      "/assets/print/booth/guide/v1-1.m.jpg"
-     ],
-     "t": [
-      "/assets/print/booth/guide/v1-1.t.jpg"
      ]
     }
    ]

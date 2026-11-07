@@ -5,7 +5,6 @@ import { C, F, CLEAN as K, LOOKS, margin, grid, word, mark, lockup, qr, sampleQR
 import * as V1 from './booth-v1.mjs';
 
 const TARP = 'Tarp. Print at 100 dpi or more. Ask the shop for a hem and grommets every 30 cm on the top edge.';
-const STAND = (a) => `Paper or card stock, colour, printed at a shop (home printers leave a white edge). Slides into an ${a} acrylic stand, the same kind as Prince’s booth.`;
 const PAPER = 'Paper. Print at 100% (no “fit to page”).';
 
 const header = {
@@ -280,78 +279,6 @@ const skirt = {
   ],
 };
 
-const regqr = {
-  id: 'regqr', piece: 'regqr', name: 'Sign-up QR', size: 'A5, 148 × 210 mm', mm: [148, 210], pages: ['Front'], print: STAND('A5'),
-  versions: [
-    {
-      id: 'v1',
-      note: 'Same as the model, with a real QR to the sign-up section of the site. Test it on 2 phones before you print.',
-      html: async () => `
-        ${white}
-        ${at(0, 15, 'Sign up', `width:148mm;text-align:center;font-size:21mm;color:${C.navy}`, 'd nw')}
-        ${at(24, 50, await qr(undefined, 100))}
-        ${at(0, 170, 'It takes a minute.', `width:148mm;text-align:center;font-size:10mm;font-weight:600;letter-spacing:-0.02em;color:${C.core}`, 'nw')}`,
-    },
-    {
-      id: 'v2',
-      note: 'Adds the web address under the QR, for phones that will not scan.',
-      html: async () => `
-        ${paper(148, 210, 5, 0.15)}
-        ${at(12, 12, lockup(13))}
-        ${at(11, 34, `Sign ${sel('<span class="g">up.</span>', { size: 'A5 · 148 × 210' })}`, `font-size:24mm;color:${C.ink}`, 'd nw')}
-        ${at(26, 74, `<div style="padding:4mm;background:#fff;border:0.3mm solid ${C.line};border-radius:3mm">${await qr(undefined, 88)}</div>`)}
-        ${at(0, 176, F.url, `width:148mm;text-align:center;font-size:4.6mm;color:${C.navy};letter-spacing:0.01em;text-transform:none`, 'm nw')}
-        ${at(0, 188, `${F.regBy} · It takes a minute.`, `width:148mm;text-align:center;font-size:3.6mm;color:${C.ink3};text-transform:none;letter-spacing:0.01em`, 'm nw')}`,
-    },
-    {
-      id: 'v3',
-      note: 'Navy board with the QR on a white tile. Four words, big enough to read from the aisle.',
-      html: async () => `
-        ${navy(148, 210, 5, 0.15)}
-        ${at(15, 14, 'Scan to<br><span class="gl">sign up.</span>', 'font-size:25mm;color:#fff;line-height:1', 'd nw')}
-        ${at(20, 76, tile(108, 8, await qr(undefined, 92)))}
-        ${at(0, 192, F.regBy, `width:148mm;text-align:center;font-size:7mm;font-weight:700;letter-spacing:-0.02em;color:${C.ice}`, 'nw')}`,
-    },
-    {
-      id: 'v4',
-      note: 'V1 with everything on one left edge. The QR is as wide as the card allows, so it scans faster.',
-      html: async () => {
-        const k = K.v4, m = margin(148, 210), cw = 148 - 2 * m;
-        return `
-        ${flat('v4')}
-        ${at(m, m, 'Sign up', `font-size:21mm;color:${k.ink}`, 'd nw')}
-        ${at(m, 44, await qr(undefined, cw))}
-        ${atb(m, m, row(cw, 'It takes a minute.', word(6, k.word)), `font-size:10mm;font-weight:600;letter-spacing:-0.02em;color:${k.hi}`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v5',
-      note: 'V2 on solid blue. The web address is plain text now, not small code letters.',
-      html: async () => {
-        const k = K.v5, m = margin(148, 210), cw = 148 - 2 * m;
-        return `
-        ${flat('v5')}
-        ${at(m, m, logo('v5', 13))}
-        ${at(m, 32, `Sign <span style="color:${k.hi}">up.</span>`, `font-size:24mm;color:${k.ink}`, 'd nw')}
-        ${at(m, 62, wide(cw, 92, await qr(undefined, 92), 9))}
-        ${atb(m, m, `<div>${F.url}</div><div style="color:${k.sub}">${F.regBy} · It takes a minute.</div>`, `font-size:5mm;font-weight:600;letter-spacing:-0.01em;line-height:1.4;color:${k.ink}`, 'nw')}`;
-      },
-    },
-    {
-      id: 'v6',
-      note: 'V3 without the grid. The white tile lines up with the words on both sides.',
-      html: async () => {
-        const k = K.v6, m = margin(148, 210), cw = 148 - 2 * m;
-        return `
-        ${flat('v6')}
-        ${at(m, m, `Scan to<br><span style="color:${k.hi}">sign up.</span>`, `font-size:22mm;color:${k.ink};line-height:1`, 'd nw')}
-        ${at(m, 64, wide(cw, 100, await qr(undefined, 100), 8))}
-        ${atb(m, m, F.regBy, `font-size:7mm;font-weight:600;letter-spacing:-0.02em;color:${k.sub}`, 'nw')}`;
-      },
-    },
-  ],
-};
-
 // sign-up sheet table: fields from the site form
 const FIELDS = [['Name', 52], ['Email', 58], ['Mobile', 34], ['Course & year', 38]];
 // left / width move and scale the table (the columns keep their ratio). numCls / numStyle set the look of the row numbers.
@@ -448,7 +375,8 @@ const sessionRows = ({ size, day, color = C.ink, sub = C.ink3, num = C.core, rul
     <span class="m nw" style="font-size:${day}mm;color:${sub}">${s.day}</span></div>`).join('');
 
 const flyer = {
-  id: 'flyer', piece: 'flyers', name: 'Flyer', size: 'A6, 105 × 148 mm', mm: [105, 148], pages: ['Front', 'Back'], print: 'Paper or card stock, 2 sides. Print 4 on one A4 sheet, then cut.',
+  id: 'flyer', piece: 'flyers', name: 'Flyer', size: 'A6, 105 × 148 mm, 2 sides', mm: [105, 148], bleed: 3, pages: ['Front', 'Back'],
+  print: 'Print shop: A6, colour, both sides, 120–160 gsm, 100 pcs. The PDF has 3 mm bleed on every side: the shop prints 4 per A4 and trims to 105 × 148.',
   versions: [
     {
       id: 'v1',
@@ -559,11 +487,11 @@ const flyer = {
 };
 
 // V1 is the original design, refined (booth-v1.mjs). It replaces the first version of each piece.
-// The standing banner, the bingo card, the resume-check sign and its team guide are new and have V1 only.
-for (const a of [header, backdrop, skirt, regqr, signup, flyer]) a.versions[0] = V1[a.id];
+// The standing banner, the sign-up QR (A4 now), the calling card and the bingo card are V1 only.
+for (const a of [header, backdrop, skirt, signup, flyer]) a.versions[0] = V1[a.id];
 
 export default {
   page: 'booth',
   looks: LOOKS.map((L) => (L.id === 'v1' ? { ...L, about: 'The pick. The design on the 3D model, refined: one margin, one type scale, all three tickets. The banner and the bingo card follow it.' } : L)),
-  assets: [header, backdrop, skirt, V1.pullup, regqr, V1.check, V1.card, V1.cardsheet, V1.bingo, V1.bingosheet, flyer, V1.flyersheet, signup, V1.guide],
+  assets: [header, backdrop, skirt, V1.pullup, V1.card, flyer, V1.regqr, V1.bingo, signup],
 };
