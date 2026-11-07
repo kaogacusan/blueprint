@@ -5,6 +5,7 @@ import { THREE, canvasTexture } from '/render/stage.js';
 import { mountPage } from '/render/page.js';
 import { loadArt, mountAssets } from '/render/assets.js';
 import { SHOP, mountShop } from '/boothrender/shop.js';
+import { mountTodo } from '/boothrender/todo.js';
 
 // ---------- sizes ----------
 const HALF = 1.5;          // our width (official)
@@ -386,3 +387,4 @@ mountPage({ pieces, groups, views, layers, build, shadowBox: 6 }).then((stage) =
   mountAssets(art, { pieces, stage });
 });
 mountShop(pieces);
+mountTodo();

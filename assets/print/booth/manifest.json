@@ -595,14 +595,14 @@
     "Front",
     "Back"
    ],
-   "print": "Only if no shop can print the calling cards in time. A4 card stock (200 gsm or more), both sides, flip on the long edge, at 100% (no “fit to page”). Cut on the crop marks: 3 cuts down, 6 across.",
+   "print": "Only if no shop can print the calling cards in time. A4 card stock, 200 gsm or more. Both sides, flip on the long edge, at 100% (no “fit to page”). Cut on the crop marks: 3 cuts down, 6 across.",
    "versions": [
     {
      "id": "v1",
      "look": "v1",
      "note": "The calling card, 2 across and 5 down, with crop marks.",
      "pdf": "/assets/print/booth/cardsheet/v1.pdf",
-     "pdfKb": 145,
+     "pdfKb": 142,
      "jpg": [
       "/assets/print/booth/cardsheet/v1-1.jpg",
       "/assets/print/booth/cardsheet/v1-2.jpg"
@@ -650,6 +650,42 @@
      "t": [
       "/assets/print/booth/bingo/v1-1.t.jpg",
       "/assets/print/booth/bingo/v1-2.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bingosheet",
+   "piece": "bingo",
+   "name": "Bingo cards, 4 on A4 (home print)",
+   "size": "A4, 2 sides, 4 cards",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Front",
+    "Back"
+   ],
+   "print": "A4 card stock, colour. Both sides, flip on the long edge, at 100% (no “fit to page”). Trim the white edge, then cut once down and once across. 15 sheets = 60 cards.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "The Red Flag Bingo card, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.",
+     "pdf": "/assets/print/booth/bingosheet/v1.pdf",
+     "pdfKb": 244,
+     "jpg": [
+      "/assets/print/booth/bingosheet/v1-1.jpg",
+      "/assets/print/booth/bingosheet/v1-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/bingosheet/v1-1.m.jpg",
+      "/assets/print/booth/bingosheet/v1-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/bingosheet/v1-1.t.jpg",
+      "/assets/print/booth/bingosheet/v1-2.t.jpg"
      ]
     }
    ]
@@ -781,6 +817,42 @@
      "t": [
       "/assets/print/booth/flyer/v6-1.t.jpg",
       "/assets/print/booth/flyer/v6-2.t.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "flyersheet",
+   "piece": "flyers",
+   "name": "Flyers, 4 on A4 (home print)",
+   "size": "A4, 2 sides, 4 flyers",
+   "mm": [
+    210,
+    297
+   ],
+   "pages": [
+    "Front",
+    "Back"
+   ],
+   "print": "Regular paper or light card stock, colour. Both sides, flip on the long edge, at 100% (no “fit to page”). Trim the white edge, then cut once down and once across. 25 sheets = 100 flyers.",
+   "versions": [
+    {
+     "id": "v1",
+     "look": "v1",
+     "note": "The flyer, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.",
+     "pdf": "/assets/print/booth/flyersheet/v1.pdf",
+     "pdfKb": 193,
+     "jpg": [
+      "/assets/print/booth/flyersheet/v1-1.jpg",
+      "/assets/print/booth/flyersheet/v1-2.jpg"
+     ],
+     "m": [
+      "/assets/print/booth/flyersheet/v1-1.m.jpg",
+      "/assets/print/booth/flyersheet/v1-2.m.jpg"
+     ],
+     "t": [
+      "/assets/print/booth/flyersheet/v1-1.t.jpg",
+      "/assets/print/booth/flyersheet/v1-2.t.jpg"
      ]
     }
    ]

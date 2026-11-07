@@ -26,6 +26,7 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 |---|---|
 | `venuerender/venue.js` | The room: sizes at the top (`W`, `D`, `H`), the checklist, run sheet, posts, and the 3D model. **The room size is an estimate.** Change `W`, `D`, `H` after you measure. |
 | `boothrender/booth.js` | The booth: sizes at the top, the parts list with costs, and the 3D model. Costs come from `shop.js` when it has a quote; otherwise they are guesses. |
+| `boothrender/todo.js` | “Get it made”, at the top of the booth page: what to print at a shop, buy, print at home, and bring, one row each with spec, price and PDF, plus a “Copy the order” button that writes the message for the print shop. Ticks are saved in the browser. |
 | `boothrender/shop.js` | The order list: per item, what to get, where (walk-in or link), price, and a backup. Prices as seen on the date in `asOf`. |
 | `render/stage.js` | Shared 3D engine (camera, pins, size lines, highlight). |
 | `render/page.js` | Shared page wiring (tabs, sliders, toggles, list, table). |
@@ -36,7 +37,7 @@ Drag to turn. Tabs change the camera. Numbers on the model match the list. Add `
 
 Every printed piece on the two models (tarps, banners, signs, cards, sheets, the title slide) has a print file in six versions:
 
-- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's standing banner, Red Flag Bingo card, resume check sign, its team guide, and the calling card (90 × 54 mm, with a 10-on-A4 sheet for printing at home) are built on it and exist in V1 only.
+- **V1 As rendered**: the design on the model, with the facts fixed to match the site. On the booth, V1 lives in `scripts/print/booth-v1.mjs`: the original designs refined into one system (one margin, one type scale, all three tickets). The booth's standing banner, Red Flag Bingo card, resume check sign, its team guide, and the calling card (90 × 54 mm). The flyer, bingo card and calling card also come as A4 sheets for printing at home (4, 4 and 10 per sheet; `sheetOf` in booth-v1.mjs) are built on it and exist in V1 only.
 - **V2 Drafting grid**: light paper, blue grid, the selection box from the site's first screen.
 - **V3 Big type**: fewer words, bigger. Reads from far away.
 - **V4 Clean white**: V1 cleaned up. White paper, navy type, one blue.

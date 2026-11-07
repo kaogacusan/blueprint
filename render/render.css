@@ -430,3 +430,63 @@ table.shop { min-width: 940px; }
 .steps ul li { margin: 4px 0; }
 table.shop--shared { min-width: 640px; }
 .steps--tight { margin: 0; }
+
+/* ---------- booth: "Get it made" checklist (boothrender/todo.js) ---------- */
+.todo { display: grid; gap: 18px; }
+.todo__bar { position: sticky; top: 64px; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); border: 1px solid var(--line); }
+.todo__bar b { font-size: 0.95rem; white-space: nowrap; }
+.todo__meter { flex: 1; height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.todo__meter i { display: block; height: 100%; width: 0; background: var(--core); transition: width 0.25s; }
+.todo__reset { border: 0; background: none; font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--ink-3); cursor: pointer; white-space: nowrap; }
+.todo__reset:hover { color: var(--core); }
+.todo__group { padding: 22px 24px; border-radius: var(--radius); background: var(--white); border: 1px solid var(--line); }
+.todo__group--print { border-color: var(--electric); box-shadow: inset 0 0 0 1px var(--electric); }
+.todo__head h3 { margin: 0; font-family: var(--display); font-size: 1.45rem; letter-spacing: -0.025em; }
+.todo__head h3 .muted { font-size: 1rem; font-weight: 600; margin-left: 4px; }
+.todo__head > p:last-child { margin: 6px 0 0; color: var(--ink-2); max-width: 72ch; }
+.todo__shop { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 16px 0 0; padding: 14px 16px; border-radius: var(--radius-sm); background: var(--paper); border: 1px solid var(--line); font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
+.todo__shop b { color: var(--ink); }
+.todo__shop a { color: var(--core); font-weight: 600; text-decoration: none; }
+.todo__shop span { font-size: 0.86rem; }
+.todo__shop .btn { flex: none; }
+.todo__steps { list-style: none; counter-reset: s; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0 0; padding: 0; }
+.todo__steps li { counter-increment: s; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--line); font-size: 0.88rem; line-height: 1.45; color: var(--ink-2); }
+.todo__steps li b { display: block; margin-bottom: 3px; color: var(--ink); font-size: 0.95rem; }
+.todo__steps li b::before { content: counter(s) " · "; font-family: var(--mono); font-size: 0.78rem; color: var(--core); }
+.todo__list { list-style: none; margin: 14px 0 0; padding: 0; }
+.todo__row { display: grid; grid-template-columns: 260px minmax(0, 1fr) 190px; grid-template-areas: "tick spec end" "tick where end"; column-gap: 18px; row-gap: 4px; align-items: start; padding: 13px 0; border-top: 1px solid var(--line); }
+.todo__row--opt { opacity: 0.78; }
+.todo__tick { grid-area: tick; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.todo__tick input { position: absolute; opacity: 0; pointer-events: none; }
+.todo__box { flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 7px; border: 1.5px solid var(--line-2); background: var(--white); display: grid; place-items: center; transition: background 0.15s, border-color 0.15s; }
+.todo__tick input:checked + .todo__box { background: var(--core); border-color: var(--core); }
+.todo__tick input:checked + .todo__box::after { content: ""; width: 6px; height: 11px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+.todo__tick input:focus-visible + .todo__box { outline: 2px solid var(--electric); outline-offset: 2px; }
+.todo__name { font-weight: 650; color: var(--ink); line-height: 1.35; }
+.todo__name i { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 7px; border-radius: 50%; background: var(--navy); color: #fff; font-style: normal; font-size: 0.7rem; font-weight: 700; vertical-align: 1px; }
+.todo__tick input:checked ~ .todo__name { color: var(--ink-3); text-decoration: line-through; }
+.todo__spec { grid-area: spec; display: flex; flex-wrap: wrap; gap: 6px; }
+.todo__spec span { padding: 3px 9px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); font-size: 0.82rem; color: var(--ink-2); }
+.todo__spec .todo__qty { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 600; }
+.todo__where { grid-area: where; margin: 2px 0 0; font-size: 0.86rem; line-height: 1.45; color: var(--ink-2); }
+.todo__where b { color: var(--ink); font-weight: 600; }
+.todo__where a { color: var(--core); font-weight: 600; text-decoration: none; }
+.todo__where a:hover, .todo__shop a:hover { text-decoration: underline; }
+.todo__end { grid-area: end; display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+.todo__price { font-weight: 700; color: var(--core); white-space: nowrap; font-size: 0.95rem; }
+.todo__file { padding: 6px 12px; border-radius: 99px; border: 1px solid var(--line-2); font-size: 0.84rem; font-weight: 650; color: var(--core); text-decoration: none; white-space: nowrap; }
+.todo__file:hover { border-color: var(--core); }
+.todo__banner { margin-top: 16px; background: var(--paper); }
+.todo__banner h3 { font-size: 1.1rem; }
+.todo__banner li { line-height: 1.55; }
+@media (max-width: 860px) {
+  .todo__steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .todo__shop { flex-direction: column; align-items: stretch; }
+  .todo__row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "tick end" "spec spec" "where where"; row-gap: 8px; }
+  .todo__spec, .todo__where { padding-left: 32px; }
+}
+@media (max-width: 480px) {
+  .todo__group { padding: 18px 16px; }
+  .todo__steps { grid-template-columns: 1fr; }
+  .todo__end { flex-direction: column; align-items: flex-end; gap: 6px; }
+}

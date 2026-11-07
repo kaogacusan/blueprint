@@ -565,5 +565,5 @@ for (const a of [header, backdrop, skirt, regqr, signup, flyer]) a.versions[0] =
 export default {
   page: 'booth',
   looks: LOOKS.map((L) => (L.id === 'v1' ? { ...L, about: 'The pick. The design on the 3D model, refined: one margin, one type scale, all three tickets. The banner and the bingo card follow it.' } : L)),
-  assets: [header, backdrop, skirt, V1.pullup, regqr, V1.check, V1.card, V1.cardsheet, V1.bingo, flyer, signup, V1.guide],
+  assets: [header, backdrop, skirt, V1.pullup, regqr, V1.check, V1.card, V1.cardsheet, V1.bingo, V1.bingosheet, flyer, V1.flyersheet, signup, V1.guide],
 };

@@ -237,29 +237,6 @@ export const card = {
   }],
 };
 
-// The calling card, 10 on an A4 sheet, for printing at home on card stock. No gaps, so one cut separates two
-// cards; the crop marks in the margin show where to cut. The grid is centred, so the backs line up when the
-// printer flips on the long edge.
-export const cardsheet = {
-  id: 'cardsheet', piece: 'card', name: 'Calling cards, 10 on A4 (home print)', size: 'A4, 2 sides, 10 cards', mm: [210, 297], pages: ['Front', 'Back'],
-  print: 'Only if no shop can print the calling cards in time. A4 card stock (200 gsm or more), both sides, flip on the long edge, at 100% (no “fit to page”). Cut on the crop marks: 3 cuts down, 6 across.',
-  versions: [{
-    id: 'v1',
-    note: 'The calling card, 2 across and 5 down, with crop marks.',
-    html: async (i) => {
-      const one = i === 0 ? await cardFront() : cardBack();
-      const x0 = (210 - 180) / 2, y0 = (297 - 270) / 2;
-      let cards = '';
-      for (let r = 0; r < 5; r++) for (let c = 0; c < 2; c++) cards += `<div style="position:absolute;left:${x0 + c * 90}mm;top:${y0 + r * 54}mm;width:90mm;height:54mm;overflow:hidden">${one}</div>`;
-      const tick = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
-      let marks = '';
-      for (const x of [x0, x0 + 90, x0 + 180]) marks += tick(x, y0 - 8, x, y0 - 2) + tick(x, y0 + 272, x, y0 + 278);
-      for (let r = 0; r <= 5; r++) { const y = y0 + r * 54; marks += tick(x0 - 8, y, x0 - 2, y) + tick(x0 + 182, y, x0 + 188, y); }
-      return `${fill('#fff')}${cards}<svg class="fill" viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg"><g stroke="#000" stroke-width="0.2">${marks}</g></svg>`;
-    },
-  }],
-};
-
 // 9 Red Flag Bingo, A6 card, 2 sides. Built like the AAA card it replaces: a blue band, white body, gradient back.
 const SQUARES = [
   'Objective: “to obtain a challenging position”',
@@ -347,3 +324,49 @@ export const flyer = {
       'display:flex;align-items:flex-end;gap:5mm')}`;
   },
 };
+
+// ---------- home-print sheets: several copies of a 2-sided piece on A4, ready for a home printer ----------
+// The grid is centred and every copy is the same, so the backs line up when the printer flips on the long edge.
+// Copies touch (one cut separates two). Pieces shrink a little if needed to keep 5 mm clear for the printer.
+// Crop marks go in the margin when there is room for them.
+const sheetOf = ({ id, piece, name, size, print, note, cell: [cw, ch], cols, rows, html }) => ({
+  id, piece, name, size, mm: [210, 297], pages: ['Front', 'Back'], print,
+  versions: [{
+    id: 'v1', note,
+    html: async (i) => {
+      const one = await html(i);
+      const k = Math.min(1, 200 / (cols * cw), 287 / (rows * ch));
+      const w = cw * k, h = ch * k, x0 = (210 - cols * w) / 2, y0 = (297 - rows * h) / 2;
+      let cells = '';
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        cells += `<div style="position:absolute;left:${x0 + c * w}mm;top:${y0 + r * h}mm;width:${w}mm;height:${h}mm;overflow:hidden">
+          <div style="position:absolute;left:0;top:0;width:${cw}mm;height:${ch}mm;transform:scale(${k});transform-origin:0 0">${one}</div></div>`;
+      }
+      let marks = '';
+      const t = (a, b, c, d) => { marks += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}"/>`; };
+      if (y0 >= 8) for (let c = 0; c <= cols; c++) { const x = x0 + c * w; t(x, y0 - 7, x, y0 - 2); t(x, 297 - y0 + 2, x, 297 - y0 + 7); }
+      if (x0 >= 8) for (let r = 0; r <= rows; r++) { const y = y0 + r * h; t(x0 - 7, y, x0 - 2, y); t(210 - x0 + 2, y, 210 - x0 + 7, y); }
+      return `${fill('#fff')}${cells}${marks ? `<svg class="fill" viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg"><g stroke="#000" stroke-width="0.2">${marks}</g></svg>` : ''}`;
+    },
+  }],
+});
+const HOME = 'Both sides, flip on the long edge, at 100% (no “fit to page”).';
+
+export const cardsheet = sheetOf({
+  id: 'cardsheet', piece: 'card', name: 'Calling cards, 10 on A4 (home print)', size: 'A4, 2 sides, 10 cards', cell: [90, 54], cols: 2, rows: 5,
+  print: `Only if no shop can print the calling cards in time. A4 card stock, 200 gsm or more. ${HOME} Cut on the crop marks: 3 cuts down, 6 across.`,
+  note: 'The calling card, 2 across and 5 down, with crop marks.',
+  html: (i) => (i === 0 ? cardFront() : cardBack()),
+});
+export const flyersheet = sheetOf({
+  id: 'flyersheet', piece: 'flyers', name: 'Flyers, 4 on A4 (home print)', size: 'A4, 2 sides, 4 flyers', cell: [105, 148], cols: 2, rows: 2,
+  print: `Regular paper or light card stock, colour. ${HOME} Trim the white edge, then cut once down and once across. 25 sheets = 100 flyers.`,
+  note: 'The flyer, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.',
+  html: (i) => flyer.html(i),
+});
+export const bingosheet = sheetOf({
+  id: 'bingosheet', piece: 'bingo', name: 'Bingo cards, 4 on A4 (home print)', size: 'A4, 2 sides, 4 cards', cell: [105, 148], cols: 2, rows: 2,
+  print: `A4 card stock, colour. ${HOME} Trim the white edge, then cut once down and once across. 15 sheets = 60 cards.`,
+  note: 'The Red Flag Bingo card, 4 to a sheet, slightly smaller than A6 so a home printer does not cut the edges off.',
+  html: (i) => bingo.versions[0].html(i),
+});
