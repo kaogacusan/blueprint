@@ -26,9 +26,9 @@ export const BACKUPS = [
 export const MESSAGED = [
   { id: 'holyspirit', prio: true, for: 'Printing', name: 'Rush Tarpaulin Printing', where: 'Holy Spirit, Commonwealth', link: FB(1639033827622521), sent: '6:53 am', status: 'waiting', note: 'Your pick. Lists calling cards and flyers too.' },
   { id: 'stand', prio: true, for: 'Roll-up stand', name: 'Roll Up Banner Stand 80 × 200, complete set', where: 'Quezon City · ₱420', link: FB(1077659547946343), sent: '6:54 am', status: 'waiting', note: 'Your pick. Asked: top rail, pole, bag; today?' },
-  { id: 'tandangsora', for: 'Printing', name: 'Rush Tarp w/ Stand / Roll-up banners', where: 'Tandang Sora, QC', link: FB(1301755045402746), sent: '7:00 am', status: 'replied', reply: '7:08–7:11: “Yes po, kaya naman po yan.” Asked if we’re ordering. No price yet.', note: 'Does everything: tarps, roll-ups, cards, flyers. Same-day delivery.' },
+  { id: 'tandangsora', for: 'Printing', name: 'Rush Tarp w/ Stand / Roll-up banners', where: 'Tandang Sora, QC', link: FB(1301755045402746), sent: '7:00 am', status: 'replied', reply: '7:08–7:11: “Yes po, kaya naman po yan.” Asked if we’re ordering. No price yet.', note: 'MK Printing Culiat. Own large-format printer; the X-stands and tarps in its photos look clean. No ratings, no card samples: ask for a photo of their calling cards.' },
   { id: 'ninja', for: 'Printing', name: 'Mr. NinjaPrints: roll-up with print', where: 'Quezon City', link: FB(4473634312888152), sent: '7:00 am', status: 'replied', reply: '7:39: “Yes, are you interested?” No price yet.', note: 'Tarps, roll-ups, calling cards, flyers.' },
-  { id: 'standprint', for: 'Printing + stand', name: 'Roll-up stand with print, rush', where: 'Quezon City · ₱1,800', link: FB(1514858010309756), sent: '6:54 am', status: 'replied', reply: '7:09: “Yes.” Asked where we are. No price yet.', note: 'Stand and print in one. Asked if they do tarps, cards, flyers.' },
+  { id: 'standprint', for: 'Printing + stand', name: 'Roll-up stand with print, rush', where: 'Quezon City · ₱1,800 (too much: the stand + print plan is about ₱700–950)', link: FB(1514858010309756), sent: '6:54 am', status: 'replied', reply: '7:09: “Yes.” Asked where we are. No price yet.', note: 'Stand and print in one. Asked if they do tarps, cards, flyers.' },
   { id: 'tarp25', for: 'Printing', name: 'Tarpaulin Printing', where: 'Quezon City', link: FB(984916557480815), sent: '6:54 am', status: 'waiting', note: 'Tarps only? Asked about cards and flyers.' },
   { id: 'romeo', for: 'Cards + flyers', name: 'Calling card / business card printing', where: 'Quezon City', link: FB(1036931945574668), sent: '7:00 am', status: 'waiting', note: 'Cards and flyers, rush. Asked about tarps.' },
   { id: 'stand2', for: 'Roll-up stand', name: 'Roll up Banner', where: 'Quezon City · ₱420–550', link: FB(1043575711793871), sent: '6:55 am', status: 'waiting', note: 'Backup stand. Asked the size.' },
@@ -104,6 +104,7 @@ export const BUY = [
     alt: [
       { name: 'Acrylic holder A4, L-shape, vertical', where: 'National Book Store, walk-in (open Sun)', link: 'https://nationalbookstore.com/products/acrylic-holder-21x297mm-l-shape-vertical-home-office-supplies-brochure-holders', price: '₱250' },
       { name: 'A4 acrylic menu stand, T-type, 2-sided', where: 'FB Marketplace, Pasig', link: FB(2242082256368134), price: '₱350' },
+      { name: 'Or: the A4 sign on sintra board with an easel back (no stand to buy)', where: 'The print shop, in the same order', price: 'Ask' },
     ],
     cost: [250, 350] },
   { id: 'cloth', piece: 'cloth', name: 'Tablecloth', for: 'both', prince: '1 (he budgets ₱379)',
