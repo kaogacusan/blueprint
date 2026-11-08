@@ -32,7 +32,7 @@ export const MESSAGED = [
   { id: 'tarp25', for: 'Printing', name: 'Tarpaulin Printing', where: 'Quezon City', link: FB(984916557480815), sent: '6:54 am', status: 'waiting', note: 'Tarps only? Asked about cards and flyers.' },
   { id: 'romeo', for: 'Cards + flyers', name: 'Calling card / business card printing', where: 'Quezon City', link: FB(1036931945574668), sent: '7:00 am', status: 'waiting', note: 'Cards and flyers, rush. Asked about tarps.' },
   { id: 'stand2', for: 'Roll-up stand', name: 'Roll up Banner', where: 'Quezon City · ₱420–550', link: FB(1043575711793871), sent: '6:55 am', status: 'waiting', note: 'Backup stand. Asked the size.' },
-  { id: 'a4', for: 'A4 acrylic stand', name: 'Acrylic display stand / menu holder', where: 'Quezon City · ₱270', link: FB(1070631269179446), sent: '6:55 am', status: 'waiting', note: 'Asked for A4 portrait.' },
+  { id: 'a4', for: 'A4 acrylic stand', name: 'Acrylic display stand / menu holder', where: 'Quezon City · ₱270', link: FB(1070631269179446), sent: '6:55 am', status: 'replied', reply: '8:26: “Yes, ₱315 each. Closed Sunday, Monday delivery.”', note: 'Dearer than NBS (₱250, walk-in today) and arrives on the day the booth opens.' },
   { id: 'a4t', for: 'A4 acrylic stand', name: 'A4 T-type acrylic stand, 2-sided', where: 'Pasig · ₱350', link: FB(2242082256368134), sent: '6:55 am', status: 'waiting', note: 'Backup. Or walk in at National Book Store (₱250).' },
   { id: 'cloth', for: 'Tablecloth', name: 'Table cloth 142 × 218 cm', where: 'Quezon City · ₱190', link: FB(1050749884375587), sent: '6:55 am', status: 'waiting', note: 'Asked for navy or black. Or a bedsheet from home.' },
 ];
