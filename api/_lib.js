@@ -38,15 +38,19 @@ export async function teamName(req) {
   return (await r.json()) || null;
 }
 
-/* ---------- tickets (migrations 010, 011). The site shows the same prices (index.html, main.js PRICE). ----------
-   Pilot pricing from Nov 7: Full Pass ₱799, Single Session ₱299 each, Barkada ₱1,999 (three Full Passes, one payer). */
+/* ---------- tickets (migrations 010, 011, 012). The site shows the same prices (index.html, main.js PRICE). ----------
+   Pilot pricing from Nov 7: Full Pass ₱799, Single Session ₱299 each, Barkada ₱1,999 (three Full Passes, one payer).
+   From Nov 10, Session 1 is free: its own ticket, no payment. Singles are for Sessions 2 to 4. */
 export const PRICE = { full: 799, single: 299, barkada: 1999 };
 const ALL = [1, 2, 3, 4];
+export const FREE = 1;
+const PAID = ALL.filter((n) => n !== FREE);
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /* what they picked on the site → what we save, or null if it doesn't add up.
-   Picking all four singles gets them the Full Pass: it's cheaper and comes with the pre-work bundle.
+   Picking all three paid singles gets them the Full Pass: it's cheaper and comes with the pre-work bundle.
    A Barkada needs two friends with a name and an email each, different from the payer's and each other's. */
 export function ticketFor(ticket, sessions, friends, email = "") {
+  if (ticket === "free") return { ticket: "free", sessions: [FREE], amount: 0, friends: [] };
   if (ticket === "full") return { ticket: "full", sessions: ALL, amount: PRICE.full, friends: [] };
   if (ticket === "barkada") {
     if (!Array.isArray(friends) || friends.length !== 2) return null;
@@ -56,22 +60,24 @@ export function ticketFor(ticket, sessions, friends, email = "") {
     return { ticket: "barkada", sessions: ALL, amount: PRICE.barkada, friends: f };
   }
   if (ticket !== "single" || !Array.isArray(sessions) || !sessions.length) return null;
-  const s = [...new Set(sessions)].filter((n) => ALL.includes(n)).sort((a, b) => a - b);
+  const s = [...new Set(sessions)].filter((n) => PAID.includes(n)).sort((a, b) => a - b);
   if (s.length !== sessions.length) return null;
-  if (s.length === 4) return ticketFor("full");
+  if (s.length === PAID.length) return ticketFor("full");
   return { ticket: "single", sessions: s, amount: s.length * PRICE.single, friends: [] };
 }
 /* a Single Session sign-up can move up to the Full Pass and pay the difference: ₱500 after one session, ₱201 after two.
    0 = nothing to upgrade (already all four, or three singles, which already cost more than the Full Pass). */
 export const upgradeDue = (r) => (r.ticket === "single" ? Math.max(0, PRICE.full - (r.amount || 0)) : 0);
+/* a session's start, Manila time. Sign-ups for it stop then (api/register.js). */
+export const startsAt = (s) => (s.date ? Date.parse(`${s.date}T${(s.start_time || "00:00").slice(0, 5)}:00+08:00`) : Infinity);
 /* a Barkada takes three seats in each session, everyone else one */
 export const seatsOf = (r) => (r.ticket === "barkada" ? 3 : 1);
 const and = (a) => (a.length < 2 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a.at(-1)}`);
 const friendNames = (r) => (r.friends || []).map((f) => f.name.trim().split(/\s+/)[0]);
 /* "the Full Pass (all four sessions)", "Session 2: Proof on Paper" (titles: { 2: "Proof on Paper" }),
    or "the Barkada ticket (all four sessions for you, Ana and Ben)" */
-export const ticketLine = (r, titles = {}) => r.ticket === "single"
-  ? and((r.sessions || []).map((n) => `Session ${n}${titles[n] ? `: ${titles[n]}` : ""}`))
+export const ticketLine = (r, titles = {}) => r.ticket === "single" || r.ticket === "free"
+  ? and((r.sessions || []).map((n) => `Session ${n}${titles[n] ? `: ${titles[n]}` : ""}`)) + (r.ticket === "free" ? " (free)" : "")
   : r.ticket === "barkada" ? `the Barkada ticket (all four sessions for ${and(["you", ...friendNames(r)])})`
   : "the Full Pass (all four sessions)";
 export async function sessionTitles() {
@@ -99,7 +105,8 @@ const time = (t) => { if (!t) return ""; const [h, m] = t.split(":").map(Number)
 async function context(r) {
   const [s, sessions] = await Promise.all([settings("payment"), db("sessions?select=n,title,date,start_time,end_time,venue,venue_status&order=n")]);
   const pay = s.payment || {};
-  const mine = r.ticket === "single" ? r.sessions || [] : ALL;
+  const picked = r.ticket === "single" || r.ticket === "free";
+  const mine = picked ? r.sessions || [] : ALL;
   const lines = sessions.filter((x) => x.date && mine.includes(x.n)).map((x) => ({
     mon: day(x.date, { weekday: undefined, day: undefined }).toUpperCase(),
     dd: day(x.date, { weekday: undefined, month: undefined }),
@@ -109,8 +116,8 @@ async function context(r) {
   // the room shown on the site (FA Annex 104), from Schedule; the site and the emails should always agree
   const room = sessions.find((x) => mine.includes(x.n) && x.venue) || sessions.find((x) => x.venue);
   return {
-    price: r.amount || PRICE.full,
-    full: r.ticket !== "single",
+    price: r.amount ?? PRICE.full,
+    full: !picked,
     barkada: r.ticket === "barkada",
     friends: friendNames(r),
     mine,
@@ -119,7 +126,6 @@ async function context(r) {
     gcashNumber: pay.gcashNumber || "",
     qrPath: pay.qrPath || "",
     prework: (pay.prework || []).filter((p) => p?.url),
-    salesClose: pay.salesClose ? day(pay.salesClose, { weekday: "long", month: "long" }) : "",
     sessions: lines,
     venue: room ? `${room.venue}, Ateneo de Manila` : "Ateneo de Manila (room to be confirmed, we'll email you)",
   };
@@ -202,7 +208,7 @@ const p = (s, extra = "") => `<p style="margin:0 0 14px;line-height:1.6;font-siz
 const h = (s) => `<p style="margin:26px 0 14px;padding-top:24px;border-top:1px solid ${LINE};font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${BLUE}">${s}</p>`;
 const code = (s) => `<b style="font-family:${MONO};letter-spacing:.04em;color:${INK}">${esc(s)}</b>`;
 /* "Sign-up number BP-4FB3 | ● Paid" */
-const STATE = { paid: ["Paid", "#0f8a46"], unpaid: ["Not paid yet", "#c26a00"], waitlist: ["Waitlist", "#c26a00"] };
+const STATE = { paid: ["Paid", "#0f8a46"], unpaid: ["Not paid yet", "#c26a00"], waitlist: ["Waitlist", "#c26a00"], free: ["Free", "#0f8a46"] };
 const chip = (c, state) => { const [word, color] = STATE[state]; return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 4px;background:#f2f5fa;border-radius:12px"><tr>
   <td style="padding:12px 0 12px 18px;font-size:14px;color:${MUTED};white-space:nowrap">Sign-up number</td>
   <td style="padding:12px 16px;font-size:18px;font-weight:800;letter-spacing:.01em;color:${INK};white-space:nowrap">${esc(c)}</td>
@@ -277,11 +283,11 @@ export async function paymentEmail(r) {
       step(2, "Upload your receipt",
         p(`Screenshot the GCash receipt, then upload it here:`) +
         btn(link, "I've paid: upload my receipt") +
-        p(`We check it and email your slot confirmation within 24 hours.${c.salesClose ? ` Sales close <b>${esc(c.salesClose)}</b>.` : ""}`, "font-size:15px") +
+        p(`We check it and email your slot confirmation within 24 hours.`, "font-size:15px") +
         p(`Keep this email: the button is your own payment page, so you can pay later or upload a new screenshot. Lost it? Register again on the site with the same email and we'll send it again.`, `font-size:14px;color:${MUTED}`)) +
       h(scheduleHead(c)) + schedule(c),
   });
-  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Seats are limited.\n\n1. Send ${peso(c.price)} by GCash for ${c.what}${to ? ` to ${to}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.${c.salesClose ? `\nSales close ${c.salesClose}.` : ""}\n\nKeep this email: the link is your own payment page. Lost it? Register again on the site with the same email and we'll send it again.\n\n${scheduleHead(c)}:\n${scheduleText(c)}\n\n${askText}`;
+  const text = `Hi ${first(r.name)}!\n\nThanks for signing up for Blueprint (sign-up number ${r.code}). Your slot isn't locked until payment is in. Seats are limited.\n\n1. Send ${peso(c.price)} by GCash for ${c.what}${to ? ` to ${to}` : ""}${qr ? " (QR attached)" : ""}.\n2. Screenshot the receipt and upload it here: ${link}\n\nWe'll email your slot confirmation within 24 hours.\n\nKeep this email: the link is your own payment page. Lost it? Register again on the site with the same email and we'll send it again.\n\n${scheduleHead(c)}:\n${scheduleText(c)}\n\n${askText}`;
   await mail({ to: r.email, subject: `Pay to lock your Blueprint slot (${r.code})`, html, text, attachments: qr ? [qr] : [] });
 }
 
@@ -336,7 +342,60 @@ export async function waitlistEmail(r) {
   await mail({ to: r.email, subject: "You're on the Blueprint waitlist", html, text });
 }
 
-/* 4. the team's answer to a question sent from the site's Ask form (api/questions.js).
+/* 4. a free Session 1 sign-up: nothing to pay. Their seat is saved, or Session 1 is full and they're next in line. */
+const restLink = `${SITE}/#tickets`;
+export async function freeEmail(r) {
+  const c = await context(r);
+  const wait = r.status === "waitlist";
+  const hi = wait
+    ? "Session 1 filled up before you signed up. Come anyway: if someone doesn’t show up, their seat is yours."
+    : "You’re in for Session 1. It’s free, so there’s nothing to pay.";
+  const html = shell({
+    preview: wait ? "Session 1 is full, but come anyway: you're next in line for a seat." : "Session 1 is free and your seat is saved. Here's when and where.",
+    kicker: "Session 1 is free",
+    title: wait ? "You’re next in line" : "Your seat is saved",
+    body:
+      p(`Hi ${esc(first(r.name))}! ${hi}`) +
+      chip(r.code, wait ? "waitlist" : "free") +
+      h("When and where") + schedule(c) +
+      infoBox([["laptop", "What to bring", bring(c)]]) +
+      h("Want the rest?") +
+      p(`Sessions 2 to 4 are <b>${peso(PRICE.single)} each</b>. Pick the ones you want on our site.`) +
+      btn(restLink, "Get Sessions 2 to 4"),
+    end: "See you there!",
+  });
+  const text = `Hi ${first(r.name)}!\n\n${hi} (sign-up number ${r.code})\n\nWhen and where:\n${scheduleText(c)}\n\nWhat to bring: ${bring(c)}\n\nWant the rest? Sessions 2 to 4 are ${peso(PRICE.single)} each: ${restLink}\n\nSee you there! ${askText}`;
+  await mail({ to: r.email, subject: wait ? `Session 1 is full: you're next in line (${r.code})` : `Your free Session 1 seat is saved (${r.code})`, html, text });
+}
+
+/* 5. "Session 1 is free" to everyone who signed up before (the team sends it once, from Sign-ups: api/signups.js).
+   One line changes with their ticket: seat saved, what they still pay, or how to join Session 1. lowered: we took Session 1 off their bill. */
+export async function freeNewsEmail(r, { lowered = false } = {}) {
+  const [c, one] = await Promise.all([context(r), context({ ticket: "free", sessions: [FREE] })]);
+  const has1 = c.mine.includes(FREE), unpaid = r.status === "registered";
+  const joinLink = `${SITE}/?free=1#tickets`;
+  const [line, link] =
+    r.ticket === "free" ? ["You don’t need to pay anymore. Your seat in Session 1 is saved.", null]
+    : has1 && !unpaid ? ["You already have your seat. Nothing changes for you.", null]
+    : has1 ? [`Come to Session 1 even before you pay. ${lowered ? "We took Session 1 off your bill: to" : "To"} lock your other sessions, pay <b>${peso(c.price)}</b>.`, [payLink(r), "Pay for my other sessions"]]
+    : ["Want to come to Session 1 too? Sign up for free on our site.", [joinLink, "Sign up free for Session 1"]];
+  const plain = line.replace(/<[^>]+>/g, "");
+  const html = shell({
+    preview: `Session 1 is free for everyone. ${one.sessions[0]?.when || ""}`,
+    kicker: "Good news",
+    title: "Session 1 is free",
+    body:
+      p(`Hi ${esc(first(r.name))}! <b>Session 1 is now free for everyone.</b> ${line}`) +
+      (link ? btn(link[0], link[1]) : "") +
+      h("Session 1") + schedule(one) +
+      infoBox([["question", "Bring a friend", `Anyone can sign up for Session 1 for free on <a href="${joinLink}" style="color:${BLUE};font-weight:600">our site</a>. Sessions 2 to 4 are ${peso(PRICE.single)} each.`]]),
+    end: "See you there!",
+  });
+  const text = `Hi ${first(r.name)}!\n\nSession 1 is now free for everyone. ${plain}${link ? `\n${link[1]}: ${link[0]}` : ""}\n\nSession 1:\n${scheduleText(one)}\n\nBring a friend: anyone can sign up for Session 1 for free on our site: ${joinLink}\nSessions 2 to 4 are ${peso(PRICE.single)} each.\n\nSee you there! ${askText}`;
+  await mail({ to: r.email, subject: "Blueprint Session 1 is free", html, text });
+}
+
+/* 6. the team's answer to a question sent from the site's Ask form (api/questions.js).
    Signed "the Blueprint team": the person who answered isn't named, to keep the team's own details private too. */
 const paras = (s) => esc(s).split(/\n{2,}/).map((x) => p(x.replace(/\n/g, "<br>"))).join("");
 export async function answerEmail(q, answer) {

@@ -112,6 +112,13 @@ export async function signupAction(action, id) {
   emit("registrations");
   return out;
 }
+/* "Session 1 is free" to everyone who signed up before, a few per call (api/signups.js). Rows whose amount changed come back. */
+export async function freeNews() {
+  const out = await server("signups", { action: "freeNews" });
+  for (const row of out.changed || []) Object.assign(S.data.registrations.find((x) => x.id === row.id) || {}, row);
+  if (out.changed?.length) emit("registrations");
+  return out;
+}
 /* their receipt screenshot: stored encrypted, so the server opens it for you (and logs that you did) */
 export const receipt = async (id) => (await server("signups", { action: "receipt", id })).image;
 /* answer a question from the site: emailed from the Blueprint inbox (api/questions.js) */

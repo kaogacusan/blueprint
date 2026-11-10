@@ -2,7 +2,7 @@
    They pay by GCash and upload a screenshot of the receipt on their own /pay link; anyone on the team opens it,
    checks GCash and clicks Paid, which emails the slot confirmation (api/signups.js). Notes, downloading, deleting and the payment setup stay with the owner.
    The rules box matches what privacy.html promises sign-ups. */
-import { S, update, remove, setting, saveSetting, setRegStatus, signupAction, eraseRegistrations, receipt, accessLog } from "/admin/store.js";
+import { S, update, remove, setting, saveSetting, setRegStatus, signupAction, freeNews, eraseRegistrations, receipt, accessLog } from "/admin/store.js";
 import { supa } from "/admin/supa.js";
 import { esc, icon, copy, toast, download, confirmBox, countUps, todayISO, peso, openDrawer, closeDrawer } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
@@ -14,8 +14,8 @@ const fmt = (iso) => new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Man
 const label = (k) => (STATUSES.find(([s]) => s === k) || [, k])[1];
 /* their ticket (migrations 010, 011): "Full Pass", "Single · S2, S3", or "Barkada · 3 Full Passes" */
 const ALL = [1, 2, 3, 4];
-const sessionsOf = (r) => (r.ticket === "single" ? r.sessions || [] : ALL);
-const ticketOf = (r) => (r.ticket === "single" ? `Single · ${sessionsOf(r).map((n) => `S${n}`).join(", ")}` : r.ticket === "barkada" ? "Barkada · 3 Full Passes" : "Full Pass");
+const sessionsOf = (r) => (r.ticket === "single" || r.ticket === "free" ? r.sessions || [] : ALL);
+const ticketOf = (r) => (r.ticket === "single" || r.ticket === "free" ? `${r.ticket === "free" ? "Free" : "Single"} · ${sessionsOf(r).map((n) => `S${n}`).join(", ")}` : r.ticket === "barkada" ? "Barkada · 3 Full Passes" : "Full Pass");
 const friendsOf = (r) => (r.friends || []).map((x) => x.name).filter(Boolean);
 /* seats are per session: a Full Pass takes one in all four, a Barkada three (same count as api/signups.js) */
 const seatsOf = (r) => (r.ticket === "barkada" ? 3 : 1);
@@ -49,9 +49,10 @@ export default {
       <header class="ph">
         <div>
           <h1 class="ph__title">Sign-ups</h1>
-          <p class="ph__sub">${checking.length ? `<b>${checking.length} sent a receipt.</b> Click Check receipt, find the payment in GCash, then click Paid. That emails their slot confirmation and pre-work.` : `Everyone who registered on the site. When someone uploads their GCash receipt, it shows here with a Check receipt button.`} Each session has ${seats} seats, and they go to whoever pays first. A Full Pass takes a seat in all four, a Barkada three in all four.</p>
+          <p class="ph__sub">${checking.length ? `<b>${checking.length} sent a receipt.</b> Click Check receipt, find the payment in GCash, then click Paid. That emails their slot confirmation and pre-work.` : `Everyone who registered on the site. When someone uploads their GCash receipt, it shows here with a Check receipt button.`} Each session has ${seats} seats, and they go to whoever pays first. A Full Pass takes a seat in all four, a Barkada three in all four. Session 1 is free: a free sign-up gets its seat right away.</p>
         </div>
         <div class="ph__actions">
+          <button class="btn btn--primary" id="freeNews" title="Email everyone who signed up that Session 1 is free. Each person gets it once.">${icon("send")} Email: Session 1 is free</button>
           <button class="btn btn--ghost" id="copyEmails" title="Copy the emails shown below, to paste in BCC">${icon("copy")} Copy emails</button>
           ${S.owner ? `<button class="btn btn--ghost" id="csv" title="Download the list below as a spreadsheet">${icon("download")} Download</button>` : ""}
         </div>
@@ -103,6 +104,18 @@ export default {
     const emails = list.map((r) => r.email);
     root.querySelector("#copyEmails").addEventListener("click", () => (emails.length ? copy(emails.join(", "), `Copied ${emails.length} email${emails.length > 1 ? "s" : ""}. Paste them in BCC, not To.`) : toast("No emails to copy.")));
     wirePaySetup(root);
+    root.querySelector("#freeNews").addEventListener("click", async (e) => {
+      const b = e.currentTarget;
+      const people = regs.filter((r) => r.code && r.status !== "cancelled" && r.ticket !== "free").length;
+      if (!(await confirmBox(`Email ${people} sign-up${people === 1 ? "" : "s"} that Session 1 is free? Unpaid Session 1 singles stop paying for it. Anyone who already got this email is skipped.`, { ok: "Send", tone: "" }))) return;
+      b.disabled = true;
+      let sent = 0;
+      try {
+        for (let out; !out || (out.sent && out.left); ) { out = await freeNews(); sent += out.sent; if (!out.sent && out.left) throw new Error("stuck"); }
+        toast(sent ? `Sent to ${sent} ${sent === 1 ? "person" : "people"}.` : "Everyone already got it.");
+      } catch { toast(`Sent to ${sent}, then it stopped. Click again to send the rest.`, "bad"); }
+      finally { b.disabled = false; }
+    });
     root.querySelector("#showLog")?.addEventListener("click", async (e) => {
       const ul = root.querySelector("#alog");
       try {
@@ -171,7 +184,7 @@ function payCell(r) {
     <small class="tk"><b>${esc(peso(r.amount))}</b> · ${esc(ticketOf(r))}</small>
     ${upgrading(r) ? `<small class="${topupSent(r) ? "" : "muted"}">Upgrading to Full Pass: <b>${esc(peso(r.topup))}</b> ${topupSent(r) ? `receipt sent ${esc(fmt(r.proof_at))}` : "not paid yet"}</small>` : ""}
     ${r.proof_path && !upgrading(r) ? `<small>Receipt sent ${r.proof_at ? esc(fmt(r.proof_at)) : ""}</small>` : r.gcash_ref ? `<small>Ref <span class="mono">${esc(r.gcash_ref)}</span></small>` : r.status === "registered" ? `<small class="muted">Not paid yet</small>` : ""}
-    ${r.paid_at ? `<small>Paid ${esc(fmt(r.paid_at))}${r.paid_by ? ` · ${esc(r.paid_by)}` : ""}</small>` : ""}
+    ${r.ticket === "free" ? `<small>${r.status === "waitlist" ? "Free · next in line" : "Free · no payment"}</small>` : r.paid_at ? `<small>Paid ${esc(fmt(r.paid_at))}${r.paid_by ? ` · ${esc(r.paid_by)}` : ""}</small>` : ""}
     ${(r.proof_path && r.status === "registered") || topupSent(r) ? `<button class="btn btn--primary btn--xs" data-proof>${icon("eye")} Check receipt</button>`
       : r.proof_path ? `<button class="btn btn--ghost btn--xs" data-proof>${icon("eye")} Receipt</button>`
       : toCheck(r) ? `<button class="btn btn--primary btn--xs" data-paid>${icon("check")} Paid</button>` : ""}
@@ -242,8 +255,6 @@ function paySetup() {
           <label class="btn btn--ghost btn--sm">${icon("upload")} ${p.qrPath ? "Replace" : "Upload"} QR<input type="file" id="qrFile" accept="image/png,image/jpeg" hidden /></label></div></div>
       <label class="payset__f"><span>Pre-work links <small>One per line: Label | link. Sent when someone is marked Paid.</small></span>
         <textarea class="cell-in" id="payPrework" rows="3" placeholder="Session 1 pre-work | https://forms.gle/...">${esc((p.prework || []).map((x) => `${x.label} | ${x.url}`).join("\n"))}</textarea></label>
-      <label class="payset__f"><span>Sales close <small>New sign-ups stop after this day (Manila time). Said in the sign-up email.</small></span>
-        <input class="cell-in" id="payClose" type="date" value="${esc(p.salesClose || "")}" /></label>
     </div>
   </details>`;
 }
@@ -256,7 +267,6 @@ function wirePaySetup(root) {
   };
   root.querySelector("#payName")?.addEventListener("change", (e) => save({ gcashName: e.target.value.trim() }));
   root.querySelector("#payNumber")?.addEventListener("change", (e) => save({ gcashNumber: e.target.value.trim() }));
-  root.querySelector("#payClose")?.addEventListener("change", (e) => save({ salesClose: e.target.value }));
   root.querySelector("#payPrework")?.addEventListener("change", (e) => {
     const rows = e.target.value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
       const [a, b] = l.includes("|") ? l.split("|").map((x) => x.trim()) : ["Pre-work", l];

@@ -1,8 +1,9 @@
 /* POST /api/register: the site's sign-up form. Saves the sign-up with a sign-up number and a private
    payment link, and emails the GCash QR. Same checks as the database (migrations 001, 003, 005, 006, 007, 010).
    The ticket (Full Pass, Single Session with the sessions they picked, or Barkada with two friends) sets the amount here, never in the browser.
-   A new sign-up gets its payment link back so the site can send them straight to /pay. */
-import { send, body, db, enc, settings, newCode, paymentEmail, ticketFor } from "./_lib.js";
+   A new paid sign-up gets its payment link back so the site can send them straight to /pay.
+   A free Session 1 sign-up has nothing to pay: its seat is saved right away (or it waits in line if Session 1 is full). */
+import { send, body, db, enc, settings, newCode, paymentEmail, freeEmail, ticketFor, seatsOf, startsAt } from "./_lib.js";
 
 const YEARS = ["3rd year", "4th year", "Fresh grad", "Other"];
 const HEARD = ["", "Student org", "Friend", "Facebook", "Instagram", "Email", "Other"];
@@ -25,41 +26,60 @@ export default async function handler(req, res) {
     return send(res, 400, { error: "invalid" });
   }
 
+  const free = tk.ticket === "free";
   try {
-    // already signed up: resend the payment email (at most every 10 minutes), say nothing else
+    // one free and one paid sign-up per email (migration 012)
+    const mine = await db(`registrations?select=id,name,email,code,status,emailed_at,pay_token,ticket,sessions,amount,friends&email=eq.${enc(row.email)}`);
+    // Session 1 is already in their paid ticket: nothing to add
+    if (free && mine.some((r) => r.ticket !== "free" && r.status !== "cancelled" && r.sessions?.includes(1))) return send(res, 200, { ok: true, again: true, has1: true });
+    // already signed up: resend their email (at most every 10 minutes), say nothing else
     // (never hand back their link here: anyone can type someone else's email)
-    const [old] = await db(`registrations?select=id,name,email,code,status,emailed_at,pay_token,ticket,sessions,amount,friends&email=eq.${enc(row.email)}`);
+    const old = mine.find((r) => (r.ticket === "free") === free);
     if (old) {
       const quiet = old.emailed_at && Date.now() - Date.parse(old.emailed_at) < 10 * 60e3;
-      if (old.status === "registered" && old.code && !quiet) {
-        await paymentEmail(old);
+      const resend = old.ticket === "free" ? freeEmail : old.status === "registered" ? paymentEmail : null;
+      if (resend && old.code && !quiet) {
+        await resend(old);
         await db(`registrations?id=eq.${old.id}`, { method: "PATCH", data: { emailed_at: new Date().toISOString() } });
       }
-      return send(res, 200, { ok: true, again: true });
+      return send(res, 200, { ok: true, again: true, free });
     }
 
-    // new sign-ups stop after the sales-close day (Manila time), set in Payment setup
-    const { payment } = await settings("payment");
-    if (payment?.salesClose && Date.now() > Date.parse(`${payment.salesClose}T23:59:59+08:00`)) return send(res, 403, { error: "closed" });
+    // sign-ups for a session stop when it starts (Manila time, from Schedule)
+    const sessions = await db("sessions?select=n,date,start_time");
+    if (sessions.some((x) => tk.sessions.includes(x.n) && Date.now() >= startsAt(x))) return send(res, 403, { error: "closed" });
 
     // a flood of sign-ups in an hour is a bot, not a class: stop before Gmail blocks us
     const hourAgo = new Date(Date.now() - 3600e3).toISOString();
     const recent = await db(`registrations?select=id&created_at=gte.${enc(hourAgo)}`);
     if (recent.length >= 40) return send(res, 429, { error: "busy" });
 
+    // free: the seat is saved now, while Session 1 has room (same count as api/signups.js)
+    let seat = {};
+    if (free) {
+      const [{ costing }, paid] = await Promise.all([settings("costing"), db("registrations?select=ticket,sessions&status=eq.paid")]);
+      const taken = paid.filter((x) => x.sessions.includes(1)).reduce((t, x) => t + seatsOf(x), 0);
+      seat = taken >= (costing?.max || 20) ? { status: "waitlist" } : { status: "paid", paid_at: new Date().toISOString(), paid_by: "free" };
+    }
+
     let saved;
     for (let i = 0; i < 5 && !saved; i++) {
-      try { [saved] = await db("registrations", { method: "POST", data: { ...row, ...tk, code: newCode() }, prefer: "return=representation" }); }
-      catch (e) { if (e.code !== "23505") throw e; } // same code picked twice: try another
+      try { [saved] = await db("registrations", { method: "POST", data: { ...row, ...tk, ...seat, code: newCode() }, prefer: "return=representation" }); }
+      catch (e) {
+        if (free && e.code === "23514") return send(res, 503, { error: "free_not_ready" }); // migration 012 not run yet
+        if (e.code === "23505" && /email/.test(e.message)) return send(res, 200, { ok: true, again: true, free }); // sent twice at once
+        if (e.code !== "23505") throw e; // same code picked twice: try another
+      }
     }
     if (!saved) throw new Error("no code");
 
     try {
-      await paymentEmail(saved);
+      await (free ? freeEmail : paymentEmail)(saved);
       await db(`registrations?id=eq.${saved.id}`, { method: "PATCH", data: { emailed_at: new Date().toISOString() } });
     } catch (e) {
       console.error("payment email failed", saved.id, e.message); // the team sees "email not sent" and can resend
     }
+    if (free) return send(res, 200, { ok: true, free: true, status: saved.status });
     return send(res, 200, { ok: true, pay: `/pay?t=${saved.pay_token}`, amount: saved.amount });
   } catch (e) {
     console.error("register failed", e.message);
