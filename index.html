@@ -59,7 +59,10 @@
 
         <p class="hero__lede">Turn what you’ve done in school, orgs, and internships into words employers understand.</p>
         <div class="hero__ctas">
-          <button class="btn btn--primary btn--lg" data-register>
+          <button class="btn btn--primary btn--lg" data-ticket="free" data-free-on>
+            Join Session 1 for free <span class="btn__arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="btn btn--primary btn--lg" data-register data-free-off>
             Register for Blueprint <span class="btn__arrow" aria-hidden="true">→</span>
           </button>
           <a href="#journey" class="btn btn--ghost btn--lg">See how it works <span aria-hidden="true">↓</span></a>
@@ -111,8 +114,8 @@
           <li class="facts__time"><b>5:30 to 7:00</b> PM</li>
           <li class="facts__venue"><b>FA Annex 104</b></li>
           <li><b>Limited</b> seats</li>
-          <li class="facts__close"><b>Register</b> by Nov 9</li>
-          <li class="facts__price"><b>₱799</b> all four, or ₱299 a session</li>
+          <li class="facts__price"><b>Session 1 free</b></li>
+          <li class="facts__close"><b>₱299</b> a session after, or ₱799 for all</li>
         </ul>
       </div>
     </section>
@@ -442,11 +445,11 @@
           </details>
           <details class="qa reveal">
             <summary>How much does it cost?</summary>
-            <p>These are pilot prices for our first run. The <b>Full Pass</b> is ₱799 for all four sessions: a locked seat for all four days and the full pre-work bundle. A <b>Single Session</b> is ₱299 for each session you pick, and you can move up to the Full Pass later by paying just the difference (₱500 after one session, ₱201 after two). The <b>Barkada</b> is ₱1,999 for three Full Passes: you and two friends, ₱666 each. You pay by GCash: after you register, you get your own payment page with our GCash QR and your amount, and we email you the link to it. Pay, then upload a screenshot of your GCash receipt there. We check it and email your slot confirmation within 24 hours.</p>
+            <p><b>Session 1 is free.</b> Just sign up so we save your seat. After that, these are pilot prices for our first run. A <b>Single Session</b> is ₱299 for each of Sessions 2 to 4 you pick, and you can move up to the Full Pass later by paying just the difference (₱500 after one session, ₱201 after two). The <b>Full Pass</b> is ₱799 for every session and the full pre-work bundle. The <b>Barkada</b> is ₱1,999 for three Full Passes: you and two friends, ₱666 each. You pay by GCash: after you register, you get your own payment page with our GCash QR and your amount, and we email you the link to it. Pay, then upload a screenshot of your GCash receipt there. We check it and email your slot confirmation within 24 hours.</p>
           </details>
           <details class="qa reveal">
             <summary>How do I sign up?</summary>
-            <p>Pick a ticket below and fill in the short form by <b>Nov 9</b>. You can pay right away on your payment page, and we’ll email you its link and the schedule.</p>
+            <p>Pick a ticket below and fill in the short form before the session starts. For Session 1, that’s it: it’s free. For the others, you pay right away on your payment page, and we’ll email you its link and the schedule.</p>
           </details>
           <details class="qa reveal">
             <summary>When and where?</summary>
@@ -512,15 +515,43 @@
       <div class="final__ghost" aria-hidden="true">blueprint</div>
       <div class="wrap final__inner">
         <h2 class="display final__title reveal">Build <span class="grad grad--light">yours.</span></h2>
-        <p class="final__copy reveal">Pilot prices for our first run. Sign up in a minute, then pay by GCash.</p>
+        <p class="final__copy reveal">Session 1 is free. After that, pilot prices for our first run: ₱299 a session.</p>
 
         <div class="tix" id="tickets">
+          <article class="tix__card tix__card--crew tix__card--pass tix__card--free reveal" id="freeCard" data-start="2026-11-10T17:30:00+08:00">
+            <span class="tix__badge">Free</span>
+            <div class="crew__main">
+              <h3 class="tix__name">Session 1</h3>
+              <p class="tix__price"><b>Free</b> <span><s>₱299</s> · no payment</span></p>
+              <p class="crew__copy"><b>Sino Ka?</b> Tue, Nov 10, 5:30 to 7:00 PM at FA Annex 104. Just sign up so we save your seat.</p>
+            </div>
+            <div class="crew__side">
+              <button class="btn btn--primary btn--lg btn--block" type="button" data-ticket="free">Sign up free <span class="btn__arrow" aria-hidden="true">→</span></button>
+              <p class="tix__note">No GCash, no receipt. Your seat is saved right away.</p>
+            </div>
+          </article>
+
+          <article class="tix__card reveal">
+            <h3 class="tix__name">Sessions 2 to 4</h3>
+            <p class="tix__price"><b>₱299</b> <span>per session</span></p>
+            <fieldset class="tix__pick" id="pickSessions">
+              <legend>Pick your sessions</legend>
+              <label class="slot" data-start="2026-11-11T17:30:00+08:00"><input type="checkbox" value="2" /><span class="slot__n">02</span><span class="slot__t">Proof on Paper<small>Wed, Nov 11</small></span></label>
+              <label class="slot" data-start="2026-11-12T17:30:00+08:00"><input type="checkbox" value="3" /><span class="slot__n">03</span><span class="slot__t">Proof in Public<small>Thu, Nov 12 · with Kurt Boquiren</small></span></label>
+              <label class="slot" data-start="2026-11-13T17:30:00+08:00"><input type="checkbox" value="4" /><span class="slot__n">04</span><span class="slot__t">Ako ’To<small>Fri, Nov 13</small></span></label>
+              <span class="tix__err" role="alert">Pick at least one session.</span>
+            </fieldset>
+            <p class="tix__up" id="upsell" aria-live="polite" hidden></p>
+            <button class="btn btn--ghost btn--lg btn--block" type="button" data-ticket="single" id="singleBtn">Pick your sessions</button>
+            <p class="tix__note">A seat in each session you pick. Want the rest later? Move up to the Full Pass and pay just the difference.</p>
+          </article>
+
           <article class="tix__card tix__card--pass reveal">
             <span class="tix__badge">Best value</span>
             <h3 class="tix__name">Full Pass</h3>
             <p class="tix__price"><b>₱799</b> <span>for all four sessions</span></p>
             <ul class="tix__pick" aria-label="Included: all four sessions">
-              <li class="tix__k">All four included <span>· ₱397 less than four singles</span></li>
+              <li class="tix__k">All four included <span>· ₱98 less than three singles</span></li>
               <li class="slot is-in"><i class="slot__tick" aria-hidden="true"></i><span class="slot__n">01</span><span class="slot__t">Sino Ka?<small>Tue, Nov 10</small></span></li>
               <li class="slot is-in"><i class="slot__tick" aria-hidden="true"></i><span class="slot__n">02</span><span class="slot__t">Proof on Paper<small>Wed, Nov 11</small></span></li>
               <li class="slot is-in"><i class="slot__tick" aria-hidden="true"></i><span class="slot__n">03</span><span class="slot__t">Proof in Public<small>Thu, Nov 12 · with Kurt Boquiren</small></span></li>
@@ -528,22 +559,6 @@
             </ul>
             <button class="btn btn--primary btn--lg btn--block" type="button" data-ticket="full">Get the Full Pass <span class="btn__arrow" aria-hidden="true">→</span></button>
             <p class="tix__note">Locked seat for all four days + full pre-work bundle.</p>
-          </article>
-
-          <article class="tix__card reveal">
-            <h3 class="tix__name">Single Session</h3>
-            <p class="tix__price"><b>₱299</b> <span>per session</span></p>
-            <fieldset class="tix__pick" id="pickSessions">
-              <legend>Pick your session</legend>
-              <label class="slot"><input type="checkbox" value="1" /><span class="slot__n">01</span><span class="slot__t">Sino Ka?<small>Tue, Nov 10</small></span></label>
-              <label class="slot"><input type="checkbox" value="2" /><span class="slot__n">02</span><span class="slot__t">Proof on Paper<small>Wed, Nov 11</small></span></label>
-              <label class="slot"><input type="checkbox" value="3" /><span class="slot__n">03</span><span class="slot__t">Proof in Public<small>Thu, Nov 12 · with Kurt Boquiren</small></span></label>
-              <label class="slot"><input type="checkbox" value="4" /><span class="slot__n">04</span><span class="slot__t">Ako ’To<small>Fri, Nov 13</small></span></label>
-              <span class="tix__err" role="alert">Pick at least one session.</span>
-            </fieldset>
-            <p class="tix__up" id="upsell" aria-live="polite" hidden></p>
-            <button class="btn btn--ghost btn--lg btn--block" type="button" data-ticket="single" id="singleBtn">Get a single session</button>
-            <p class="tix__note">A seat in each session you pick. Want the rest later? Move up to the Full Pass and pay just the difference.</p>
           </article>
 
           <article class="tix__card tix__card--crew reveal">
@@ -582,7 +597,7 @@
 
     <form class="reg" id="regForm" novalidate>
       <h2 class="reg__title" id="modalTitle">Start your <span class="grad">Blueprint.</span></h2>
-      <p class="reg__sub">It takes a minute. Then pay by GCash and upload your receipt to lock your slot. Registration closes Nov 9.</p>
+      <p class="reg__sub" id="regSub">It takes a minute. Then pay by GCash and upload your receipt to lock your slot.</p>
 
       <div class="mine" aria-live="polite">
         <div>
@@ -687,27 +702,50 @@
       <div class="ticket">
         <div class="ticket__top">
           <img src="assets/blueprint-mark.png" alt="" />
-          <span class="mono" id="regTicket">Blueprint · Full Pass</span>
+          <span class="mono" id="regTicket">Blueprint · Sign-up</span>
         </div>
         <p class="ticket__name" id="regName">You</p>
         <p class="ticket__meta mono" id="regMeta">—</p>
         <div class="ticket__perf" aria-hidden="true"></div>
-        <p class="ticket__foot mono">Status · Registered, awaiting payment</p>
+        <p class="ticket__foot mono" id="regStatus">Status · Registered, awaiting payment</p>
       </div>
       <h2 class="reg__title" id="doneTitle">You’re on the list.</h2>
       <p class="reg__sub" id="doneText">Your slot isn’t locked until you pay. Three steps:</p>
-      <ol class="next">
+      <ol class="next" id="nextSteps">
         <li id="stepPay"><b>Pay by GCash</b> using the QR on your payment page.</li>
         <li><b>Upload a screenshot</b> of your GCash receipt on the same page.</li>
         <li><b>Get your slot confirmation</b> by email within 24 hours.</li>
       </ol>
       <div class="done__ctas">
         <a class="btn btn--primary btn--lg btn--block" id="payNow" href="/pay">Pay now</a>
+        <button class="btn btn--primary btn--lg btn--block" id="getRest" type="button" hidden>Get Sessions 2 to 4 · ₱299 each</button>
         <button class="btn btn--ghost btn--block" data-close>Back to the page</button>
       </div>
       <p class="done__fine" id="doneFine">We also emailed you this link, so you can pay later. Can’t find the email? Check spam, or register again with the same email and we’ll resend it.</p>
     </div>
   </dialog>
+
+  <!-- ───────────── SESSION 1 IS FREE ─────────────
+       Pops up on every visit until Session 1 starts (main.js). After it's closed, the bar at the bottom stays. -->
+  <dialog class="modal freepop" id="freePop" aria-labelledby="freeTitle">
+    <button class="modal__x" data-close aria-label="Close">✕</button>
+    <div class="freepop__in">
+      <p class="freepop__k"><i class="freepop__dot" aria-hidden="true"></i><span id="freeWhen">Tue, Nov 10</span></p>
+      <h2 class="freepop__title" id="freeTitle">Session 1 is <span class="freepop__word">FREE.</span></h2>
+      <p class="freepop__sub">No payment. Just sign up so we save you a seat.</p>
+      <div class="freepop__card">
+        <span class="freepop__n">01</span>
+        <span class="freepop__t"><b>Sino Ka?</b><small>5:30 to 7:00 PM · FA Annex 104</small></span>
+        <span class="freepop__price"><s>₱299</s><b>₱0</b></span>
+      </div>
+      <button class="btn btn--light btn--lg btn--block" type="button" data-ticket="free">Sign up free <span class="btn__arrow" aria-hidden="true">→</span></button>
+      <button class="freepop__later" type="button" data-close>Maybe later</button>
+      <p class="freepop__fine">Sessions 2 to 4 after that: ₱299 each.</p>
+    </div>
+  </dialog>
+  <button class="freebar" id="freeBar" type="button" data-ticket="free" hidden>
+    <b>Session 1 is free</b><span id="freeBarWhen">Tue, Nov 10, 5:30 PM</span><i aria-hidden="true">Sign up →</i>
+  </button>
 
   <script src="config.js"></script>
   <script src="main.js"></script>

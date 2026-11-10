@@ -103,11 +103,18 @@ Search `index.html` for `PLACEHOLDER` to find each one.
 
 ## Tickets
 
-Pilot prices from Nov 7. Three tickets, in the dark section at the bottom (`#tickets`). Every Register button on the page scrolls there; the ticket buttons open the form.
+Pilot prices from Nov 7. Session 1 is free from Nov 10. Four tickets, in the dark section at the bottom (`#tickets`). Every Register button on the page scrolls there; the ticket buttons open the form.
 
+- **Session 1, free** (shown until Session 1 starts). No payment. The sign-up gets its seat right away (status paid, `paid_by` "free"), or waitlist if Session 1 is full, and a "your seat is saved" email.
 - **Full Pass**, ₱799 (marked Best value): all four sessions, a locked seat for all four days and the full pre-work bundle.
-- **Single Session**, ₱299 each, with a session picker. Picking 1 shows "All four for ₱500 more", 2 shows "₱201 more", 3 shows how much less the Full Pass is; picking all 4 gets the Full Pass.
+- **Single Session**, ₱299 each, for Sessions 2 to 4 only, with a session picker. Picking 1 shows "Every session for ₱500 more", 2 shows "₱201 more"; picking all 3 gets the Full Pass (₱98 less).
 - **Barkada**, ₱1,999 for three Full Passes (₱666 each). One person signs up and pays, and adds two friends' names and emails in the form. The slot confirmation and pre-work go to all three (the friends are copied). A Barkada takes 3 seats in every session.
+
+**Session 1 is free pop-up:** every visit shows a pop-up until Session 1 starts. When it's closed, a bar stays at the bottom. The hero button says "Join Session 1 for free". After Session 1 starts, all of that hides by itself (`data-start` on the free card and on each session row in `index.html`). `/?free=1` opens the free sign-up form directly (the link in the emails).
+
+**Sign-ups close per session**, when that session starts (Manila time, from Schedule). The old "Sales close" date is gone.
+
+**Email: Session 1 is free** (button on the workspace's Sign-ups page): emails everyone who signed up before. Each person gets it once, so it's safe to click again. Unpaid singles with Session 1 stop paying for it (Session 1 only becomes a free ticket). Anyone who already sent a receipt is left alone: check those by hand. One email can have one free sign-up and one paid one, so Session 1 people can still buy Sessions 2 to 4 (`012_free_session.sql`). **Run that migration in Supabase**, or free sign-ups say "just come" instead of saving.
 
 **Upgrades:** a Single Session sign-up can move up to the Full Pass on their own payment page (`/pay`). Not paid yet: the ticket just switches to the Full Pass. Paid already: they pay the difference with the same QR (₱500 after one session, ₱201 after two), upload that receipt, and the team confirms it on Sign-ups, which makes them a Full Pass and emails them (`011_pilot_pricing.sql`: `topup`, `topup_at`). The paid-single confirmation email offers the upgrade too.
 
