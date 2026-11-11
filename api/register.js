@@ -5,7 +5,7 @@
    A free Session 1 sign-up has nothing to pay: its seat is saved right away (or it waits in line if Session 1 is full). */
 import { send, body, db, enc, settings, newCode, paymentEmail, freeEmail, ticketFor, seatsOf, startsAt } from "./_lib.js";
 
-const YEARS = ["3rd year", "4th year", "Fresh grad", "Other"];
+const YEARS = ["1st year", "2nd year", "3rd year", "4th year", "Fresh grad", "Other"];
 const HEARD = ["", "Student org", "Friend", "Facebook", "Instagram", "Email", "Other"];
 const str = (v, max) => String(v ?? "").trim().slice(0, max);
 
