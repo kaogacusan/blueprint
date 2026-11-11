@@ -545,7 +545,7 @@ async function onJoin(e) {
     if (r.needCode) { busy(btn, false); return openSignIn(email, "code", `Welcome back! <b>${esc(email)}</b> already has a Blueprint, so we emailed you a 6-digit code to sign in.`); }
     take(r);
     toast("You’re in. Session 1 is open.");
-    firstVisit = true;
+    tailorMode = "first";
     location.hash = "#/tailor";
   } catch (ex) { busy(btn, false); err.textContent = msg(ex); }
 }
@@ -602,7 +602,11 @@ function openSignIn(email = "", mode = "email", note = "") {
     }
   };
 }
-let firstVisit = false;
+/* the three tailoring questions show up right after sign-up ("first"), and once on each device when someone who
+   hasn't answered them signs in or comes back ("welcome": workshop ticket holders, people who skipped). "edit" from the menu. */
+let tailorMode = "edit";
+const askedKey = () => `bp_tailor_asked_${D?.me?.email}`;
+const shouldAsk = () => D && !D.me.goal && !store.get(askedKey());
 function afterIn() {
   if (intent.buy) {
     const n = intent.buy === "rest" ? null : Number(intent.buy);
@@ -620,29 +624,35 @@ function afterIn() {
 function renderTailor() {
   chrome();
   document.title = "Tailor Blueprint to you · Blueprint Online";
-  const me = D.me, first = firstVisit;
+  const me = D.me, mode = tailorMode;
+  store.set(askedKey(), 1);
+  const T = {
+    first: { kicker: "One last thing", lede: "Three quick taps. We’ll point you to the parts that matter most for what you want, with examples from your field. Change it any time.", go: "Start Session 1", skip: "Skip for now", to: "#/s/1" },
+    welcome: { kicker: `Welcome back, ${esc(me.first)}`, lede: "Before you jump back in: three quick taps, so we can point you to the parts that matter most for what you want, with examples from your field. Change it any time.", go: "Show me my plan", skip: "Skip for now", to: "#/" },
+    edit: { kicker: "Your path", lede: "Three quick taps. We’ll point you to the parts that matter most for what you want, with examples from your field. Change it any time.", go: "Save my path", skip: "Cancel", to: "#/" },
+  }[mode] || {};
   const cards = (name, list, cur) => `<div class="cards" role="radiogroup">${list.map(([v, b, s]) => `<label><input type="radio" name="${name}" value="${v}" ${cur === v ? "checked" : ""} /><span><b>${esc(b)}</b>${s ? `<small>${esc(s)}</small>` : ""}</span></label>`).join("")}</div>`;
   const chips = (name, list, cur) => `<div class="chips" role="radiogroup">${list.map(([v, b]) => `<label><input type="radio" name="${name}" value="${v}" ${cur === v ? "checked" : ""} /><span>${esc(b)}</span></label>`).join("")}</div>`;
   app.innerHTML = `<div class="wrap"><form class="tailor fadeup" id="tailorForm">
-    <p class="kicker">${first ? "One last thing" : "Your path"}</p>
+    <p class="kicker">${T.kicker}</p>
     <h1 class="display h2">Tailor Blueprint <span class="grad">to you.</span></h1>
-    <p class="lede">Three quick taps. We’ll point you to the parts that matter most for what you want, with examples from your field. Change it any time.</p>
+    <p class="lede">${T.lede}</p>
     <div class="q"><p class="q__t"><span>1</span>What are you working toward?</p>${cards("goal", GOALS, me.goal)}</div>
     <div class="q"><p class="q__t"><span>2</span>What field are you in?</p>${chips("field", FIELDS, me.field)}</div>
     <div class="q"><p class="q__t"><span>3</span>Where’s your résumé at?</p>${cards("stage", STAGES, me.stage)}</div>
     ${!me.heard ? `<div class="q"><p class="q__t" style="font-size:1.05rem"><span>+</span>How did you hear about Blueprint? <span class="opt">optional</span></p>${chips("heard", HEARD.map((x) => [x, x]), "")}</div>` : ""}
-    <div class="tailor__go"><button class="btn btn--primary btn--lg" type="submit">${first ? "Start Session 1" : "Save my path"} ${arrow}</button><button type="button" class="link" id="skip">${first ? "Skip for now" : "Cancel"}</button></div>
+    <div class="tailor__go"><button class="btn btn--primary btn--lg" type="submit">${T.go} ${arrow}</button><button type="button" class="link" id="skip">${T.skip}</button></div>
   </form></div>`;
-  $("#skip").onclick = () => { firstVisit = false; location.hash = first ? "#/s/1" : "#/"; };
+  $("#skip").onclick = () => { tailorMode = "edit"; location.hash = T.to; };
   $("#tailorForm").onsubmit = async (e) => {
     e.preventDefault();
     const v = Object.fromEntries(new FormData(e.target));
     const btn = e.submitter; busy(btn, true, "Saving");
     try {
       take(await call("profile", { goal: v.goal || "", field: v.field || "", stage: v.stage || "", ...(v.heard ? { heard_from: v.heard } : {}) }));
-      firstVisit = false;
+      tailorMode = "edit";
       toast(v.goal ? `Tailored for: ${goalName(v.goal)}` : "Saved");
-      location.hash = first ? "#/s/1" : "#/";
+      location.hash = T.to;
     } catch (ex) { busy(btn, false); toast(msg(ex), true); }
   };
 }
@@ -965,6 +975,7 @@ async function route() {
   if (h[0] === "s") renderSession(Number(h[1]), h[2] || 0);
   else if (h[0] === "blueprint") renderBlueprint();
   else if (h[0] === "tailor") renderTailor();
+  else if (shouldAsk()) { tailorMode = "welcome"; location.hash = "#/tailor"; }
   else renderHome();
 }
 addEventListener("hashchange", route);
