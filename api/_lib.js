@@ -2,7 +2,7 @@
    Runs on Vercel with the Supabase service key and the Blueprint Gmail app password,
    both set as environment variables (never in the repo, never sent to the browser). */
 import nodemailer from "nodemailer";
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "node:crypto";
 
 const U = process.env.SUPABASE_URL;
 const K = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -151,6 +151,8 @@ function dataKey() {
   if (k.length !== 32) throw new Error("DATA_ENCRYPTION_KEY missing");
   return k;
 }
+/* a separate key for one job (e.g. signing course logins), made from the data key so there's nothing new to set up */
+export const subKey = (label) => createHmac("sha256", dataKey()).update(`blueprint:${label}`).digest();
 export function seal(data) {
   const iv = randomBytes(12), c = createCipheriv("aes-256-gcm", dataKey(), iv);
   const out = Buffer.concat([c.update(data), c.final()]);
@@ -417,3 +419,6 @@ export async function answerEmail(q, answer) {
 export async function newQuestionPing() {
   await mail({ to: process.env.GMAIL_USER, subject: "New question on the Blueprint site", html: shell({ preview: "Someone asked a question on the site.", kicker: "Team", title: "Someone asked a question", ask: false, body: p(`Answer it in the workspace: <a href="${SITE}/admin/#questions" style="color:${BLUE};font-weight:600">Questions</a>. Their details stay there, not in this inbox.`) }), text: `Someone asked a question on the site. Answer it in the workspace: ${SITE}/admin/#questions` });
 }
+
+/* the email building blocks, for the course emails in api/_learn.js */
+export { mail, shell, p, h, btn, esc, first, peso, askText };

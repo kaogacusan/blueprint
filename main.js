@@ -361,7 +361,7 @@
   });
 
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
-  const PRIVACY_VERSION = "2026-11-07";
+  const PRIVACY_VERSION = "2026-11-11";
 
   /* the server saves it and emails their payment link (api/register.js). A new sign-up gets the link back. */
   const saveRegistration = async (row) => {
