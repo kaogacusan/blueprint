@@ -120,7 +120,7 @@ export default {
       const ul = root.querySelector("#alog");
       try {
         const rows = await accessLog();
-        const who = (t) => (t.startsWith("q") ? "a question" : regs.find((r) => String(r.id) === t)?.name || `sign-up #${t}`);
+        const who = (t) => (t.startsWith("q") ? "a question" : t.startsWith("course:") ? `course order ${(S.data.course_orders || []).find((o) => `course:${o.id}` === t)?.code || t.slice(7)}` : regs.find((r) => String(r.id) === t)?.name || `sign-up #${t}`);
         ul.innerHTML = rows.length ? rows.map((a) => `<li><span>${esc(fmt(a.at))}</span><span><b>${esc(a.who)}</b> ${esc(a.action)}: ${esc(who(a.target))}</span></li>`).join("") : `<li><span>Nothing yet.</span></li>`;
         ul.hidden = false; e.target.hidden = true;
       } catch { toast("Couldn’t load the log.", "bad"); }

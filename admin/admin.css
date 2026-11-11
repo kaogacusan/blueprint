@@ -1347,3 +1347,33 @@ body.is-alarmed { overflow: hidden; }
 .alog { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12px; max-height: 220px; overflow: auto; }
 .alog li { display: flex; gap: 10px; padding: 4px 0; border-top: 1px solid var(--line); }
 .alog li span:first-child { min-width: 108px; color: var(--ink-3); }
+
+/* ================= COURSE (Blueprint Online) ================= */
+.sdot--pending, .spill--pending { --bgc: #fff1e0; --fg: #b45309; }
+.sdot--rejected, .spill--rejected { --bgc: #ffecec; --fg: #c42b31; }
+.stat--warn .stat__n b { color: var(--warn); }
+.table--course .mono { display: block; }
+.table--course td.st { min-width: 190px; }
+.table--course .st-rejected td { opacity: 0.7; }
+.ch--tools { flex-wrap: wrap; }
+.ch--tools h3 { margin-right: auto; }
+.ch--tools .search { flex: 0 1 280px; height: 34px; }
+.sess { display: inline-flex; gap: 4px; }
+.sess .tag.is-off { background: #f4f5f9; color: #c2c8d6; }
+.sess .tag.is-wait { box-shadow: inset 0 0 0 1.5px currentColor; }
+.prog { min-width: 200px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.prog span { white-space: nowrap; }
+.prog .done { color: #11753f; font-weight: 650; }
+.prog i { font-style: normal; color: var(--ink-3); }
+.cset__wide { grid-column: 1 / -1; }
+.cset__vids { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px 24px; }
+.cset__vids label { display: flex; flex-direction: column; gap: 4px; }
+.notebox { display: grid; gap: 8px; margin-top: 14px; scroll-margin-bottom: 90px; color: var(--ink-2); font-size: 13.5px; }
+.notebox b { color: var(--ink); }
+.notebox textarea { width: 100%; padding: 9px 11px; border-radius: 10px; border: 1px solid var(--line-2); background: #fff; resize: vertical; font-size: 14px; }
+.notebox textarea:focus { outline: none; border-color: var(--electric); box-shadow: 0 0 0 3px rgba(0, 109, 255, 0.12); }
+@media (max-width: 640px) {
+  .ch--tools .search { flex: 1 1 100%; order: 3; }
+  .cset > summary { flex-wrap: wrap; }
+  .cset > summary > .muted { order: 3; flex-basis: 100%; }
+}

@@ -24,6 +24,8 @@ export default async function handler(req, res) {
     }
 
     if (action === "check") {
+      // two teammates on the same receipt: the first answer counts
+      if (o.status !== "pending") return send(res, 409, { error: "checked", row: o });
       const stamp = new Date().toISOString();
       if (ok === true) {
         const [next] = await db(`course_orders?id=eq.${id}`, { method: "PATCH", prefer: "return=representation", data: { status: "paid", checked_at: stamp, checked_by: who, note: "" } });

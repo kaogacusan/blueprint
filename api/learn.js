@@ -179,8 +179,14 @@ async function buy(res, l, b) {
   }
   if (!o) throw new Error("no code");
   const path = `course/${o.id}.enc`;
-  await saveFile(path, seal(img), "application/octet-stream"); // locked with our key: only api/course.js opens it
-  await db(`course_orders?id=eq.${o.id}`, { method: "PATCH", data: { proof_path: path, proof_at: new Date().toISOString() } });
+  try {
+    await saveFile(path, seal(img), "application/octet-stream"); // locked with our key: only api/course.js opens it
+    await db(`course_orders?id=eq.${o.id}`, { method: "PATCH", data: { proof_path: path, proof_at: new Date().toISOString() } });
+  } catch (e) {
+    // no receipt, no order: they can try again
+    await db(`course_orders?id=eq.${o.id}`, { method: "DELETE" }).catch(() => {});
+    throw e;
+  }
 
   if (pr.instant) {
     l.unlocked = [...new Set([...l.unlocked, ...sessions])].sort();

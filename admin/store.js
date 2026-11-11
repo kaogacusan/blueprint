@@ -26,9 +26,17 @@ const TABLES = {
   registrations: ["*", "created_at"],
   questions: ["*", "created_at"],
   decks: ["slug, session_no, title, subtitle, slide_count, updated_at", "session_no"],
+  // Blueprint Online (migration 014). The team may only read these learner columns (never the sign-in hashes),
+  // and their worksheet answers aren't needed here, only which steps are done.
+  learners: ["id, created_at, name, email, year, heard_from, unlocked, via, last_seen", "created_at"],
+  course_orders: ["*", "created_at"],
+  course_work: ["learner_id, session, done, completed_at, updated_at", "updated_at"],
+  course_sessions: ["n, title, steps, video_url", "n"],
 };
-const NEWEST_FIRST = ["registrations", "questions"];
-const PK = { sessions: "n", settings: "key", decks: "slug" };
+const NEWEST_FIRST = ["registrations", "questions", "learners", "course_orders"];
+const PK = { sessions: "n", settings: "key", decks: "slug", course_sessions: "n" };
+/* the course is new: if one of its tables can't load, the rest of the workspace still opens */
+const COURSE = ["learners", "course_orders", "course_work", "course_sessions"];
 const pk = (t) => PK[t] || "id";
 
 const listeners = new Set();
@@ -42,7 +50,13 @@ export async function reload(table) {
   S.data[table] = data;
 }
 export async function loadAll() {
-  await Promise.all(Object.keys(TABLES).map(reload));
+  await Promise.all(Object.keys(TABLES).map((t) => (COURSE.includes(t) ? reload(t).catch((e) => { console.warn(`[${t}]`, e.message); S.data[t] = []; }) : reload(t))));
+}
+/* the course tables aren't on realtime, so the Course page asks for them again; redraws only if something changed */
+export async function reloadCourse() {
+  const before = JSON.stringify(COURSE.map((t) => S.data[t]));
+  await Promise.all(COURSE.map(reload));
+  if (JSON.stringify(COURSE.map((t) => S.data[t])) !== before) emit("course_orders");
 }
 
 /* live updates: when the owner changes something, everyone's page refreshes */
@@ -121,6 +135,17 @@ export async function freeNews() {
 }
 /* their receipt screenshot: stored encrypted, so the server opens it for you (and logs that you did) */
 export const receipt = async (id) => (await server("signups", { action: "receipt", id })).image;
+/* Blueprint Online (api/course.js): a course order's GCash receipt (decrypted and logged, like the workshop's) */
+export const courseReceipt = async (id) => (await server("course", { action: "receipt", id })).image;
+/* ok: paid. Not ok: not paid, which locks those sessions again and emails them the note. */
+export async function checkCourseOrder(id, ok, note = "") {
+  const out = await server("course", { action: "check", id, ok, note });
+  const list = S.data.course_orders || [], i = list.findIndex((o) => o.id === id);
+  if (out.row && i >= 0) list[i] = out.row;
+  await reload("learners").catch(() => {}); // the server opened or locked their sessions
+  emit("course_orders");
+  return out;
+}
 /* answer a question from the site: emailed from the Blueprint inbox (api/questions.js) */
 export async function answerQuestion(id, answer) {
   const { row } = await server("questions", { action: "answer", id, answer });
