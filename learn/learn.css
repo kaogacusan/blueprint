@@ -558,3 +558,60 @@ p { margin: 0; }
 @media (max-width: 480px) { .m-done, .m-locked { grid-template-columns: 1fr; } .m-locked > .i { margin: 0; } }
 .scard__f > span:first-child, .resume__row .small { display: inline-flex; align-items: center; gap: 6px; }
 .scard__f > span:first-child .i, .resume__row .small .i { width: 15px; height: 15px; }
+
+/* ---------- the worksheet, on the module page (Nov 12: replaces the Google Forms) ---------- */
+.ws { padding: clamp(20px, 3.4vw, 32px); }
+.ws-head { display: grid; gap: 6px; padding-bottom: 18px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.ws-head .kicker { margin: 0; }
+.ws-head .kicker .i { width: 15px; height: 15px; }
+.ws-head .soft { font-size: 0.95rem; line-height: 1.5; max-width: 56ch; }
+.ws-sec { margin: 26px 0 14px; }
+.ws-sec h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.2rem; letter-spacing: -0.03em; color: var(--navy); }
+.ws-sec p { margin: 4px 0 0; color: var(--ink-3); font-size: 0.93rem; line-height: 1.5; }
+.ws-q { margin-bottom: 20px; }
+.ws-q .lab { line-height: 1.4; }
+.ws-q .hint { white-space: normal; }
+.ws-q .ex { margin: 2px 0 4px; }
+.ws-q .ex summary .i:first-child { width: 15px; height: 15px; }
+.ws-q .ex summary .chev { width: 16px; height: 16px; }
+.ws-from { margin: 2px 0 4px; }
+.ws-from p { white-space: normal; max-height: 9.5em; overflow: auto; }
+.ws-q.is-missing .ta, .ws-q.is-missing .in { border-color: var(--bad); background: #fffafa; }
+.ws-q.is-missing .chips span, .ws-q.is-missing .cards span { border-color: rgba(210, 59, 63, 0.55); }
+.ws-q.is-missing .lab::after { content: "Needs an answer"; margin-left: 8px; font-size: 0.78rem; font-weight: 600; color: var(--bad); }
+.ws-count { margin: 2px 0 0; font-size: 0.82rem; color: var(--ink-3); text-align: right; }
+.ws-count.is-over { color: var(--bad); font-weight: 600; }
+.ws-cards { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.ws-more { margin-top: 8px; max-width: 320px; }
+.ws-grid { display: grid; gap: 10px; }
+.ws-grid__row { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); }
+.ws-grid__row > b { font-size: 0.9rem; letter-spacing: -0.01em; }
+.ws-grid .chips span { min-height: 38px; font-size: 0.88rem; }
+.ws-tick { font-size: 0.97rem; color: var(--ink); }
+.ws-bar { margin: 8px calc(-1 * clamp(20px, 3.4vw, 32px)) 0; padding-left: clamp(20px, 3.4vw, 32px); padding-right: clamp(20px, 3.4vw, 32px); background: linear-gradient(rgba(255, 255, 255, 0), #fff 30%); border-radius: 0 0 var(--radius) var(--radius); }
+.m-done__row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+
+/* ---------- the review call ---------- */
+.mini__ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--tint); color: var(--core); }
+.mini__ic .i { width: 22px; height: 22px; }
+.rv-mine { display: grid; gap: 12px; border-color: rgba(0, 109, 255, 0.22); background: linear-gradient(140deg, #fff 55%, #eef4ff); box-shadow: var(--shadow); }
+.rv-mine .kicker { margin: 0; }
+.rv-when { margin: 0; font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.05; }
+.rv-when span { display: block; margin-top: 8px; font-family: var(--text); font-size: 1rem; font-weight: 550; letter-spacing: -0.01em; color: var(--ink-2); }
+.rv-who { color: var(--ink-2); }
+.rv-acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.rv-prog { padding: 14px 16px; border-radius: 14px; background: #fff; border: 1px solid var(--line); }
+.rv-prog .soft { font-size: 0.94rem; line-height: 1.5; }
+.rv-change { text-align: left; margin: 0; }
+.rv-pick { margin-top: 22px; }
+.rv-day { margin-top: 18px; }
+.rv-day h3 { margin: 0 0 10px; font-size: 0.95rem; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); }
+.rv-times { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.rv-t { display: grid; gap: 1px; justify-items: center; padding: 10px 8px; border: 1px solid var(--line-2); border-radius: 14px; background: #fff; transition: border-color 0.2s, background 0.2s, transform 0.2s var(--ease); }
+.rv-t b { font-family: var(--display); font-size: 1rem; letter-spacing: -0.02em; color: var(--ink); }
+.rv-t small { font-size: 0.78rem; color: var(--ink-3); }
+.rv-t:hover { border-color: var(--electric); background: var(--tint); transform: translateY(-1px); }
+.rv-t:hover b { color: var(--core); }
+@media (max-width: 480px) { .rv-acts .btn { width: 100%; } .rv-times { grid-template-columns: repeat(3, 1fr); } }
+.rv-prog .btn { white-space: normal; height: auto; min-height: var(--h); padding-top: 8px; padding-bottom: 8px; text-align: left; max-width: 100%; }
+.player > section { min-width: 0; }

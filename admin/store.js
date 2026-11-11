@@ -26,17 +26,18 @@ const TABLES = {
   registrations: ["*", "created_at"],
   questions: ["*", "created_at"],
   decks: ["slug, session_no, title, subtitle, slide_count, updated_at", "session_no"],
-  // Blueprint Online (migration 014). The team may only read these learner columns (never the sign-in hashes),
-  // and their worksheet answers aren't needed here, only which steps are done.
+  // Blueprint Online (migrations 014, 018). The team may only read these learner columns (never the sign-in hashes).
+  // Worksheet answers are loaded only when someone opens them (workAnswers below), not every minute.
   learners: ["id, created_at, name, email, year, heard_from, goal, field, stage, unlocked, via, last_seen", "created_at"],
   course_orders: ["*", "created_at"],
   course_work: ["learner_id, session, done, completed_at, updated_at", "updated_at"],
-  course_sessions: ["n, title, minutes, video_url, slides_url, form_url", "n"],
+  course_sessions: ["n, title, minutes, video_url, slides_url, worksheet", "n"],
+  review_slots: ["*", "starts_at"],
 };
 const NEWEST_FIRST = ["registrations", "questions", "learners", "course_orders"];
 const PK = { sessions: "n", settings: "key", decks: "slug", course_sessions: "n" };
 /* the course is new: if one of its tables can't load, the rest of the workspace still opens */
-const COURSE = ["learners", "course_orders", "course_work", "course_sessions"];
+const COURSE = ["learners", "course_orders", "course_work", "course_sessions", "review_slots"];
 const pk = (t) => PK[t] || "id";
 
 const listeners = new Set();
@@ -145,6 +146,21 @@ export async function checkCourseOrder(id, ok, note = "") {
   await reload("learners").catch(() => {}); // the server opened or locked their sessions
   emit("course_orders");
   return out;
+}
+/* review calls (api/course.js): slotsAdd { date, from, to, reviewer, meet }, slotRemove { id }, slotCancel { id } */
+export async function reviewAction(action, payload) {
+  const out = await server("course", { action, ...payload });
+  await reload("review_slots").catch(() => {});
+  emit("course_orders");
+  return out;
+}
+/* everyone's worksheet answers (or one learner's), for reading before a call and for the CSV */
+export async function workAnswers(learnerId) {
+  let q = supa.from("course_work").select("learner_id, session, answers, completed_at, updated_at").order("session");
+  if (learnerId) q = q.eq("learner_id", learnerId);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data;
 }
 /* answer a question from the site: emailed from the Blueprint inbox (api/questions.js) */
 export async function answerQuestion(id, answer) {

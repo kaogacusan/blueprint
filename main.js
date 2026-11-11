@@ -184,7 +184,7 @@
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
   /* ---------- Get Blueprint ----------
-     One product since Nov 11: Blueprint Online, ₱349 (four modules plus a 15-minute 1:1 with Thomas).
+     One product since Nov 11: Blueprint Online, ₱349 (four modules plus a 15-minute résumé review).
      Every "Get Blueprint" button opens the sign-up form. /api/register saves it (ticket "online"), sets the amount
      itself, and emails the link to their payment page (GCash QR + reference number). The team sees it in /admin.
      Deep links: /?get opens the form · ?from=booth picks "Booth" for "How did you hear about Blueprint?" */
@@ -243,6 +243,32 @@
   });
   if (qs.has("get")) openModal();
 
+  /* "Blueprint is now online": a small note that pops up in the corner after a moment.
+     Hidden while the form is open and once you reach the final "Build yours" section; ✕ keeps it closed for this visit. */
+  const pop = document.getElementById("hoPop");
+  if (pop) {
+    let gone = false;
+    try { gone = sessionStorage.getItem("bp_pop") === "x"; } catch {}
+    const final = document.getElementById("register");
+    let nearEnd = false;
+    const sync = () => {
+      const show = !gone && !modal.open && !nearEnd;
+      if (show && pop.hidden) { pop.hidden = false; requestAnimationFrame(() => pop.classList.add("is-in")); }
+      else if (!show && !pop.hidden) { pop.classList.remove("is-in"); setTimeout(() => { if (!pop.classList.contains("is-in")) pop.hidden = true; }, 320); }
+    };
+    if (final) new IntersectionObserver(([e]) => { nearEnd = e.isIntersecting; sync(); }, { threshold: 0.15 }).observe(final);
+    pop.querySelector(".ho-pop__x").addEventListener("click", () => {
+      gone = true;
+      try { sessionStorage.setItem("bp_pop", "x"); } catch {}
+      sync();
+    });
+    modal.addEventListener("close", () => setTimeout(sync, 400));
+    pop.querySelector("[data-register]").addEventListener("click", sync);
+    setTimeout(sync, reduce ? 300 : 1800);
+    /* On phones it sits over the page, so it tucks itself away after a while (it doesn't come back on this visit) */
+    if (window.matchMedia("(max-width: 640px)").matches) setTimeout(() => { gone = true; sync(); }, 14000);
+  }
+
   const validate = () => {
     checkMobile();
     checkGift();
@@ -262,7 +288,7 @@
   });
 
   /* the date on privacy.html; saved with each sign-up so we know which notice they agreed to */
-  const PRIVACY_VERSION = "2026-11-11";
+  const PRIVACY_VERSION = "2026-11-12";
 
   /* the server saves it and emails their payment link (api/register.js). A new sign-up gets the link back. */
   const saveRegistration = async (row) => {

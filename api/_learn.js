@@ -1,10 +1,11 @@
 /* Shared code for Blueprint Online (/learn): who gets in, sign-in tokens, what a learner sees, and the course emails.
-   Files starting with "_" are not routes. Tables: migrations 014 and 017.
+   Files starting with "_" are not routes. Tables: migrations 014, 017 and 018.
 
    Since the Nov 11 night plan there is one product, Blueprint Online (₱349), bought through the site's sign-up form:
    register → pay by GCash → type the reference number on /pay → the team clicks Paid → accessEmail() sends the course link.
    Who gets in: a paid (or "refunded, free access") sign-up under that email. A gift goes to gift_email, not the buyer.
-   Modules open in order: Module 2 after they finish Module 1's form, and so on. Module 4 done → the 1:1 booking link. */
+   Modules open in order: each ends with a worksheet on the page (Thomas's questions, migration 018); submitting it opens
+   the next module. The 15-minute résumé review: they book a time on the site whenever they like (review_slots). */
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { db, enc, settings, subKey, SITE, mail, shell, p, h, btn, esc, first, peso, askText, chip, step, payCard, qrAttachment, payLink } from "./_lib.js";
 
@@ -82,31 +83,72 @@ export async function learnerForGrant(r, email) {
 }
 
 /* ---------- everything the course needs, in one go ----------
-   A module's video, slides and form are only sent once it's open: they bought it, and the module before is done.
-   The 1:1 booking link only once Module 4 is done. */
+   A module's video, slides and worksheet are only sent once it's open: they bought it, and the module before is submitted.
+   Their own answers come back for every module they've started. The review call: theirs, and the open times. */
+export const CALLS_UNTIL = "Dec 5";
+const HOUR = 36e5;
 export async function snapshot(l) {
-  const [mods, work, { course = {} }] = await Promise.all([
-    db("course_sessions?select=n,title,tagline,leave_with,minutes,page_text,credits,video_url,slides_url,form_url&order=n"),
-    db(`course_work?select=session,completed_at&learner_id=eq.${l.id}`),
-    settings("course"),
-  ]);
   const paid = ALL.every((n) => l.unlocked.includes(n));
-  const doneAt = Object.fromEntries(work.filter((w) => w.completed_at).map((w) => [w.session, w.completed_at]));
-  const open = (n) => paid && (n === 1 || !!doneAt[n - 1]);
-  const finished = ALL.every((n) => doneAt[n]);
+  const [mods, work, review] = await Promise.all([
+    db("course_sessions?select=n,title,tagline,leave_with,minutes,page_text,credits,video_url,slides_url,worksheet,confirm_text&order=n"),
+    db(`course_work?select=session,answers,completed_at,updated_at&learner_id=eq.${l.id}`),
+    paid ? reviewFor(l) : null,
+  ]);
+  const w = Object.fromEntries(work.map((x) => [x.session, x]));
+  const doneAt = (n) => w[n]?.completed_at || null;
+  const open = (n) => paid && (n === 1 || !!doneAt(n - 1));
   return {
     me: { name: l.name, first: first(l.name), email: l.email, paid, via: l.via },
     modules: mods.map((m) => ({
       n: m.n, title: m.title, tagline: m.tagline, leaveWith: m.leave_with, minutes: m.minutes, text: m.page_text, credits: m.credits,
-      open: open(m.n), doneAt: doneAt[m.n] || null,
-      ...(open(m.n) ? { video: m.video_url || "", slides: m.slides_url || "", form: m.form_url || "" } : {}),
+      open: open(m.n), doneAt: doneAt(m.n), savedAt: w[m.n]?.updated_at || null, answers: paid ? w[m.n]?.answers || {} : {},
+      ...(open(m.n) ? { video: m.video_url || "", slides: m.slides_url || "", worksheet: m.worksheet || [], confirm: m.confirm_text || "" } : {}),
     })),
-    coaching: doneAt[4] ? { booking: course.booking || "", until: course.callsUntil || "Dec 5" } : null,
-    finished,
+    review,
+    finished: ALL.every((n) => doneAt(n)),
   };
 }
 
-/* the course page before anyone signs in: titles, times, what you leave with. No forms, no videos. */
+/* their review call (with the Meet link) and the open times: 12+ hours away, nobody on them. Change or cancel until 24 hours before. */
+export async function reviewFor(l) {
+  const soon = new Date(Date.now() + 12 * HOUR).toISOString();
+  const [mine, open] = await Promise.all([
+    db(`review_slots?select=id,starts_at,minutes,reviewer,meet_url&learner_id=eq.${l.id}`),
+    db(`review_slots?select=id,starts_at,minutes,reviewer&learner_id=is.null&starts_at=gt.${enc(soon)}&order=starts_at,reviewer&limit=300`),
+  ]);
+  const s = mine[0];
+  return {
+    mine: s ? { id: s.id, startsAt: s.starts_at, minutes: s.minutes, reviewer: s.reviewer, meet: s.meet_url, canChange: Date.parse(s.starts_at) - Date.now() > 24 * HOUR } : null,
+    open: open.map((o) => ({ id: o.id, startsAt: o.starts_at, minutes: o.minutes, reviewer: o.reviewer })),
+    until: CALLS_UNTIL,
+  };
+}
+
+/* ---------- worksheet answers: only the questions in that module's worksheet, trimmed to size ---------- */
+const TEXT = ["long", "short", "url", "choice"];
+export function cleanAnswers(items, raw = {}) {
+  const out = {};
+  const str = (v, max) => (typeof v === "string" || typeof v === "number" ? String(v).slice(0, max) : "");
+  for (const q of items || []) {
+    if (!q.id || !(q.id in raw || `${q.id}_more` in raw)) continue;
+    const v = raw[q.id];
+    if (TEXT.includes(q.t)) {
+      const s = str(v, q.t === "long" ? 5000 : 600);
+      if (q.t === "choice" && s && !q.options.some((o) => o.v === s)) continue;
+      out[q.id] = s;
+      if (q.more) out[`${q.id}_more`] = str(raw[`${q.id}_more`], 200);
+    } else if (q.t === "checks") {
+      out[q.id] = Array.isArray(v) ? q.options.filter((o) => v.includes(o)) : [];
+    } else if (q.t === "grid") {
+      out[q.id] = Object.fromEntries(q.rows.map((r) => [r, Array.isArray(v?.[r]) ? q.cols.filter((c) => v[r].includes(c)) : []]));
+    } else if (q.t === "tick") out[q.id] = v === true;
+  }
+  return out;
+}
+/* the questions still empty that need an answer before they can submit */
+export const missing = (items, a) => (items || []).filter((q) => q.id && TEXT.includes(q.t) && !q.opt && !String(a[q.id] || "").trim()).map((q) => q.id);
+
+/* the course page before anyone signs in: titles, times, what you leave with. No worksheets, no videos. */
 export async function catalog() {
   const mods = await db("course_sessions?select=n,title,tagline,leave_with,minutes&order=n");
   return { modules: mods.map((m) => ({ n: m.n, title: m.title, tagline: m.tagline, leaveWith: m.leave_with, minutes: m.minutes })) };
@@ -129,7 +171,7 @@ export async function onlinePayEmail(r) {
     kicker: "You're registered",
     title: "Two steps to get Blueprint",
     body:
-      p(`Hi ${esc(first(r.name))}! Thanks for registering for <b>Blueprint Online</b>: four short modules plus a 15-minute 1:1 with Thomas.${gift}`) +
+      p(`Hi ${esc(first(r.name))}! Thanks for registering for <b>Blueprint Online</b>: four short modules plus a 15-minute review of your résumé and LinkedIn.${gift}`) +
       chip(r.code, "unpaid") +
       h("How to pay") +
       step(1, "Pay with GCash",
@@ -153,12 +195,12 @@ export async function accessEmail(r, { free = false } = {}) {
   const name = gift ? r.gift_name || "" : r.name;
   const link = accessLink(r);
   const lead = free
-    ? "Thank you for signing up for Blueprint last week, and sorry the workshops didn’t push through. We’ve moved Blueprint online, and you get it free: four short modules plus a 15-minute 1:1 with Thomas."
+    ? "Thank you for signing up for Blueprint last week, and sorry the workshops didn’t push through. We’ve moved Blueprint online, and you get it free: four short modules plus a 15-minute review of your résumé and LinkedIn."
     : "Here’s your access to Blueprint.";
   const leadText = free
-    ? "Thank you for signing up for Blueprint last week, and sorry the workshops didn't push through. We've moved Blueprint online, and you get it free: four short modules plus a 15-minute 1:1 with Thomas."
+    ? "Thank you for signing up for Blueprint last week, and sorry the workshops didn't push through. We've moved Blueprint online, and you get it free: four short modules plus a 15-minute review of your résumé and LinkedIn."
     : "You're in. Here's your access to Blueprint.";
-  const giftLine = gift ? `${first(r.name)} got you Blueprint, a short online course on your résumé, LinkedIn and how you introduce yourself, plus a 15-minute 1:1 with Thomas.` : "";
+  const giftLine = gift ? `${first(r.name)} got you Blueprint, a short online course on your résumé, LinkedIn and how you introduce yourself, plus a 15-minute one-on-one review on Google Meet.` : "";
   const html = shell({
     preview: gift ? `${first(r.name)} got you Blueprint. Start with Module 1.` : free ? "Blueprint is online now, and it's free for you." : "Here's your access to Blueprint. Start with Module 1.",
     kicker: gift ? "A gift for you" : free ? "Blueprint Online" : "Payment received",
@@ -166,13 +208,13 @@ export async function accessEmail(r, { free = false } = {}) {
     body:
       p(`Hi${name ? ` ${esc(first(name))}` : ""}! ${gift ? esc(giftLine) : lead}`) +
       btn(link, "Open Blueprint") +
-      p(`Start with Module 1. It takes about 20 minutes. When you finish Module 4, you’ll get the link to book your 15-minute 1:1 with Thomas.`) +
+      p(`Start with Module 1. It takes about 20 minutes. You can also pick a time for your 15-minute résumé review now, on the course page. Your reviewer reads your worksheets before the call.`) +
       (free ? p(`If you know anyone graduating who’d want this, it’s ${peso(349)} until Sunday.`) : "") +
       p("The Blueprint Team") +
       h("Coming back later") +
       p(`The button above signs you in on this device. ${newDevice}`, "font-size:15px;color:#5b6378"),
   });
-  const text = `Hi${name ? ` ${first(name)}` : ""}!\n\n${gift ? giftLine : leadText}\n\nHere's your access: ${link}\n\nStart with Module 1. It takes about 20 minutes. When you finish Module 4, you'll get the link to book your 15-minute 1:1 with Thomas.${free ? `\n\nIf you know anyone graduating who'd want this, it's ₱349 until Sunday.` : ""}\n\n${newDevice}\n\nThe Blueprint Team\n${askText}`;
+  const text = `Hi${name ? ` ${first(name)}` : ""}!\n\n${gift ? giftLine : leadText}\n\nHere's your access: ${link}\n\nStart with Module 1. It takes about 20 minutes. You can also pick a time for your 15-minute résumé review now, on the course page. Your reviewer reads your worksheets before the call.${free ? `\n\nIf you know anyone graduating who'd want this, it's ₱349 until Sunday.` : ""}\n\n${newDevice}\n\nThe Blueprint Team\n${askText}`;
   await mail({ to: accessEmailOf(r), subject: gift ? `${first(r.name)} got you Blueprint` : "You're in. Here's Blueprint.", html, text });
 }
 
@@ -204,4 +246,53 @@ export async function rejectEmail(l, o) {
   });
   const text = `Hi ${first(l.name)}!\n\nWe checked the receipt you sent (order ${o.code}, ${peso(o.amount)}) and it didn't match a payment we got.${o.note ? `\nOur note: ${o.note}` : ""}\n\n${askText}`;
   await mail({ to: l.email, subject: `Blueprint: we couldn't match your receipt (${o.code})`, html, text });
+}
+
+/* ---------- the review call ---------- */
+const TZ = "Asia/Manila";
+export const callTime = (iso) => new Date(iso).toLocaleString("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const gstamp = (ms) => new Date(ms).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+/* "Add to Google Calendar" for their call */
+export function calLink(s) {
+  const start = Date.parse(s.starts_at), end = start + (s.minutes || 15) * 60e3;
+  const q = new URLSearchParams({ action: "TEMPLATE", text: "Blueprint résumé review", dates: `${gstamp(start)}/${gstamp(end)}`,
+    details: `Your 15-minute résumé review with ${s.reviewer}.${s.meet_url ? ` Join: ${s.meet_url}` : ""} Change it on ${LEARN}#/review (up to 24 hours before).`, location: s.meet_url || "Google Meet" });
+  return `https://calendar.google.com/calendar/render?${q}`;
+}
+const REVIEW_PAGE = `${LEARN}#/review`;
+
+/* booked or moved: the time, who, the Meet link, and what to do before */
+export async function reviewEmail(l, s, { moved = false } = {}) {
+  const when = callTime(s.starts_at);
+  const html = shell({
+    preview: `${when} (Manila time), 15 minutes on Google Meet with ${s.reviewer}.`,
+    kicker: moved ? "Review call moved" : "Review call booked",
+    title: `${esc(when)}`,
+    body:
+      p(`Hi ${esc(first(l.name))}! Your 15-minute résumé review is ${moved ? "now " : ""}on <b>${esc(when)}</b> (Manila time) with <b>${esc(s.reviewer)}</b>, on Google Meet.`) +
+      (s.meet_url ? btn(s.meet_url, "Google Meet link") : p(`We’ll email the Google Meet link before the call.`)) +
+      p(`<a href="${esc(calLink(s))}" style="color:#0646c8;font-weight:600">Add it to Google Calendar</a>`, "font-size:15px") +
+      h("Before the call") +
+      p(`Finish all four worksheets on the course page. ${esc(first(s.reviewer))} reads them before your call, so the 15 minutes go to your résumé bullets, your LinkedIn or your intro, and your next step.`) +
+      p(`Have your résumé and LinkedIn open.`) +
+      p(`Need another time? Change it on the <a href="${REVIEW_PAGE}" style="color:#0646c8;font-weight:600">course page</a> up to 24 hours before. A missed call without notice isn’t rebooked.`, "font-size:15px;color:#5b6378"),
+  });
+  const text = `Hi ${first(l.name)}!\n\nYour 15-minute résumé review is ${moved ? "now " : ""}on ${when} (Manila time) with ${s.reviewer}, on Google Meet.\n${s.meet_url ? `Google Meet: ${s.meet_url}\n` : ""}Add to Google Calendar: ${calLink(s)}\n\nBefore the call: finish all four worksheets on the course page. ${first(s.reviewer)} reads them before your call. Have your résumé and LinkedIn open.\n\nNeed another time? Change it at ${REVIEW_PAGE} up to 24 hours before. A missed call without notice isn't rebooked.\n\nThe Blueprint Team\n${askText}`;
+  await mail({ to: l.email, subject: `Your Blueprint résumé review: ${when}`, html, text });
+}
+
+/* the team had to cancel their time: pick another */
+export async function reviewCancelledEmail(l, s) {
+  const when = callTime(s.starts_at);
+  const html = shell({
+    preview: `We had to cancel your review call on ${when}. Pick another time.`,
+    kicker: "Review call",
+    title: "Please pick another time",
+    body:
+      p(`Hi ${esc(first(l.name))}! Sorry, we had to cancel your résumé review on <b>${esc(when)}</b>.`) +
+      btn(REVIEW_PAGE, "Pick another time") +
+      p(`Your worksheets are still saved, and your reviewer still reads them before the call.`, "font-size:15px;color:#5b6378"),
+  });
+  const text = `Hi ${first(l.name)}!\n\nSorry, we had to cancel your résumé review on ${when}. Pick another time here: ${REVIEW_PAGE}\n\nYour worksheets are still saved.\n\nThe Blueprint Team\n${askText}`;
+  await mail({ to: l.email, subject: "Blueprint: please pick another time for your review", html, text });
 }

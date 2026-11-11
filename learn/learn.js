@@ -1,8 +1,9 @@
 /* Blueprint Online: the course at /learn. Same look as the main site.
-   Thomas's Nov 11 night plan: one product (₱349, bought on the main site), four short modules done in order,
-   each one a video (or the deck until the video is up), a short page and a Google Form that is the worksheet.
-   Ticking "I've sent my form" opens the next module. Module 4 done → the 15-minute 1:1 with Thomas.
-   Routes (hash):  #/  welcome + modules (signed in) or the sign-in page · #/m/2  Module 2 · #/coaching  the 1:1
+   One product (₱349, bought on the main site), four short modules done in order: each is a video (or the deck until
+   the video is up), a short page, and a worksheet on the page (Thomas's questions). Answers save as they type;
+   submitting the worksheet opens the next module. The 15-minute résumé review: they pick a time on #/review whenever
+   they like (even before they start), and their reviewer reads the worksheets first.
+   Routes (hash):  #/  welcome + modules (signed in) or the sign-in page · #/m/2  Module 2 · #/review  the review call
    Sign-in: the button in their "You're in" email (?k=…) signs them straight in; otherwise email → 6-digit code.
    Everything goes through /api/learn. The token stays in this browser. */
 
@@ -21,7 +22,7 @@ const store = {
 };
 const TOKEN = "bp_learn_token";
 let token = store.get(TOKEN);
-let D = null;   // signed in: me, modules, coaching
+let D = null;   // signed in: me, modules (with their worksheet and answers), review
 let C = null;   // the public catalog, for the sign-in page
 
 /* the button in the access email: /learn?k=… */
@@ -50,6 +51,8 @@ const P = {
   award: '<circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 7 5-3 5 3-1.5-7"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  down: '<path d="m6 9 6 6 6-6"/>',
+  pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
 };
 const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ""}</svg>`;
 const arrow = `<span class="btn__arrow" aria-hidden="true">→</span>`;
@@ -66,7 +69,7 @@ async function call(action, data = {}) {
 }
 function take(snap) {
   if (snap.token) { token = snap.token; store.set(TOKEN, token); }
-  if (snap.modules) D = { me: snap.me, modules: snap.modules, coaching: snap.coaching, finished: snap.finished };
+  if (snap.modules) D = { me: snap.me, modules: snap.modules, review: snap.review, finished: snap.finished };
 }
 function signOut(quiet) {
   token = null; D = null; store.del(TOKEN);
@@ -74,7 +77,9 @@ function signOut(quiet) {
 }
 function msg(e) {
   return { offline: "No connection. Check your signal and try again.", invalid: "That email doesn’t look right.", signin: "Please sign in again.",
-    order: "Finish the module before this one first.", badlink: "That link doesn’t work anymore. Sign in with your email instead." }[e.code]
+    order: "Submit the worksheet for the module before this one first.", badlink: "That link doesn’t work anymore. Sign in with your email instead.",
+    taken: "Someone just took that time. Pick another one.", locked: "Your call is less than 24 hours away, so it can’t be changed here. Ask us on the site.",
+    toolong: "That’s a lot of text. Shorten a few answers and try again." }[e.code]
     || "Something went wrong on our side. Try again, or ask us on the site.";
 }
 function toast(text, bad = false) {
@@ -119,13 +124,13 @@ function chrome() {
     return;
   }
   const cur = h[0] === "m" ? h[1] : nextUp()?.n || 1, n = doneCount();
-  const on = (k) => ((k === "home" ? !h[0] : k === "mod" ? h[0] === "m" : h[0] === "coaching") ? "is-on" : "");
-  nav.innerHTML = `<a href="#/" class="${on("home")}">My course</a><a href="#/m/${cur}" class="${on("mod")}">Modules</a><a href="#/coaching" class="${on("coach")}">1:1 with Thomas</a>`;
+  const on = (k) => ((k === "home" ? !h[0] : k === "mod" ? h[0] === "m" : h[0] === "review") ? "is-on" : "");
+  nav.innerHTML = `<a href="#/" class="${on("home")}">My course</a><a href="#/m/${cur}" class="${on("mod")}">Modules</a><a href="#/review" class="${on("review")}">Review call</a>`;
   right.innerHTML = `<a class="meter" href="#/" title="Modules done">${ring((n / 4) * 100, 28)}<b>${n}/4</b><span>done</span></a>
     <button class="avatar" id="me" aria-label="Your account" aria-haspopup="menu">${esc(initials(D.me.name))}</button>`;
   $("#me").onclick = (e) => { e.stopPropagation(); toggleMenu(); };
   tabs.hidden = false; document.body.classList.add("has-tabs");
-  tabs.innerHTML = `<a href="#/" class="${on("home")}">${icon("home")}Home</a><a href="#/m/${cur}" class="${on("mod")}">${icon("list")}Module ${cur}</a><a href="#/coaching" class="${on("coach")}">${icon("cal")}1:1</a>`;
+  tabs.innerHTML = `<a href="#/" class="${on("home")}">${icon("home")}Home</a><a href="#/m/${cur}" class="${on("mod")}">${icon("list")}Module ${cur}</a><a href="#/review" class="${on("review")}">${icon("cal")}Review</a>`;
 }
 function toggleMenu() {
   const old = $(".menu");
@@ -151,8 +156,8 @@ const FAQ = [
   ["I paid. How do I get in?", "Open the “You’re in” email we sent after we checked your payment, and tap Open Blueprint. On another phone or laptop, sign in here with the same email and we’ll send you a 6-digit code."],
   ["Someone bought it for me.", "Sign in with the email they gave us. The access email went there too."],
   ["I paid but didn’t get the email.", "We send it within 1 hour, 8 AM to 10 PM. Check Spam. Still nothing? Ask us on the site with the email you registered with."],
-  ["How does the 1:1 work?", "Finish Module 4 and you’ll get a booking link. It’s 15 minutes on Google Meet. Thomas reads your answers before the call."],
-  ["How long do I have access?", "You keep it. The 1:1 calls run until Dec 5."],
+  ["How does the review work?", "It’s a 15-minute one-on-one review of your résumé and LinkedIn on Google Meet. Pick a time on the course page whenever you like, even before you start. Your reviewer reads your worksheets before the call."],
+  ["How long do I have access?", "You keep it. Review calls run until Dec 5."],
 ];
 async function renderLanding() {
   chrome();
@@ -168,7 +173,7 @@ async function renderLanding() {
       <ul class="facts">
         <li>${icon("list")}<span><b>4 modules</b>, in order</span></li>
         <li>${icon("clock")}<span>About <b>${totalMins(ms)} minutes</b> in total</span></li>
-        <li>${icon("cal")}<span><b>15-minute 1:1</b> with Thomas</span></li>
+        <li>${icon("cal")}<span><b>15-minute review</b> of your résumé and LinkedIn</span></li>
         <li>${icon("phone")}<span>On your own time</span></li>
       </ul>
       ${ms.length ? `<ol class="outline stagger">${ms.map((m) => `<li>${poster(m.n)}<span><b>${esc(m.title)}</b><small>${esc(m.tagline)}</small></span><span class="tag">${m.minutes} min</span></li>`).join("")}</ol>` : ""}
@@ -254,10 +259,22 @@ function openSignIn(email = "", mode = "email") {
 /* ==========================================================================
    Signed in: welcome + the four modules
    ========================================================================== */
+const TZ = "Asia/Manila";
+const callDay = (iso) => new Date(iso).toLocaleDateString("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" });
+const callDayLong = (iso) => new Date(iso).toLocaleDateString("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" });
+const callTime = (iso) => new Date(iso).toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
+const callWhen = (iso) => `${callDay(iso)}, ${callTime(iso)}`;
+const firstName = (n = "") => n.trim().split(/\s+/)[0];
+function reviewCard() {
+  const r = D.review, mine = r?.mine;
+  return mine
+    ? `<a class="card card--pad mini" href="#/review" style="text-decoration:none"><span class="mini__ic">${icon("cal")}</span><div><h3 class="h3" style="font-size:1.15rem">Your review call</h3><p><b>${esc(callWhen(mine.startsAt))}</b> with ${esc(mine.reviewer)}. ${doneCount() < 4 ? `Finish your worksheets before then: ${4 - doneCount()} to go.` : "Your worksheets are in."}</p></div></a>`
+    : `<a class="card card--pad mini" href="#/review" style="text-decoration:none"><span class="mini__ic">${icon("cal")}</span><div><h3 class="h3" style="font-size:1.15rem">Book your review call</h3><p>15 minutes on your résumé and LinkedIn. Pick a time now, even before you start: it gives you a date to finish by.</p></div></a>`;
+}
 function renderHome() {
   chrome();
   document.title = "My course · Blueprint Online";
-  const me = D.me, nx = nextUp(), n = doneCount();
+  const me = D.me, nx = nextUp(), n = doneCount(), mine = D.review?.mine;
   if (!me.paid) return renderNotYet();
   let top;
   if (nx) {
@@ -268,10 +285,11 @@ function renderHome() {
         <p class="soft">${esc(nx.leaveWith)}</p>
         <div class="resume__row"><span class="soft small">${icon("clock")} About ${nx.minutes} min</span><span class="btn btn--primary">${n ? "Continue" : "Start Module 1"} ${arrow}</span></div></div></a>`;
   } else {
-    top = `<a class="card resume fadeup" href="#/coaching">${poster(4, { small: "All four done" })}
-      <div class="resume__t"><p class="kicker" style="margin:0">You finished Blueprint</p><h2 class="h3">Book your 1:1 with Thomas</h2>
-      <p class="soft">15 minutes on Google Meet. Bring your résumé and LinkedIn; he’ll have read your answers.</p>
-      <div class="resume__row"><span class="btn btn--primary">Book my 1:1 ${arrow}</span></div></div></a>`;
+    top = `<a class="card resume fadeup" href="#/review">${poster(4, { small: "All four done" })}
+      <div class="resume__t"><p class="kicker" style="margin:0">You finished Blueprint</p>
+      <h2 class="h3">${mine ? `Your review call: ${esc(callWhen(mine.startsAt))}` : "Book your review call"}</h2>
+      <p class="soft">15 minutes on Google Meet. Your reviewer reads your four worksheets before the call.</p>
+      <div class="resume__row"><span class="btn btn--primary">${mine ? "See the details" : "Pick a time"} ${arrow}</span></div></div></a>`;
   }
   const card = (m) => `<a class="card scard ${m.open ? "" : "scard--locked"}" href="#/m/${m.n}">
       ${poster(m.n, { small: m.tagline, lock: !m.open })}
@@ -286,11 +304,11 @@ function renderHome() {
         <div class="sgrid stagger">${D.modules.map(card).join("")}</div>
       </div>
       <aside class="side-stack">
+        ${reviewCard()}
         <div class="card card--pad fadeup"><p class="kicker">How it works</p>
-          <p class="soft" style="margin:8px 0 0">There are four modules, about ${totalMins(D.modules)} minutes in total. Do them in order, on your own time. Each one ends with a short form. Your answers are your output, so keep them.</p>
-          <p class="soft" style="margin:10px 0 0">When you send a module’s form, tick <b>I’ve sent my form</b> on that page and the next module opens.</p></div>
-        <a class="card card--pad mini" href="#/coaching" style="text-decoration:none">${ring((n / 4) * 100)}<div><h3 class="h3" style="font-size:1.15rem">Your 1:1 with Thomas</h3><p>${D.coaching ? "Unlocked. Book your 15 minutes." : `Unlocks when you finish Module 4.${n ? ` ${4 - n} to go.` : ""}`}</p></div></a>
-        <div class="card card--pad"><p class="kicker">${icon("award")}Certificate</p><p class="soft" style="margin:8px 0 0">Finish all four modules and we’ll email you a Blueprint certificate, signed by Thomas.</p></div>
+          <p class="soft" style="margin:8px 0 0">Four modules, about ${totalMins(D.modules)} minutes in total. Do them in order, on your own time.</p>
+          <p class="soft" style="margin:10px 0 0">Each one ends with a worksheet right on the page. Your answers save as you type, and they’re your output. Submit the worksheet and the next module opens.</p></div>
+        <div class="card card--pad"><p class="kicker">${icon("award")}Certificate</p><p class="soft" style="margin:8px 0 0">Submit all four worksheets and we’ll email you a Blueprint certificate.</p></div>
       </aside>
     </div></div>`;
 }
@@ -304,7 +322,7 @@ function renderNotYet() {
 }
 
 /* ==========================================================================
-   A module: the video (or the deck), the page, the form, then "I've sent it"
+   A module: the video (or the deck), the page, then the worksheet
    ========================================================================== */
 function videoEmbed(url) {
   if (!url) return null;
@@ -314,10 +332,10 @@ function videoEmbed(url) {
   if ((m = url.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/(\w+))?/))) return `https://player.vimeo.com/video/${m[1]}${m[2] ? `?h=${m[2]}` : ""}`;
   return null;
 }
-const opened = (n) => !!store.get(`bp_form_${D.me.email}_${n}`);
 function moduleList(here) {
+  const mine = D.review?.mine;
   return `<ul class="ls">${D.modules.map((m) => `<li><a href="#/m/${m.n}" class="${m.doneAt ? "is-done" : ""} ${here === m.n ? "is-here" : ""}"><span class="st">${m.doneAt ? icon("check") : m.open ? "" : icon("lock")}</span><span>${m.n}. ${esc(m.title)} <small class="soft">· ${m.minutes} min</small></span></a></li>`).join("")}
-    <li><a href="#/coaching" class="${D.coaching ? "" : ""} ${here === "coaching" ? "is-here" : ""}"><span class="st">${D.coaching ? "" : icon("lock")}</span><span>Your 1:1 with Thomas</span></a></li></ul>`;
+    <li><a href="#/review" class="${mine ? "is-done" : ""} ${here === "review" ? "is-here" : ""}"><span class="st">${mine ? icon("check") : ""}</span><span>Your review call${mine ? ` <small class="soft">· ${esc(callDay(mine.startsAt))}</small>` : ""}</span></a></li></ul>`;
 }
 function sidePanel(here) {
   const n = doneCount();
@@ -326,6 +344,86 @@ function sidePanel(here) {
     <div class="side__body">${moduleList(here)}</div>
   </aside>`;
 }
+
+/* ---------- the worksheet ---------- */
+const WKEY = (n) => `bp_ws_${D.me.email}_${n}`; // a copy in this browser, in case the connection drops
+const lines = (s) => esc(s).replace(/\n/g, "<br>");
+const nWords = (s) => (String(s || "").trim().match(/\S+/g) || []).length;
+function fromBox(q) {
+  const m = M(q.from.m);
+  const vals = (q.from.ids || []).map((id) => String(m?.answers?.[id] || "").trim()).filter(Boolean);
+  if (!vals.length) return "";
+  return `<div class="callout callout--you ws-from"><span class="callout__ic">${icon("doc")}</span><div><b>${esc(q.from.label)}</b><p>${vals.map(lines).join("<br>")}</p>
+    ${q.from.paste ? `<button class="link" type="button" data-paste="${esc(q.id)}" style="margin-top:6px">Paste it in</button>` : ""}</div></div>`;
+}
+function fieldHTML(q, a) {
+  const id = `w-${q.id}`, v = a[q.id];
+  const opt = q.opt ? `<span class="opt">Optional</span>` : "";
+  const help = q.help ? `<p class="hint">${lines(q.help)}</p>` : "";
+  const ex = q.ex ? `<details class="ex"><summary>${icon("doc")}Example${icon("down", "chev")}</summary><p>${esc(q.ex)}</p></details>` : "";
+  const from = q.from ? fromBox(q) : "";
+  const head = (forId) => `<${forId ? `label class="lab" for="${forId}"` : `p class="lab"`}>${esc(q.label)}${opt}</${forId ? "label" : "p"}>${help}${ex}${from}`;
+  let body = "";
+  if (q.t === "long") {
+    body = `<textarea class="ta" id="${id}" data-q="${esc(q.id)}" rows="${q.rows || 4}" maxlength="5000" placeholder="${esc(q.ph || "")}">${esc(v || "")}</textarea>${q.words ? `<p class="ws-count" data-count="${esc(q.id)}"></p>` : ""}`;
+    return `<div class="field ws-q" data-field="${esc(q.id)}">${head(id)}${body}</div>`;
+  }
+  if (q.t === "short" || q.t === "url") {
+    body = `<input class="in" id="${id}" data-q="${esc(q.id)}" type="${q.t === "url" ? "url" : "text"}" ${q.t === "url" ? 'inputmode="url" autocapitalize="off"' : ""} maxlength="600" value="${esc(v || "")}" placeholder="${esc(q.ph || "")}" />`;
+    return `<div class="field ws-q" data-field="${esc(q.id)}">${head(id)}${body}</div>`;
+  }
+  if (q.t === "choice") {
+    const cards = q.options.some((o) => o.d);
+    body = `<div class="${cards ? "cards ws-cards" : "chips"}" role="radiogroup">${q.options.map((o) => `<label><input type="radio" name="${id}" data-q="${esc(q.id)}" value="${esc(o.v)}" ${v === o.v ? "checked" : ""} />
+      <span>${cards ? `<b>${esc(o.v)}</b><small>${esc(o.d || "")}</small>` : esc(o.v)}</span></label>`).join("")}</div>
+      ${q.more ? `<input class="in ws-more" data-more="${esc(q.id)}" data-for="${esc(q.more.v)}" maxlength="200" value="${esc(a[`${q.id}_more`] || "")}" placeholder="${esc(q.more.ph)}" ${v === q.more.v ? "" : "hidden"} />` : ""}`;
+    return `<div class="field ws-q" data-field="${esc(q.id)}">${head("")}${body}</div>`;
+  }
+  if (q.t === "checks") {
+    const on = Array.isArray(v) ? v : [];
+    body = `<div class="chips">${q.options.map((o) => `<label><input type="checkbox" data-q="${esc(q.id)}" value="${esc(o)}" ${on.includes(o) ? "checked" : ""} /><span>${esc(o)}</span></label>`).join("")}</div>`;
+    return `<div class="field ws-q" data-field="${esc(q.id)}">${head("")}${body}</div>`;
+  }
+  if (q.t === "grid") {
+    const g = v && typeof v === "object" ? v : {};
+    body = `<div class="ws-grid">${q.rows.map((r) => `<div class="ws-grid__row"><b>${esc(r)}</b><div class="chips">${q.cols.map((c) => `<label><input type="checkbox" data-q="${esc(q.id)}" data-row="${esc(r)}" value="${esc(c)}" ${(g[r] || []).includes(c) ? "checked" : ""} /><span>${esc(c)}</span></label>`).join("")}</div></div>`).join("")}</div>`;
+    return `<div class="field ws-q" data-field="${esc(q.id)}">${head("")}${body}</div>`;
+  }
+  if (q.t === "tick") {
+    return `<div class="field ws-q" data-field="${esc(q.id)}"><label class="consent ws-tick"><input type="checkbox" data-q="${esc(q.id)}" ${v === true ? "checked" : ""} /><span>${esc(q.label)}</span></label></div>`;
+  }
+  return "";
+}
+function worksheetHTML(m, a) {
+  let qn = 0;
+  return (m.worksheet || []).map((q) => {
+    if (q.t === "sec") return `<div class="ws-sec"><h3>${esc(q.title)}</h3>${q.text ? `<p>${esc(q.text)}</p>` : ""}</div>`;
+    qn++;
+    return fieldHTML(q, a);
+  }).join("");
+}
+/* what's on the page right now, in the same shape the server keeps */
+function collect(root, items) {
+  const out = {};
+  for (const q of items || []) {
+    if (!q.id) continue;
+    const els = $$(`[data-q="${CSS.escape(q.id)}"]`, root);
+    if (q.t === "long" || q.t === "short" || q.t === "url") out[q.id] = els[0]?.value ?? "";
+    else if (q.t === "choice") {
+      out[q.id] = els.find((e) => e.checked)?.value || "";
+      if (q.more) out[`${q.id}_more`] = $(`[data-more="${CSS.escape(q.id)}"]`, root)?.value || "";
+    } else if (q.t === "checks") out[q.id] = els.filter((e) => e.checked).map((e) => e.value);
+    else if (q.t === "grid") out[q.id] = Object.fromEntries(q.rows.map((r) => [r, els.filter((e) => e.dataset.row === r && e.checked).map((e) => e.value)]));
+    else if (q.t === "tick") out[q.id] = !!els[0]?.checked;
+  }
+  return out;
+}
+const TEXTY = ["long", "short", "url", "choice"];
+const missingIds = (items, a) => (items || []).filter((q) => q.id && TEXTY.includes(q.t) && !q.opt && !String(a[q.id] || "").trim()).map((q) => q.id);
+
+let saver = null; // the open worksheet's autosave, so leaving the page can flush it
+function flushSave() { saver?.flush(); }
+
 function renderModule(n) {
   const m = M(n);
   if (!m || !D.me.paid) { location.hash = "#/"; return; }
@@ -337,7 +435,7 @@ function renderModule(n) {
     const prev = M(m.n - 1);
     app.innerHTML = `<div class="wrap player"><section>${crumbs}${mbar}
       <div class="fadeup"><div class="lesson__head"><p class="kicker">Module ${m.n} · about ${m.minutes} min</p><h1 class="display">${esc(m.title)}</h1><p>${esc(m.leaveWith)}</p></div>
-      <div class="m-locked card card--pad">${icon("lock")}<div><b>Finish Module ${prev.n} first</b><p class="soft">Blueprint works in order: each module builds on your answers from the one before. Send the Module ${prev.n} form, tick <b>I’ve sent my form</b>, and this one opens.</p>
+      <div class="m-locked card card--pad">${icon("lock")}<div><b>Finish Module ${prev.n} first</b><p class="soft">Blueprint works in order: each module builds on your answers from the one before. Submit the Module ${prev.n} worksheet and this one opens.</p>
         <a class="btn btn--primary" href="#/m/${prev.n}" style="margin-top:12px">Go to Module ${prev.n}: ${esc(prev.title)} ${arrow}</a></div></div></div>
     </section>${sidePanel(m.n)}</div>`;
     return wireList(m.n);
@@ -351,13 +449,16 @@ function renderModule(n) {
        <p class="fine" style="margin-top:10px">The video for this module goes up soon. Until then, go through the slides and read the page below.</p>`
     : `<div class="video poster poster--${m.n}"><span class="poster__t">Module ${m.n} · ${esc(m.title)}</span><b>${two(m.n)}</b><span class="soon">${icon("video")}Video going up soon</span></div>`;
   const next = M(m.n + 1);
-  const done = m.doneAt
-    ? `<div class="m-done card card--pad"><span class="m-done__ic">${icon("check")}</span><div><b>You sent the Module ${m.n} form${m.doneAt ? ` (${esc(when(m.doneAt))})` : ""}.</b>
-        <p class="soft">${next ? `Module ${next.n} is open.` : "That’s all four. Your 1:1 with Thomas is unlocked."}</p>
-        <a class="btn btn--primary" href="${next ? `#/m/${next.n}` : "#/coaching"}" style="margin-top:12px">${next ? `Next: Module ${next.n}, ${esc(next.title)}` : "Book my 1:1 with Thomas"} ${arrow}</a></div></div>`
-    : `<div class="m-send card card--pad"><b>Sent it?</b>
-        <p class="soft">Once you’ve submitted the Module ${m.n} form, tick this${next ? ` to open Module ${next.n}` : " to unlock your 1:1 with Thomas"}. Thomas reads your answers before your call, so take your time.</p>
-        <button class="btn btn--ghost" id="doneBtn" style="margin-top:12px">${icon("check")}I’ve sent my Module ${m.n} form</button></div>`;
+  // their answers: the server's copy, unless this browser has a newer one that didn't reach us
+  const local = store.get(WKEY(m.n));
+  let answers = m.answers || {};
+  const localNewer = local && local.answers && (!m.savedAt || local.at > Date.parse(m.savedAt) + 1000);
+  if (localNewer) answers = { ...answers, ...local.answers };
+  const items = m.worksheet || [];
+  const doneBox = m.doneAt ? `<div class="m-done card card--pad" id="mDone"><span class="m-done__ic">${icon("check")}</span><div>
+      <b>${justSubmitted === m.n ? "Worksheet submitted." : `You submitted this worksheet on ${esc(when(m.doneAt))}.`}</b>
+      <p class="soft">${justSubmitted === m.n && m.confirm ? esc(m.confirm) : "You can still change your answers below. They save as you type."}</p>
+      <div class="m-done__row">${next ? `<a class="btn btn--primary" href="#/m/${next.n}">Next: Module ${next.n}, ${esc(next.title)} ${arrow}</a>` : `<a class="btn btn--primary" href="#/review">${D.review?.mine ? "Your review call" : "Book your review call"} ${arrow}</a>`}</div></div></div>` : "";
   app.innerHTML = `<div class="wrap player">
     <section>${crumbs}${mbar}<div class="fadeup">
       <div class="lesson__head"><p class="kicker">Module ${m.n} of 4 · about ${m.minutes} min</p><h1 class="display">${esc(m.title)}</h1><p>${esc(m.tagline)}</p></div>
@@ -365,66 +466,217 @@ function renderModule(n) {
       <div class="m-page">
         ${m.text ? `<p class="m-text">${esc(m.text)}</p>` : ""}
         <div class="m-leave"><p class="kicker">You leave with</p><p>${esc(m.leaveWith)}</p></div>
-        ${m.n === 2 ? `<div class="callout"><span class="callout__ic">${icon("doc")}</span><div><b>Two paths</b><p><b>First résumé</b> if you don’t have one yet: you build your first three bullets from your orgs, school projects, volunteering and part-time work. <b>Rebuild</b> if you want yours better.</p></div></div>` : ""}
-        <div class="m-form">
-          ${m.form
-            ? `<a class="btn btn--primary btn--lg btn--block" id="formBtn" href="${esc(m.form)}" target="_blank" rel="noopener">${icon("form")}Start the Module ${m.n} form ${arrow}</a>
-               <p class="fine">Opens in a new tab. The form is the worksheet: its questions walk you through the module, and your answers are your output. Use the same email you signed in with.</p>`
-            : `<div class="note">The Module ${m.n} form goes up soon. Check back later today; we’ll also post it in our stories.</div>`}
-        </div>
-        ${done}
+        ${m.n === 2 ? `<div class="callout"><span class="callout__ic">${icon("doc")}</span><div><b>Two paths</b><p><b>First résumé</b> if you don’t have one yet: you build your first three bullets from your orgs, school projects, volunteering and part-time work. <b>Rebuild</b> if you want yours better.${M(1)?.answers?.path ? ` In Module 1 you picked <b>${esc(M(1).answers.path)}</b>.` : ""}</p></div></div>` : ""}
+        ${doneBox}
+        ${items.length ? `<form class="card ws" id="ws" novalidate>
+          <div class="ws-head"><p class="kicker">${icon("pen")}Module ${m.n} worksheet</p>
+            <h2 class="h3">Your answers are your output.</h2>
+            <p class="soft">Work through it with the video. Your answers save as you type, so you can stop and come back. Your reviewer reads them before your review call.</p></div>
+          ${worksheetHTML(m, answers)}
+          <div class="lnav ws-bar"><span class="saved" id="saved" aria-live="polite"><i></i><span>${m.savedAt ? `Saved ${esc(when(m.savedAt))}` : "Saves as you type"}</span></span>
+            <button class="btn btn--primary" type="submit" id="submitBtn">${m.doneAt ? `${icon("check")}Save changes` : `Submit Module ${m.n} ${arrow}`}</button></div>
+          <p class="err" id="wsErr" role="alert"></p>
+        </form>` : `<div class="note">The Module ${m.n} worksheet goes up soon. Check back later today.</div>`}
         ${m.credits ? `<p class="m-credits"><b>Credits:</b> ${esc(m.credits)}</p>` : ""}
       </div>
     </div></section>
     ${sidePanel(m.n)}
   </div>`;
   wireList(m.n);
-  $("#formBtn")?.addEventListener("click", () => store.set(`bp_form_${D.me.email}_${m.n}`, Date.now()));
-  $("#doneBtn")?.addEventListener("click", async (e) => {
-    const btn = e.currentTarget;
-    if (!m.form) return toast("The form isn’t up yet. Check back soon.", true);
-    if (!opened(m.n) && !confirm(`Did you submit the Module ${m.n} form? Thomas reads your answers before your 1:1.`)) return;
+  if (justSubmitted === m.n) { justSubmitted = 0; requestAnimationFrame(() => $("#mDone")?.scrollIntoView({ block: "center", behavior: "smooth" })); }
+  if (items.length) wireWorksheet(m, items, localNewer);
+}
+let justSubmitted = 0;
+
+function wireWorksheet(m, items, unsaved) {
+  const form = $("#ws"), saved = $("#saved"), label = $("span", saved);
+  let timer = 0, dirty = false, inflight = null;
+  const setSaved = (state, text) => { saved.className = `saved ${state}`; label.textContent = text; };
+  const words = () => $$("[data-count]", form).forEach((el) => {
+    const q = items.find((x) => x.id === el.dataset.count), n = nWords($(`[data-q="${CSS.escape(q.id)}"]`, form).value);
+    el.textContent = `${n} word${n === 1 ? "" : "s"}${q.words ? ` · under ${q.words}` : ""}`;
+    el.classList.toggle("is-over", !!q.words && n > q.words);
+  });
+  const save = async () => {
+    clearTimeout(timer);
+    if (!dirty) return;
+    dirty = false;
+    const answers = collect(form, items);
+    store.set(WKEY(m.n), { answers, at: Date.now() });
+    setSaved("is-busy", "Saving…");
+    inflight = call("save", { module: m.n, answers })
+      .then((r) => { m.answers = answers; m.savedAt = r.savedAt; store.del(WKEY(m.n)); if (!dirty) setSaved("", "Saved"); })
+      .catch((e) => { dirty = true; setSaved("is-bad", e.code === "offline" ? "Not saved yet: no connection" : "Not saved yet"); })
+      .finally(() => { inflight = null; });
+    return inflight;
+  };
+  const touch = () => { dirty = true; setSaved("is-busy", "Editing…"); clearTimeout(timer); timer = setTimeout(save, 1200); };
+  saver = {
+    flush() {
+      if (!dirty) return;
+      const answers = collect(form, items);
+      store.set(WKEY(m.n), { answers, at: Date.now() });
+      m.answers = answers;
+      try { navigator.sendBeacon(API, new Blob([JSON.stringify({ action: "save", token, module: m.n, answers })], { type: "application/json" })); } catch {}
+      dirty = false; clearTimeout(timer);
+    },
+  };
+  form.addEventListener("input", (e) => {
+    if (e.target.dataset.count !== undefined || e.target.matches("textarea")) words();
+    e.target.closest(".ws-q")?.classList.remove("is-missing");
+    touch();
+  });
+  form.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.type === "radio") {
+      const more = $(`[data-more="${CSS.escape(t.dataset.q)}"]`, form);
+      if (more) { more.hidden = t.value !== more.dataset.for; if (!more.hidden) more.focus(); }
+      t.closest(".ws-q")?.classList.remove("is-missing");
+    }
+    touch();
+  });
+  form.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-paste]");
+    if (!b) return;
+    const q = items.find((x) => x.id === b.dataset.paste), ta = $(`[data-q="${CSS.escape(q.id)}"]`, form);
+    const text = (q.from.ids || []).map((id) => String(M(q.from.m)?.answers?.[id] || "").trim()).filter(Boolean).join(" ");
+    ta.value = ta.value.trim() ? `${ta.value.trim()}\n${text}` : text;
+    ta.focus(); touch();
+  });
+  words();
+  if (unsaved) { dirty = true; save(); }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("#submitBtn"), err = $("#wsErr");
+    err.textContent = "";
+    const answers = collect(form, items);
+    const left = missingIds(items, answers);
+    $$(".ws-q.is-missing", form).forEach((x) => x.classList.remove("is-missing"));
+    if (left.length) {
+      left.forEach((id) => $(`[data-field="${CSS.escape(id)}"]`, form)?.classList.add("is-missing"));
+      const firstEl = $(`[data-field="${CSS.escape(left[0])}"]`, form);
+      firstEl?.scrollIntoView({ block: "center", behavior: "smooth" });
+      $("textarea, input", firstEl)?.focus({ preventScroll: true });
+      err.textContent = `${left.length} answer${left.length === 1 ? " is" : "s are"} still empty. They’re marked in red. Your answers so far are saved.`;
+      touch();
+      return;
+    }
+    clearTimeout(timer); dirty = false;
+    if (inflight) await inflight.catch(() => {});
     busy(btn, true, "Saving");
+    const first = !m.doneAt;
     try {
-      take(await call("done", { module: m.n }));
-      toast(next ? `Module ${m.n} done. Module ${next.n} is open.` : "All four done. Book your 1:1 with Thomas.");
-      route();
-    } catch (err) { busy(btn, false); toast(msg(err), true); }
+      take(await call("submit", { module: m.n, answers }));
+      store.del(WKEY(m.n));
+      saver = null;
+      if (first) { justSubmitted = m.n; toast(M(m.n + 1) ? `Module ${m.n} submitted. Module ${m.n + 1} is open.` : "All four submitted. That’s Blueprint."); route(); }
+      else { busy(btn, false); setSaved("", "Saved"); toast("Changes saved"); }
+    } catch (ex) {
+      busy(btn, false);
+      if (ex.code === "missing") {
+        (ex.data?.ids || []).forEach((id) => $(`[data-field="${CSS.escape(id)}"]`, form)?.classList.add("is-missing"));
+        err.textContent = "A few answers are still empty. They’re marked in red.";
+      } else err.textContent = msg(ex);
+    }
   });
 }
 function wireList(here) {
   $("#mList")?.addEventListener("click", () => { const box = openSheet(`<p class="kicker">Blueprint Online</p><h2 class="sheet__title">Your modules</h2><div style="margin-top:12px">${moduleList(here)}</div>`); $$("a", box).forEach((a) => a.addEventListener("click", closeSheet)); });
 }
+addEventListener("pagehide", flushSave);
+addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushSave(); });
 
 /* ==========================================================================
-   The 1:1 with Thomas (after Module 4)
+   The 15-minute résumé review: book a time, any time after they get in
    ========================================================================== */
-function renderCoaching() {
+function gcal(s) {
+  const st = (ms) => new Date(ms).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const start = Date.parse(s.startsAt), end = start + (s.minutes || 15) * 60e3;
+  const q = new URLSearchParams({ action: "TEMPLATE", text: "Blueprint résumé review", dates: `${st(start)}/${st(end)}`,
+    details: `Your 15-minute résumé review with ${s.reviewer}.${s.meet ? ` Join: ${s.meet}` : ""}`, location: s.meet || "Google Meet" });
+  return `https://calendar.google.com/calendar/render?${q}`;
+}
+let picking = false; // "Pick another time" open
+function renderReview() {
   if (!D.me.paid) { location.hash = "#/"; return; }
   chrome();
-  document.title = "Your 1:1 with Thomas · Blueprint Online";
-  const c = D.coaching, left = 4 - doneCount(), nx = nextUp();
-  const crumbs = `<nav class="crumbs"><a href="#/">My course</a>${icon("chev")}<span>Your 1:1 with Thomas</span></nav>`;
-  const body = c
-    ? `${c.booking
-        ? `<a class="btn btn--primary btn--lg" href="${esc(c.booking)}" target="_blank" rel="noopener">${icon("cal")}Book my 15 minutes ${arrow}</a><p class="fine">Book any open slot. It’s on Google Meet.</p>`
-        : `<div class="note">The booking link goes up soon. We’ll email it to you, so keep an eye on your inbox.</div>`}
-      <div class="m-page" style="margin-top:22px">
-        <p class="m-text">Before the call, Thomas reads your module answers and your résumé. The 15 minutes go like this: 5 minutes on your résumé bullets, 5 on your LinkedIn or your intro, 5 on your next step.</p>
-        <ul class="ticks"><li>Bring your résumé and your LinkedIn.</li><li>Can’t make your slot? Reschedule at least 24 hours before through the same link.</li><li>A missed call without notice isn’t rebooked.</li><li>Calls run until ${esc(c.until || "Dec 5")}.</li></ul>
-      </div>`
-    : `<div class="m-locked card card--pad">${icon("lock")}<div><b>Unlocks when you finish Module 4</b><p class="soft">${left} module${left === 1 ? "" : "s"} to go. When you send the Module 4 form and tick <b>I’ve sent my form</b>, the booking link shows up here.</p>
-        ${nx ? `<a class="btn btn--primary" href="#/m/${nx.n}" style="margin-top:12px">Continue: Module ${nx.n}, ${esc(nx.title)} ${arrow}</a>` : ""}</div></div>`;
+  document.title = "Your review call · Blueprint Online";
+  const r = D.review || { mine: null, open: [], until: "Dec 5" }, mine = r.mine, n = doneCount(), nx = nextUp();
+  const crumbs = `<nav class="crumbs"><a href="#/">My course</a>${icon("chev")}<span>Your review call</span></nav>`;
+  const progress = n === 4
+    ? `<p class="soft">All four worksheets are in. Your reviewer reads them before the call.</p>`
+    : `<p class="soft"><b>${n} of 4 worksheets</b> submitted. Finish them before your call: your reviewer reads them first, so the 15 minutes go to your résumé, not to catching up.</p>
+       ${nx ? `<a class="btn btn--ghost btn--sm" href="#/m/${nx.n}" style="margin-top:10px">Continue: Module ${nx.n}, ${esc(nx.title)} ${arrow}</a>` : ""}`;
+  const mineBox = mine ? `<div class="card card--pad rv-mine fadeup">
+      <p class="kicker">${icon("cal")}Booked</p>
+      <h2 class="display rv-when">${esc(callDayLong(mine.startsAt))}<span>${esc(callTime(mine.startsAt))} · 15 minutes, Manila time</span></h2>
+      <p class="rv-who">With <b>${esc(mine.reviewer)}</b>, on Google Meet.</p>
+      <div class="rv-acts">
+        ${mine.meet ? `<a class="btn btn--primary" href="${esc(mine.meet)}" target="_blank" rel="noopener">${icon("video")}Google Meet link</a>` : `<span class="soft small">We’ll email the Google Meet link before the call.</span>`}
+        <a class="btn btn--ghost" href="${esc(gcal(mine))}" target="_blank" rel="noopener">${icon("cal")}Add to Google Calendar</a>
+      </div>
+      <div class="rv-prog">${progress}</div>
+      ${mine.canChange
+        ? `<p class="fine rv-change">Need another time? <button class="link" id="rvPick">${picking ? "Keep this time" : "Pick another time"}</button> · <button class="link" id="rvCancel">Cancel my call</button></p>`
+        : `<p class="fine rv-change">Your call is less than 24 hours away, so it can’t be changed here. Something came up? <a class="link" href="/#ask">Ask us</a>.</p>`}
+    </div>` : "";
+  const days = new Map();
+  for (const s of r.open) { const k = callDayLong(s.startsAt); if (!days.has(k)) days.set(k, []); days.get(k).push(s); }
+  const picker = !mine || picking ? `<div class="rv-pick fadeup">
+      <h2 class="h3">${mine ? "Pick another time" : "Pick a time"}</h2>
+      <p class="soft" style="margin:6px 0 16px">${mine ? "Your current time is kept until you pick a new one." : "Book it now, even before you start. A date gives you something to finish by."}</p>
+      ${days.size ? [...days].map(([d, ss]) => `<div class="rv-day"><h3>${esc(d)}</h3><div class="rv-times">${ss.map((s) => `<button class="rv-t" data-slot="${s.id}"><b>${esc(callTime(s.startsAt))}</b><small>${esc(firstName(s.reviewer))}</small></button>`).join("")}</div></div>`).join("")
+        : `<div class="note">No open times right now. We’re adding more this week, so check back soon. Calls run until ${esc(r.until)}.</div>`}
+    </div>` : "";
   app.innerHTML = `<div class="wrap player"><section>${crumbs}<div class="fadeup">
-    <div class="lesson__head"><p class="kicker">After Module 4</p><h1 class="display">Your 15-minute 1:1 with Thomas</h1><p>One call on Google Meet to go over your résumé, your LinkedIn and your next step.</p></div>
-    ${body}
-  </div></section>${sidePanel("coaching")}</div>`;
+    <div class="lesson__head"><p class="kicker">Included with Blueprint</p><h1 class="display">Your 15-minute résumé review</h1><p>A one-on-one review of your résumé and LinkedIn, on Google Meet.</p></div>
+    ${mineBox}
+    ${picker}
+    <div class="m-page" style="margin-top:26px">
+      <div class="card card--pad"><p class="kicker">How it goes</p>
+        <ul class="ticks" style="margin-top:10px">
+          <li>Before the call, your reviewer reads your worksheets and your résumé.</li>
+          <li>The 15 minutes: 5 on your résumé bullets, 5 on your LinkedIn or your intro, 5 on your next step.</li>
+          <li>Have your résumé and LinkedIn open.</li>
+          <li>Change or cancel here up to 24 hours before. A missed call without notice isn’t rebooked.</li>
+          <li>Calls run until ${esc(r.until)}.</li>
+        </ul></div>
+    </div>
+  </div></section>${sidePanel("review")}</div>`;
+  $("#rvPick")?.addEventListener("click", () => { picking = !picking; renderReview(); });
+  $("#rvCancel")?.addEventListener("click", async (e) => {
+    if (!confirm(`Cancel your review call on ${callWhen(mine.startsAt)}? Someone else can book that time.`)) return;
+    const b = e.currentTarget; b.disabled = true;
+    try { take(await call("cancel")); picking = false; toast("Call cancelled. Pick a new time whenever you’re ready."); renderReview(); }
+    catch (err) { b.disabled = false; toast(msg(err), true); if (err.code === "locked") { take(await call("me").catch(() => ({}))); renderReview(); } }
+  });
+  $$("[data-slot]").forEach((b) => b.addEventListener("click", () => confirmSlot(r.open.find((s) => s.id === Number(b.dataset.slot)))));
+}
+function confirmSlot(s) {
+  if (!s) return;
+  const moving = !!D.review?.mine;
+  const box = openSheet(`<p class="kicker">${icon("cal")}Your review call</p>
+    <h2 class="sheet__title">${esc(callDayLong(s.startsAt))}, ${esc(callTime(s.startsAt))}</h2>
+    <p class="soft">15 minutes on Google Meet with <b>${esc(s.reviewer)}</b>. Manila time. ${moving ? "Your old time goes back on the list." : ""}</p>
+    <p class="soft" style="margin-top:10px">We’ll email you the details. You can change it here up to 24 hours before.</p>
+    <p class="err" id="bErr" role="alert"></p>
+    <button class="btn btn--primary btn--lg btn--block" id="bookBtn" style="margin-top:18px">${moving ? "Move my call here" : "Book this time"} ${arrow}</button>`);
+  $("#bookBtn", box).onclick = async (e) => {
+    const btn = e.currentTarget;
+    busy(btn, true, "Booking");
+    try { take(await call("book", { slot: s.id })); closeSheet(); picking = false; toast(moving ? "Moved. We emailed you the new time." : "Booked. We emailed you the details."); renderReview(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    catch (err) {
+      busy(btn, false); $("#bErr", box).textContent = msg(err);
+      if (err.code === "taken") { try { take(await call("me")); } catch {} setTimeout(() => { closeSheet(); renderReview(); }, 1400); }
+    }
+  };
 }
 
 /* ==========================================================================
    Router
    ========================================================================== */
 async function route() {
+  flushSave(); saver = null;
   $(".menu")?.remove();
   if (!$("#sheet").hidden && !$("#c-code")) closeSheet();
   if (linkKey) {
@@ -443,9 +695,11 @@ async function route() {
     }
   }
   const h = where();
-  window.scrollTo({ top: 0 });
+  if (h[0] === "coaching") { location.replace("#/review"); return; } // old links
+  if (h[0] !== "review") picking = false;
+  if (!justSubmitted) window.scrollTo({ top: 0 });
   if (h[0] === "m") renderModule(Number(h[1]));
-  else if (h[0] === "coaching") renderCoaching();
+  else if (h[0] === "review") renderReview();
   else renderHome();
 }
 addEventListener("hashchange", route);

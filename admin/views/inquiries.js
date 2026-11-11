@@ -214,7 +214,7 @@ async function removeProofs(rows) {
 
 /* last week's workshop buyers: they keep their refund and get Blueprint Online free (Thomas's doc 03) */
 async function markRefunded(r) {
-  if (!(await confirmBox(`Mark ${r.name} as refunded, free access? This emails them Blueprint Online for free (the course link and the 1:1). Only for last week’s workshop buyers.`, { ok: "Send free access", tone: "" }))) return false;
+  if (!(await confirmBox(`Mark ${r.name} as refunded, free access? This emails them Blueprint Online for free (the course link and the 15-minute résumé review). Only for last week’s workshop buyers.`, { ok: "Send free access", tone: "" }))) return false;
   try {
     const out = await signupAction("refunded", r.id);
     toast(out.emailed ? `Free access sent to ${out.to}.` : `${r.name} is marked, but the email didn’t send. Click Resend.`, out.emailed ? "" : "bad");

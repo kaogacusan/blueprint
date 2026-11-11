@@ -1,14 +1,19 @@
-/* POST /api/learn: everything a learner does on /learn (Blueprint Online, migrations 014 and 017).
+/* POST /api/learn: everything a learner does on /learn (Blueprint Online, migrations 014, 017 and 018).
    { action: "catalog" }              the course page before sign-in: module titles, times, what you leave with
    { action: "link", k }              the button in their access email (api/_learn.js accessLink) → signed in
    { action: "code", email }          emails a 6-digit sign-in code if that email has Blueprint (same answer either way)
    { action: "verify", email, code }  the code → signed in
    { action: "me", token }            everything the page needs (api/_learn.js snapshot)
-   { action: "done", token, module }  "I've sent my Module N form": marks it done, which opens the next one
+   { action: "save", token, module, answers }    the worksheet, saved as they type (a draft; doesn't open anything)
+   { action: "submit", token, module, answers }  saves it and checks every required answer is there. The first submit
+                                                 marks the module done, which opens the next one. They can keep editing.
+   { action: "book", token, slot }    books (or moves) their 15-minute review call; emails them the time and Meet link
+   { action: "cancel", token }        lets go of their call (only 24+ hours before)
    Who gets in: a paid (or refunded, free access) Blueprint sign-up under that email, or a gift to it (api/_learn.js grantFor).
    The token is signed with our own key and checked against the database every time. */
 import { send, body, db, enc } from "./_lib.js";
-import { COLS, ALL, catalog, signToken, learnerFrom, codeHash, newLoginCode, grantFor, learnerForGrant, fromLink, accessEmailOf, snapshot, codeEmail } from "./_learn.js";
+import { COLS, ALL, catalog, signToken, learnerFrom, codeHash, newLoginCode, grantFor, learnerForGrant, fromLink, accessEmailOf, snapshot, codeEmail,
+  cleanAnswers, missing, reviewEmail } from "./_learn.js";
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const str = (v, max) => String(v ?? "").trim().slice(0, max);
@@ -29,7 +34,10 @@ export default async function handler(req, res) {
       case "me":
         db(`learners?id=eq.${l.id}`, { method: "PATCH", data: { last_seen: new Date().toISOString() } }).catch(() => {});
         return send(res, 200, await snapshot(l));
-      case "done": return await done(res, l, b);
+      case "save": return await saveWork(res, l, b, false);
+      case "submit": return await saveWork(res, l, b, true);
+      case "book": return await book(res, l, b);
+      case "cancel": return await cancel(res, l);
     }
     return send(res, 400, { error: "action" });
   } catch (e) {
@@ -91,19 +99,52 @@ async function verify(res, b) {
   return signedIn(res, l);
 }
 
-/* ---------- "I've sent my form" ---------- */
-async function done(res, l, b) {
+/* ---------- the worksheet: save as they type, submit to open the next module ---------- */
+async function saveWork(res, l, b, submit) {
   const n = Number(b.module);
-  if (!ALL.includes(n)) return send(res, 400, { error: "invalid" });
+  if (!ALL.includes(n) || !b.answers || typeof b.answers !== "object" || Array.isArray(b.answers)) return send(res, 400, { error: "invalid" });
   if (!ALL.every((x) => l.unlocked.includes(x))) return send(res, 403, { error: "locked" });
-  // in order: the module before has to be done first
-  const work = await db(`course_work?select=session,completed_at&learner_id=eq.${l.id}`);
-  const doneSet = new Set(work.filter((w) => w.completed_at).map((w) => w.session));
-  if (n > 1 && !doneSet.has(n - 1)) return send(res, 409, { error: "order" });
-  if (!doneSet.has(n)) {
-    const now = new Date().toISOString();
-    await db("course_work?on_conflict=learner_id,session", { method: "POST", prefer: "resolution=merge-duplicates",
-      data: { learner_id: l.id, session: n, completed_at: now, updated_at: now } });
+  const [[mod], work] = await Promise.all([
+    db(`course_sessions?select=worksheet&n=eq.${n}`),
+    db(`course_work?select=session,completed_at,answers&learner_id=eq.${l.id}`),
+  ]);
+  const doneAt = Object.fromEntries(work.map((w) => [w.session, w.completed_at]));
+  const before = work.find((w) => w.session === n)?.answers || {};
+  // in order: the module before has to be submitted first
+  if (n > 1 && !doneAt[n - 1]) return send(res, 409, { error: "order" });
+  // merged over what's saved: the page sends every question (so a cleared box clears), a partial save keeps the rest
+  const answers = { ...cleanAnswers(mod?.worksheet, before), ...cleanAnswers(mod?.worksheet, b.answers) };
+  if (Buffer.byteLength(JSON.stringify(answers)) > 58000) return send(res, 413, { error: "toolong" });
+  if (submit) {
+    const left = missing(mod?.worksheet, answers);
+    if (left.length) return send(res, 400, { error: "missing", ids: left });
   }
+  const now = new Date().toISOString();
+  await db("course_work?on_conflict=learner_id,session", { method: "POST", prefer: "resolution=merge-duplicates",
+    data: { learner_id: l.id, session: n, answers, updated_at: now, ...(submit && !doneAt[n] ? { completed_at: now } : {}) } });
+  if (!submit) return send(res, 200, { ok: true, savedAt: now });
+  return send(res, 200, await snapshot(l));
+}
+
+/* ---------- the review call ---------- */
+async function book(res, l, b) {
+  const id = Number(b.slot);
+  if (!Number.isInteger(id)) return send(res, 400, { error: "invalid" });
+  if (!ALL.every((x) => l.unlocked.includes(x))) return send(res, 403, { error: "locked" });
+  const [before] = await db(`review_slots?select=id&learner_id=eq.${l.id}`);
+  let s;
+  try { s = await db("rpc/book_review_slot", { method: "POST", data: { p_learner: l.id, p_slot: id } }); }
+  catch (e) { if (["taken", "locked"].includes(e.message)) return send(res, 409, { error: e.message }); throw e; }
+  const moved = !!before && before.id !== s.id;
+  if (!before || moved) {
+    try { await reviewEmail(l, s, { moved }); } catch (e) { console.error("review email failed", l.id, e.message); }
+  }
+  return send(res, 200, await snapshot(l));
+}
+
+async function cancel(res, l) {
+  const later = new Date(Date.now() + 24 * 36e5).toISOString();
+  const out = await db(`review_slots?learner_id=eq.${l.id}&starts_at=gt.${enc(later)}`, { method: "PATCH", prefer: "return=representation", data: { learner_id: null, booked_at: null } });
+  if (!out.length) return send(res, 409, { error: "locked" });
   return send(res, 200, await snapshot(l));
 }
