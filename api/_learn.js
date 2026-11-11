@@ -1,5 +1,5 @@
 /* Shared code for Blueprint Online (/learn): who gets in, sign-in tokens, what a learner sees, and the course emails.
-   Files starting with "_" are not routes. Tables: migrations 014, 017 and 018.
+   Files starting with "_" are not routes. Tables: migrations 014, 016, 017, 018 and 019.
 
    Since the Nov 11 night plan there is one product, Blueprint Online (₱349), bought through the site's sign-up form:
    register → pay by GCash → type the reference number on /pay → the team clicks Paid → accessEmail() sends the course link.
@@ -12,7 +12,7 @@ import { db, enc, settings, subKey, SITE, mail, shell, p, h, btn, esc, first, pe
 export const LEARN = `${SITE}/learn`;
 export const YEARS = ["1st year", "2nd year", "3rd year", "4th year", "Fresh grad", "Other"];
 export const ALL = [1, 2, 3, 4];
-export const COLS = "id,name,email,year,heard_from,unlocked,via,token_ver,login_hash,login_expires,login_tries,login_sent_at";
+export const COLS = "id,name,email,year,heard_from,unlocked,via,token_ver,login_hash,login_expires,login_tries,login_sent_at,goal,stage,review_plan,onboarded_at";
 
 /* ---------- sign-in token: "<payload>.<signature>", kept in their browser for 60 days ---------- */
 const b64 = (buf) => Buffer.from(buf).toString("base64url");
@@ -98,7 +98,9 @@ export async function snapshot(l) {
   const doneAt = (n) => w[n]?.completed_at || null;
   const open = (n) => paid && (n === 1 || !!doneAt(n - 1));
   return {
-    me: { name: l.name, first: first(l.name), email: l.email, paid, via: l.via },
+    me: { name: l.name, first: first(l.name), email: l.email, paid, via: l.via,
+      // the welcome's answers (learn/welcome.js, migrations 016 + 019)
+      goal: l.goal || "", stage: l.stage || "", reviewPlan: l.review_plan || "", onboarded: !!l.onboarded_at },
     modules: mods.map((m) => ({
       n: m.n, title: m.title, tagline: m.tagline, leaveWith: m.leave_with, minutes: m.minutes, text: m.page_text, credits: m.credits,
       open: open(m.n), doneAt: doneAt(m.n), savedAt: w[m.n]?.updated_at || null, answers: paid ? w[m.n]?.answers || {} : {},

@@ -30,6 +30,10 @@ const sess = (ns) => sorted(ns).join(", ");
 const words = (ns) => { const s = sorted(ns); return s.length > 1 ? `${s.slice(0, -1).join(", ")} and ${s.at(-1)}` : s[0] || ""; };
 const many = (ns) => ns.length > 1;
 const learnerOf = (o) => (S.data.learners || []).find((l) => l.id === o.learner_id);
+/* what they told the welcome on /learn (learn/welcome.js): working toward, where their résumé is, the review call */
+const GOAL = { internship: "Internship", job: "First job", org: "Org position", scholarship: "Scholarship or exchange", explore: "Exploring" };
+const STAGE = { none: "No résumé yet", rough: "Résumé needs work", applying: "Applying now" };
+const aims = (l) => { const t = [GOAL[l.goal], STAGE[l.stage], l.review_plan === "yes" ? "Wants a review" : ""].filter(Boolean); return t.length ? `<small>${esc(t.join(" · "))}</small>` : ""; };
 
 const RULES = [
   "Only use these details to run Blueprint Online. Emailing more than one learner? Put the emails in <b>BCC</b>.",
@@ -107,7 +111,7 @@ export default {
           <thead><tr><th>Name</th><th>Year</th><th>How they got it</th><th>Worksheets</th><th>Review call</th><th>Last seen</th></tr></thead>
           <tbody id="learnerRows">${list.map((l, i) => `<tr class="in" data-l="${l.id}" style="--i:${Math.min(i, 16)}">
             <td><b>${esc(l.name)}</b><small><a href="mailto:${esc(l.email)}">${esc(l.email)}</a></small><button class="btn btn--ghost btn--xs" data-answers>${icon("doc")} Answers</button></td>
-            <td class="nowrap">${esc(l.year)}</td>
+            <td class="nowrap">${esc(l.year)}${aims(l)}</td>
             <td>${l.via ? `<span class="tag">${esc(VIA[l.via] || l.via)}</span>` : `<span class="muted">—</span>`}</td>
             <td>${chips(l, done.get(l.id) || [])}</td>
             <td class="nowrap">${callOf.get(l.id) ? `<b>${esc(fmt(callOf.get(l.id).starts_at))}</b><small>${esc(callOf.get(l.id).reviewer)}</small>` : `<span class="muted">Not booked</span>`}</td>

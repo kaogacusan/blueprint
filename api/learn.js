@@ -1,4 +1,4 @@
-/* POST /api/learn: everything a learner does on /learn (Blueprint Online, migrations 014, 017 and 018).
+/* POST /api/learn: everything a learner does on /learn (Blueprint Online, migrations 014, 017, 018 and 019).
    { action: "catalog" }              the course page before sign-in: module titles, times, what you leave with
    { action: "link", k }              the button in their access email (api/_learn.js accessLink) → signed in
    { action: "code", email }          emails a 6-digit sign-in code if that email has Blueprint (same answer either way)
@@ -9,6 +9,7 @@
                                                  marks the module done, which opens the next one. They can keep editing.
    { action: "book", token, slot }    books (or moves) their 15-minute review call; emails them the time and Meet link
    { action: "cancel", token }        lets go of their call (only 24+ hours before)
+   { action: "profile", token, goal, stage, review }  the welcome's three answers (learn/welcome.js); marks the welcome seen
    Who gets in: a paid (or refunded, free access) Blueprint sign-up under that email, or a gift to it (api/_learn.js grantFor).
    The token is signed with our own key and checked against the database every time. */
 import { send, body, db, enc } from "./_lib.js";
@@ -38,6 +39,7 @@ export default async function handler(req, res) {
       case "submit": return await saveWork(res, l, b, true);
       case "book": return await book(res, l, b);
       case "cancel": return await cancel(res, l);
+      case "profile": return await profile(res, l, b);
     }
     return send(res, 400, { error: "action" });
   } catch (e) {
@@ -147,4 +149,13 @@ async function cancel(res, l) {
   const out = await db(`review_slots?learner_id=eq.${l.id}&starts_at=gt.${enc(later)}`, { method: "PATCH", prefer: "return=representation", data: { learner_id: null, booked_at: null } });
   if (!out.length) return send(res, 409, { error: "locked" });
   return send(res, 200, await snapshot(l));
+}
+
+/* ---------- the welcome's answers: what they're working toward, where their résumé is, the review call ---------- */
+const GOALS = ["", "internship", "job", "org", "scholarship", "explore"], STAGES = ["", "none", "rough", "applying"], PLANS = ["", "yes", "later"];
+async function profile(res, l, b) {
+  const pick = (v, ok) => (ok.includes(v) ? v : "");
+  const data = { goal: pick(b.goal, GOALS), stage: pick(b.stage, STAGES), review_plan: pick(b.review, PLANS), onboarded_at: l.onboarded_at || new Date().toISOString() };
+  const [next] = await db(`learners?id=eq.${l.id}`, { method: "PATCH", prefer: "return=representation", data });
+  return send(res, 200, await snapshot({ ...l, ...next }));
 }

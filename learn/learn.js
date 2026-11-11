@@ -3,9 +3,13 @@
    the video is up), a short page, and a worksheet on the page (Thomas's questions). Answers save as they type;
    submitting the worksheet opens the next module. The 15-minute résumé review: they pick a time on #/review whenever
    they like (even before they start), and their reviewer reads the worksheets first.
-   Routes (hash):  #/  welcome + modules (signed in) or the sign-in page · #/m/2  Module 2 · #/review  the review call
+   Routes (hash):  #/  home (signed in) or the signed-out page · #/m/2  Module 2 · #/review  the review call
    Sign-in: the button in their "You're in" email (?k=…) signs them straight in; otherwise email → 6-digit code.
+   The first time in, the welcome (learn/welcome.js) asks three questions one screen at a time; the signed-out page and
+   the home page are drawn by learn/home.js (styles: learn/home.css).
    Everything goes through /api/learn. The token stays in this browser. */
+import { landing, home } from "/learn/home.js";
+import { onboarding, pathName } from "/learn/welcome.js";
 
 const API = "/api/learn";
 const BUY = "/?get";
@@ -159,45 +163,13 @@ const FAQ = [
   ["How does the review work?", "It’s a 15-minute one-on-one review of your résumé and LinkedIn on Google Meet. Pick a time on the course page whenever you like, even before you start. Your reviewer reads your worksheets before the call."],
   ["How long do I have access?", "You keep it. Review calls run until Dec 5."],
 ];
+/* what landing() and home() in learn/home.js and the welcome need from here */
+const ctx = () => ({ app, D, C, esc, icon, arrow, BUY, FAQ, call, take, toast, sendCode, editProfile });
 async function renderLanding() {
   chrome();
   document.title = "Blueprint Online";
   if (!C) { try { C = await call("catalog"); } catch { C = { modules: [] }; } }
-  const ms = C.modules;
-  app.innerHTML = `
-  <section class="hero"><div class="wrap hero__grid">
-    <div class="fadeup">
-      <p class="kicker">Blueprint Online</p>
-      <h1 class="display h1">Welcome to <span class="grad">Blueprint.</span></h1>
-      <p class="lede">Blueprint helps you figure out what you want to be known for, then puts it on your résumé, your LinkedIn and the way you introduce yourself.</p>
-      <ul class="facts">
-        <li>${icon("list")}<span><b>4 modules</b>, in order</span></li>
-        <li>${icon("clock")}<span>About <b>${totalMins(ms)} minutes</b> in total</span></li>
-        <li>${icon("cal")}<span><b>15-minute review</b> of your résumé and LinkedIn</span></li>
-        <li>${icon("phone")}<span>On your own time</span></li>
-      </ul>
-      ${ms.length ? `<ol class="outline stagger">${ms.map((m) => `<li>${poster(m.n)}<span><b>${esc(m.title)}</b><small>${esc(m.tagline)}</small></span><span class="tag">${m.minutes} min</span></li>`).join("")}</ol>` : ""}
-    </div>
-    <div class="join fadeup" id="join">
-      <h2 class="join__title">Sign in</h2>
-      <p class="join__sub">Type the email you registered with (or the one the course was sent to). We’ll email you a 6-digit code. No password.</p>
-      <form id="inForm" novalidate>
-        <div class="field"><label for="i-email">Email</label><input class="in" id="i-email" type="email" autocomplete="email" inputmode="email" maxlength="200" placeholder="you@email.com" /></div>
-        <p class="err" id="iErr" role="alert"></p>
-        <button class="btn btn--primary btn--lg btn--block" type="submit" style="margin-top:10px">Send my code ${arrow}</button>
-      </form>
-      <p class="join__alt">Don’t have Blueprint yet? <a class="link" href="${BUY}">Get it for ₱349</a></p>
-    </div>
-  </div></section>
-
-  <section class="section section--white" id="faq"><div class="wrap" style="max-width:900px">
-    <div class="section__head"><p class="kicker">Getting in</p><h2 class="display h2">Questions, <span class="grad">answered.</span></h2></div>
-    <div class="faq">${FAQ.map(([q, a]) => `<details class="qa"><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")}</div>
-  </div></section>
-
-  <footer class="foot"><div class="wrap"><span>Blueprint is an LAS50 student venture at Ateneo de Manila.</span>
-    <nav><a href="/">Blueprint site</a><a href="/privacy.html">Privacy</a><a href="/#ask">Ask us</a></nav></div></footer>`;
-  $("#inForm").onsubmit = (e) => sendCode(e, $("#i-email").value, $("#iErr"));
+  landing(ctx());
 }
 async function sendCode(e, raw, errEl) {
   e.preventDefault();
@@ -247,7 +219,7 @@ function openSignIn(email = "", mode = "email") {
     const btn = $("button[type=submit]", box);
     if (input.value.length !== 6) return ($("#cErr", box).textContent = "The code has 6 digits.");
     busy(btn, true, "Signing in");
-    try { take(await call("verify", { email, code: input.value })); closeSheet(); toast(`Welcome, ${esc(D.me.first)}`); location.hash = "#/"; route(); }
+    try { take(await call("verify", { email, code: input.value })); closeSheet(); if (D.me.onboarded) toast(`Welcome back, ${esc(D.me.first)}`); location.hash = "#/"; route(); }
     catch (err) {
       busy(btn, false); input.value = ""; input.focus();
       $("#cErr", box).textContent = err.code === "wrong" ? `That code isn’t right.${err.data?.left ? ` ${err.data.left} tries left.` : " Ask for a new one."}`
@@ -265,52 +237,31 @@ const callDayLong = (iso) => new Date(iso).toLocaleDateString("en-US", { timeZon
 const callTime = (iso) => new Date(iso).toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
 const callWhen = (iso) => `${callDay(iso)}, ${callTime(iso)}`;
 const firstName = (n = "") => n.trim().split(/\s+/)[0];
-function reviewCard() {
-  const r = D.review, mine = r?.mine;
-  return mine
-    ? `<a class="card card--pad mini" href="#/review" style="text-decoration:none"><span class="mini__ic">${icon("cal")}</span><div><h3 class="h3" style="font-size:1.15rem">Your review call</h3><p><b>${esc(callWhen(mine.startsAt))}</b> with ${esc(mine.reviewer)}. ${doneCount() < 4 ? `Finish your worksheets before then: ${4 - doneCount()} to go.` : "Your worksheets are in."}</p></div></a>`
-    : `<a class="card card--pad mini" href="#/review" style="text-decoration:none"><span class="mini__ic">${icon("cal")}</span><div><h3 class="h3" style="font-size:1.15rem">Book your review call</h3><p>15 minutes on your résumé and LinkedIn. Pick a time now, even before you start: it gives you a date to finish by.</p></div></a>`;
-}
 function renderHome() {
   chrome();
   document.title = "My course · Blueprint Online";
-  const me = D.me, nx = nextUp(), n = doneCount(), mine = D.review?.mine;
-  if (!me.paid) return renderNotYet();
-  let top;
-  if (nx) {
-    top = `<a class="card resume fadeup" href="#/m/${nx.n}">
-      ${poster(nx.n, { small: `Module ${nx.n}` })}
-      <div class="resume__t"><p class="kicker" style="margin:0">${n ? "Up next" : "Start here"}</p>
-        <h2 class="h3">Module ${nx.n}: ${esc(nx.title)}</h2>
-        <p class="soft">${esc(nx.leaveWith)}</p>
-        <div class="resume__row"><span class="soft small">${icon("clock")} About ${nx.minutes} min</span><span class="btn btn--primary">${n ? "Continue" : "Start Module 1"} ${arrow}</span></div></div></a>`;
-  } else {
-    top = `<a class="card resume fadeup" href="#/review">${poster(4, { small: "All four done" })}
-      <div class="resume__t"><p class="kicker" style="margin:0">You finished Blueprint</p>
-      <h2 class="h3">${mine ? `Your review call: ${esc(callWhen(mine.startsAt))}` : "Book your review call"}</h2>
-      <p class="soft">15 minutes on Google Meet. Your reviewer reads your four worksheets before the call.</p>
-      <div class="resume__row"><span class="btn btn--primary">${mine ? "See the details" : "Pick a time"} ${arrow}</span></div></div></a>`;
-  }
-  const card = (m) => `<a class="card scard ${m.open ? "" : "scard--locked"}" href="#/m/${m.n}">
-      ${poster(m.n, { small: m.tagline, lock: !m.open })}
-      <div class="scard__t"><b>${esc(m.title)}</b><span>${esc(m.leaveWith)}</span></div>
-      <div class="scard__f"><span>${icon("clock")} ${m.minutes} min</span>${stateTag(m)}</div></a>`;
-  app.innerHTML = `<div class="wrap dash">
-    <div class="hello fadeup"><h1 class="display">Welcome to Blueprint, ${esc(me.first)}.</h1></div>
-    <div class="dash__grid">
-      <div>
-        ${top}
-        <div class="blockhead"><h2>Your modules</h2><span>${n} of 4 done · about ${totalMins(D.modules)} min in total</span></div>
-        <div class="sgrid stagger">${D.modules.map(card).join("")}</div>
-      </div>
-      <aside class="side-stack">
-        ${reviewCard()}
-        <div class="card card--pad fadeup"><p class="kicker">How it works</p>
-          <p class="soft" style="margin:8px 0 0">Four modules, about ${totalMins(D.modules)} minutes in total. Do them in order, on your own time.</p>
-          <p class="soft" style="margin:10px 0 0">Each one ends with a worksheet right on the page. Your answers save as you type, and they’re your output. Submit the worksheet and the next module opens.</p></div>
-        <div class="card card--pad"><p class="kicker">${icon("award")}Certificate</p><p class="soft" style="margin:8px 0 0">Submit all four worksheets and we’ll email you a Blueprint certificate.</p></div>
-      </aside>
-    </div></div>`;
+  if (!D.me.paid) return renderNotYet();
+  home(ctx());
+}
+/* "Change" on the home page: just the three questions again */
+async function editProfile() {
+  await onboarding(ctx(), { only: true });
+  if (!where()[0]) renderHome();
+}
+/* the welcome, once, the first time they're in. Two routes can ask at the same moment (hashchange + a direct call),
+   so they share one run. Afterwards they land on the home page. */
+let welcoming = null;
+function welcomeOnce() {
+  if (!D?.me?.paid || D.me.onboarded) return null;
+  return (welcoming ||= (async () => {
+    const me = D.me;
+    if (!me.first || me.name === me.email.split("@")[0]) me.first = ""; // a gift recipient's name can be their email
+    closeSheet();
+    await onboarding(ctx());
+    D.me.onboarded = true; // even if saving failed: don't ask again on this visit
+    history.replaceState(null, "", location.pathname + "#/");
+    welcoming = null;
+  })());
 }
 /* signed in, but this email hasn't got Blueprint (yet) */
 function renderNotYet() {
@@ -452,6 +403,8 @@ function renderModule(n) {
   // their answers: the server's copy, unless this browser has a newer one that didn't reach us
   const local = store.get(WKEY(m.n));
   let answers = m.answers || {};
+  // Module 1's "Which path fits you?": start from what they told the welcome about their résumé
+  if (m.n === 1 && !answers.path && pathName(D.me.stage)) answers = { ...answers, path: pathName(D.me.stage) };
   const localNewer = local && local.answers && (!m.savedAt || local.at > Date.parse(m.savedAt) + 1000);
   if (localNewer) answers = { ...answers, ...local.answers };
   const items = m.worksheet || [];
@@ -682,7 +635,7 @@ async function route() {
   if (linkKey) {
     // the button in their access email
     const k = linkKey; linkKey = null;
-    try { token = null; take(await call("link", { k })); toast(`You’re in, ${esc(D.me.first)}.`); }
+    try { token = null; take(await call("link", { k })); if (D.me.onboarded) toast(`You’re in, ${esc(D.me.first)}.`); }
     catch (e) { await renderLanding(); toast(msg(e), true); return; }
   }
   if (!token) return renderLanding();
@@ -694,6 +647,7 @@ async function route() {
       return;
     }
   }
+  if (D.me.paid && !D.me.onboarded) await welcomeOnce();
   const h = where();
   if (h[0] === "coaching") { location.replace("#/review"); return; } // old links
   if (h[0] !== "review") picking = false;

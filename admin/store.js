@@ -28,7 +28,7 @@ const TABLES = {
   decks: ["slug, session_no, title, subtitle, slide_count, updated_at", "session_no"],
   // Blueprint Online (migrations 014, 018). The team may only read these learner columns (never the sign-in hashes).
   // Worksheet answers are loaded only when someone opens them (workAnswers below), not every minute.
-  learners: ["id, created_at, name, email, year, heard_from, goal, field, stage, unlocked, via, last_seen", "created_at"],
+  learners: ["id, created_at, name, email, year, heard_from, goal, field, stage, review_plan, unlocked, via, last_seen", "created_at"],
   course_orders: ["*", "created_at"],
   course_work: ["learner_id, session, done, completed_at, updated_at", "updated_at"],
   course_sessions: ["n, title, minutes, video_url, slides_url, worksheet", "n"],
