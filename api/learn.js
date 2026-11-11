@@ -2,7 +2,8 @@
    { action: "start", name, email, year, heard_from, consent, privacy_version }
         New email: their account is made and they're signed in right away (Session 1 is free). A paid workshop ticket
         under the same email opens every session. Known email: we email a sign-in code instead ({ needCode: true }).
-   { action: "prices" }                  the prices, for the sign-up screen
+   { action: "catalog" }              the course page before sign-in: sessions, their lesson titles, prices (no lesson content)
+   { action: "profile", token, goal, field, stage, heard_from }   the three "tailor it to you" answers (all optional)
    { action: "code", email }          emails a 6-digit sign-in code (says the same thing whether or not the email exists)
    { action: "verify", email, code }  the code → signed in
    { action: "me", token }            everything the page needs (api/_learn.js snapshot)
@@ -14,7 +15,7 @@
    The token is signed with our own key and checked against the database every time. */
 import { send, body, db, enc, settings, newCode, readFile, saveFile, seal } from "./_lib.js";
 import {
-  YEARS, HEARD, COLS, PAID, signToken, learnerFrom, codeHash, newLoginCode, prices, restOf, restPrice, spentOn,
+  YEARS, HEARD, GOALS, FIELDS, STAGES, COLS, PAID, catalog, signToken, learnerFrom, codeHash, newLoginCode, prices, restOf, restPrice, spentOn,
   workshopBuyer, snapshot, welcomeEmail, codeEmail, unlockEmail,
 } from "./_learn.js";
 
@@ -32,6 +33,7 @@ export default async function handler(req, res) {
       case "code": return await sendCode(res, b);
       case "verify": return await verify(res, b);
       case "prices": { const pr = await prices(); return send(res, 200, { single: pr.single, bundle: pr.bundle }); }
+      case "catalog": return send(res, 200, await catalog());
     }
     const l = await learnerFrom(b.token);
     if (!l) return send(res, 401, { error: "signin" });
@@ -42,6 +44,7 @@ export default async function handler(req, res) {
       case "save": return await save(res, l, b);
       case "pay": return await payInfo(res);
       case "buy": return await buy(res, l, b);
+      case "profile": return await profile(res, l, b);
     }
     return send(res, 400, { error: "action" });
   } catch (e) {
@@ -194,4 +197,15 @@ async function buy(res, l, b) {
   }
   try { await unlockEmail(l, o, pr.instant); } catch (e) { console.error("unlock email failed", o.id, e.message); }
   return send(res, 200, { ok: true, order: o.code, instant: pr.instant, ...(await snapshot(l)) });
+}
+
+/* ---------- tailor it to them ---------- */
+async function profile(res, l, b) {
+  const data = {};
+  if (b.goal !== undefined) { if (!GOALS.includes(b.goal)) return send(res, 400, { error: "invalid" }); data.goal = b.goal; }
+  if (b.field !== undefined) { if (!FIELDS.includes(b.field)) return send(res, 400, { error: "invalid" }); data.field = b.field; }
+  if (b.stage !== undefined) { if (!STAGES.includes(b.stage)) return send(res, 400, { error: "invalid" }); data.stage = b.stage; }
+  if (b.heard_from) { if (!HEARD.includes(b.heard_from)) return send(res, 400, { error: "invalid" }); data.heard_from = b.heard_from; }
+  if (Object.keys(data).length) await db(`learners?id=eq.${l.id}`, { method: "PATCH", data });
+  return send(res, 200, await snapshot({ ...l, ...data }));
 }

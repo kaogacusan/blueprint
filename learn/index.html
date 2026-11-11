@@ -3,36 +3,37 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Blueprint Online</title>
-  <meta name="description" content="Build your résumé, LinkedIn and intro in four short sessions. Session 1 is free." />
-  <meta name="theme-color" content="#030b24" />
+  <title>Blueprint Online — Build your career brand</title>
+  <meta name="description" content="Four short sessions that turn what you’ve done in school, orgs and internships into a résumé, a LinkedIn and an intro people remember. Session 1 is free." />
+  <meta name="theme-color" content="#f8fafc" />
   <link rel="icon" href="/assets/blueprint-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/learn/learn.css" />
 </head>
 <body>
-  <div class="grid-bg" aria-hidden="true"></div>
-  <div class="scan" aria-hidden="true"></div>
-
-  <header class="top" id="top">
-    <a href="#/" class="top__brand" aria-label="Blueprint Online home">
-      <img src="/assets/blueprint-mark.png" alt="" class="top__mark" />
-      <img src="/assets/blueprint-wordmark.png" alt="blueprint" class="top__word" />
-      <span class="top__tag">online</span>
-    </a>
-    <div class="top__right" id="topRight"></div>
+  <header class="bar">
+    <div class="wrap bar__in">
+      <a href="#/" class="brand" aria-label="Blueprint Online home">
+        <img src="/assets/blueprint-mark.png" alt="" class="brand__mark" />
+        <img src="/assets/blueprint-wordmark.png" alt="blueprint" class="brand__word" />
+        <span class="brand__tag">Online</span>
+      </a>
+      <nav class="bar__nav" id="barNav" aria-label="Course"></nav>
+      <div class="bar__right" id="barRight"></div>
+    </div>
   </header>
 
-  <main id="app" class="app" aria-live="polite">
-    <div class="boot"><span class="boot__dot"></span><span class="mono">Loading your Blueprint…</span></div>
+  <main id="app" aria-live="polite">
+    <div class="boot"><div><span class="spin"></span><p>Loading Blueprint…</p></div></div>
   </main>
 
+  <nav class="tabbar" id="tabbar" aria-label="Course" hidden></nav>
   <div class="toasts" id="toasts" aria-live="polite"></div>
   <div class="sheet" id="sheet" hidden></div>
 
-  <noscript><p style="color:#fff;padding:24px">Blueprint Online needs JavaScript to run.</p></noscript>
+  <noscript><p style="padding:24px">Blueprint Online needs JavaScript to run.</p></noscript>
   <script type="module" src="/learn/learn.js"></script>
 </body>
 </html>

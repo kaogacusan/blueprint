@@ -6,6 +6,10 @@
 import { S, update, setting, saveSetting, reloadCourse, courseReceipt, checkCourseOrder } from "/admin/store.js";
 import { esc, icon, copy, toast, confirmBox, countUps, peso, openDrawer, closeDrawer } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
+/* what they said they're working toward on /learn ("Tailor Blueprint to you", migration 016) */
+const GOAL = { internship: "Internship", job: "First job", org: "Org position", scholarship: "Scholarship / exchange", explore: "Not sure yet" };
+const FIELD = { business: "Business", creative: "Comms & creative", scitech: "Sci, tech & health", policy: "Policy, law & soc sci", humanities: "Humanities & education", other: "Other field" };
+const STAGE = { none: "No résumé yet", rough: "Has a résumé", applying: "Applying now" };
 
 const SESSIONS = [1, 2, 3, 4];
 const STATUS = { pending: "Pending", paid: "Paid", rejected: "Not paid" };
@@ -98,10 +102,11 @@ export default {
         <div class="ch ch--tools"><h3>${icon("users")} Learners</h3>
           ${learners.length ? `<label class="search">${icon("search")}<input id="q" placeholder="Search name or email" value="${esc(f.q)}" /></label><span class="muted">${list.length} of ${learners.length}</span>` : `<span class="muted">Everyone who started at /learn</span>`}</div>
         ${list.length ? `<div class="tablewrap"><table class="table table--regs table--course">
-          <thead><tr><th>Name</th><th>Year</th><th>Heard from</th><th>Sessions</th><th>Via</th><th>Progress</th><th>Last seen</th></tr></thead>
+          <thead><tr><th>Name</th><th>Year</th><th>Going for</th><th>Heard from</th><th>Sessions</th><th>Via</th><th>Progress</th><th>Last seen</th></tr></thead>
           <tbody>${list.map((l, i) => `<tr class="in" style="--i:${Math.min(i, 16)}">
             <td><b>${esc(l.name)}</b><small><a href="mailto:${esc(l.email)}">${esc(l.email)}</a></small></td>
             <td class="nowrap">${esc(l.year)}</td>
+            <td>${l.goal ? `<b>${esc(GOAL[l.goal] || l.goal)}</b>` : `<span class="muted">—</span>`}${l.field ? `<small>${esc(FIELD[l.field] || l.field)}</small>` : ""}${l.stage ? `<small>${esc(STAGE[l.stage] || l.stage)}</small>` : ""}</td>
             <td>${l.heard_from ? esc(l.heard_from) : `<span class="muted">—</span>`}</td>
             <td>${chips(l, waiting)}</td>
             <td>${l.via === "workshop" ? `<span class="tag" title="A paid workshop ticket came with it, so every session is open">Workshop</span>` : l.via ? esc(l.via) : `<span class="muted">—</span>`}</td>

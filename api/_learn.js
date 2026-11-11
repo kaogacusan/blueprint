@@ -6,9 +6,12 @@ import { db, enc, settings, subKey, SITE, mail, shell, p, h, btn, esc, first, pe
 export const LEARN = `${SITE}/learn`;
 export const YEARS = ["1st year", "2nd year", "3rd year", "4th year", "Fresh grad", "Other"];
 export const HEARD = ["", "Booth", "Student org", "Friend", "Facebook", "Instagram", "Email", "Other"];
+export const GOALS = ["", "internship", "job", "org", "scholarship", "explore"];
+export const FIELDS = ["", "business", "creative", "scitech", "policy", "humanities", "other"];
+export const STAGES = ["", "none", "rough", "applying"];
 export const FREE = [1];
 export const PAID = [2, 3, 4];
-export const COLS = "id,name,email,year,unlocked,via,token_ver,login_hash,login_expires,login_tries,login_sent_at";
+export const COLS = "id,name,email,year,heard_from,goal,field,stage,unlocked,via,token_ver,login_hash,login_expires,login_tries,login_sent_at";
 
 /* ---------- sign-in token: "<payload>.<signature>", kept in their browser for 60 days ---------- */
 const b64 = (buf) => Buffer.from(buf).toString("base64url");
@@ -62,7 +65,7 @@ export async function snapshot(l) {
   ]);
   const open = (n) => l.unlocked.includes(n);
   return {
-    me: { name: l.name, first: first(l.name), email: l.email, year: l.year, unlocked: l.unlocked, via: l.via },
+    me: { name: l.name, first: first(l.name), email: l.email, year: l.year, unlocked: l.unlocked, via: l.via, goal: l.goal || "", field: l.field || "", stage: l.stage || "", heard: l.heard_from || "" },
     sessions: sessions.map((x) => ({
       n: x.n, title: x.title, tagline: x.tagline, leaveWith: x.leave_with, minutes: x.minutes, open: open(x.n), free: FREE.includes(x.n),
       outline: (x.steps || []).map((st) => ({ id: st.id, title: st.title, feeds: st.feeds || [] })),
@@ -72,6 +75,15 @@ export async function snapshot(l) {
     orders: orders.map((o) => ({ code: o.code, sessions: o.sessions, amount: o.amount, status: o.status, at: o.created_at, note: o.status === "rejected" ? o.note : "" })),
     prices: { single: pr.single, bundle: pr.bundle, rest: restPrice(pr, l.unlocked, spentOn(orders)), restSessions: restOf(l.unlocked), spent: spentOn(orders) },
     gcash: { name: s.payment?.gcashName || "", number: s.payment?.gcashNumber || "" },
+  };
+}
+
+/* the course page before anyone signs in: what each session makes and its lesson titles. No prompts, no videos. */
+export async function catalog() {
+  const [sessions, pr] = await Promise.all([db("course_sessions?select=n,title,tagline,leave_with,minutes,steps&order=n"), prices()]);
+  return {
+    sessions: sessions.map((x) => ({ n: x.n, title: x.title, tagline: x.tagline, leaveWith: x.leave_with, minutes: x.minutes, free: FREE.includes(x.n), lessons: (x.steps || []).map((st) => st.title) })),
+    prices: { single: pr.single, bundle: pr.bundle },
   };
 }
 

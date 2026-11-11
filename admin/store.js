@@ -28,7 +28,7 @@ const TABLES = {
   decks: ["slug, session_no, title, subtitle, slide_count, updated_at", "session_no"],
   // Blueprint Online (migration 014). The team may only read these learner columns (never the sign-in hashes),
   // and their worksheet answers aren't needed here, only which steps are done.
-  learners: ["id, created_at, name, email, year, heard_from, unlocked, via, last_seen", "created_at"],
+  learners: ["id, created_at, name, email, year, heard_from, goal, field, stage, unlocked, via, last_seen", "created_at"],
   course_orders: ["*", "created_at"],
   course_work: ["learner_id, session, done, completed_at, updated_at", "updated_at"],
   course_sessions: ["n, title, steps, video_url", "n"],
