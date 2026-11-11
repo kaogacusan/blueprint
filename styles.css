@@ -1365,3 +1365,62 @@ html:not(.free-open) [data-free-on], .free-open [data-free-off] { display: none 
   .freebar span { display: none; }
   .freepop__in { padding: 30px 20px 22px; }
 }
+
+/* ---------- Home page, Blueprint Online (Nov 11): one product, ₱349. Page-only classes start with ho- ---------- */
+.ho-have { margin: 20px 0 0; text-align: center; color: var(--ink-3); font-size: 1rem; letter-spacing: -0.01em; animation: up 0.9s var(--ease) 0.8s both; }
+.ho-have a { color: var(--core); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.ho-have a:hover { color: var(--electric); }
+.ho-have--light { margin-top: 26px; color: rgba(225, 235, 255, 0.75); animation: none; }
+.ho-have--light a { color: #fff; }
+.ho-have--light a:hover { color: var(--cyan); }
+
+.facts.ho-facts { grid-template-columns: repeat(5, auto); }
+.ho-nw { white-space: nowrap; }
+
+.ho-how { background: #fff; margin-top: -1px; padding-top: clamp(16px, 3vw, 40px); border-bottom: 1px solid var(--line); }
+.ho-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; counter-reset: ho; }
+.ho-steps li {
+  counter-increment: ho; padding: 20px 20px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper);
+  color: var(--ink-2); font-size: 1.02rem; line-height: 1.42; letter-spacing: -0.015em; text-wrap: pretty;
+}
+.ho-steps li::before {
+  content: "0" counter(ho); display: block; width: fit-content; margin-bottom: 14px;
+  font-family: var(--display); font-weight: 750; font-size: 2.4rem; letter-spacing: -0.06em; line-height: 1;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.ho-steps b { color: var(--ink); font-weight: 650; }
+
+.ho-time { align-self: flex-start; margin: 12px 0 0; padding: 4px 11px; border-radius: 999px; background: var(--tint); color: var(--core); font-size: 0.86rem; font-weight: 650; letter-spacing: -0.01em; }
+.ho-leave { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.ho-leave + .ticks { border-top: 0; padding-top: 10px; }
+.ho-paths {
+  margin: 16px 0 0; padding: 14px 18px; border-radius: 14px; background: var(--tint); border: 1px solid rgba(6, 70, 200, 0.15);
+  color: var(--ink-2); font-size: 1rem; line-height: 1.45; letter-spacing: -0.015em; position: relative; z-index: 1;
+}
+.ho-paths b { color: var(--navy); font-weight: 650; }
+
+.people.ho-one { grid-template-columns: 1fr; max-width: 860px; }
+.tix.ho-one { grid-template-columns: 1fr; max-width: 520px; }
+.ho-tix { margin: 0 0 22px; }
+
+.ho-gift {
+  display: flex; align-items: flex-start; gap: 10px; margin: 2px 0 12px; padding: 12px 14px;
+  border: 1px dashed var(--line-2); border-radius: 12px; cursor: pointer;
+  color: var(--ink-2); font-size: 0.9rem; line-height: 1.4;
+}
+.ho-gift input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--core); }
+.ho-gift b { color: var(--navy); font-weight: 650; }
+.ho-gift small { display: block; margin-top: 2px; color: var(--ink-3); font-size: 0.8rem; }
+.ho-gift:has(input:checked) { border-style: solid; border-color: rgba(6, 70, 200, 0.25); background: var(--tint); }
+
+@media (max-width: 1080px) {
+  .facts.ho-facts { grid-template-columns: repeat(3, auto); }
+  .ho-steps { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .facts.ho-facts { grid-template-columns: 1fr 1fr; }
+  .ho-facts .ho-span { grid-column: 1 / -1; }
+  .ho-steps { grid-template-columns: 1fr; }
+  .ho-steps li { padding: 16px 18px 18px; }
+  .ho-steps li::before { margin-bottom: 10px; font-size: 1.9rem; }
+}

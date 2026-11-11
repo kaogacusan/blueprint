@@ -31,7 +31,7 @@ const TABLES = {
   learners: ["id, created_at, name, email, year, heard_from, goal, field, stage, unlocked, via, last_seen", "created_at"],
   course_orders: ["*", "created_at"],
   course_work: ["learner_id, session, done, completed_at, updated_at", "updated_at"],
-  course_sessions: ["n, title, steps, video_url", "n"],
+  course_sessions: ["n, title, minutes, video_url, slides_url, form_url", "n"],
 };
 const NEWEST_FIRST = ["registrations", "questions", "learners", "course_orders"];
 const PK = { sessions: "n", settings: "key", decks: "slug", course_sessions: "n" };

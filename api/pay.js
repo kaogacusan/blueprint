@@ -1,6 +1,7 @@
 /* /api/pay: the private payment page (/pay?t=...) from the sign-up email.
    GET  ?t=token            their name, sign-up number, their ticket and amount, and our GCash QR
-   POST { t, image }        a screenshot of their GCash receipt (a JPEG data URL, shrunk in the browser)
+   POST { t, ref, image }   their GCash reference number (Blueprint Online, Nov 11 night plan), and optionally a screenshot
+                            of the receipt (a JPEG data URL, shrunk in the browser). Older tickets: the screenshot alone.
    POST { t, upgrade: true } Single Session → Full Pass (migration 011). Not paid yet: the ticket just switches and
                             the amount becomes the Full Pass price. Already paid: they owe the difference (topup,
                             ₱500 after one session, ₱201 after two), pay it with the same QR and upload that receipt;
@@ -14,7 +15,7 @@ const MAX = 3e6; // bytes, after the browser shrinks it (usually ~300 KB)
 
 async function find(t) {
   if (!TOKEN.test(String(t || ""))) return null;
-  const [r] = await db(`registrations?select=id,name,code,status,proof_path,proof_at,ticket,sessions,amount,friends,topup,topup_at&pay_token=eq.${enc(t)}`);
+  const [r] = await db(`registrations?select=id,name,code,status,proof_path,proof_at,ticket,sessions,amount,friends,topup,topup_at,gcash_ref,ref_at,gift_name,gift_email&pay_token=eq.${enc(t)}`);
   return r || null;
 }
 const first = (name) => name.trim().split(/\s+/)[0];
@@ -23,7 +24,7 @@ const topping = (r) => r.status === "paid" && r.topup > 0;
 /* can move up now: Single Session with something left to pay, and not while we're checking a receipt */
 const canUpgrade = (r) => upgradeDue(r) > 0 && ((r.status === "registered" && !r.proof_path) || (r.status === "paid" && !r.topup));
 /* a top-up receipt only counts if it came in after they asked to upgrade */
-const sentAt = (r) => (topping(r) ? (r.proof_at && r.topup_at && Date.parse(r.proof_at) > Date.parse(r.topup_at) ? r.proof_at : null) : r.proof_path ? r.proof_at : null);
+const sentAt = (r) => (r.ref_at && !topping(r) ? r.ref_at : topping(r) ? (r.proof_at && r.topup_at && Date.parse(r.proof_at) > Date.parse(r.topup_at) ? r.proof_at : null) : r.proof_path ? r.proof_at : null);
 
 export default async function handler(req, res) {
   try {
@@ -39,7 +40,8 @@ export default async function handler(req, res) {
         upgrade: canUpgrade(r) ? { due: upgradeDue(r), full: PRICE.full } : null,
         gcashName: payment.gcashName || "", gcashNumber: payment.gcashNumber || "",
         qr: qr ? `data:${qr.type};base64,${qr.data.toString("base64")}` : null,
-        proofAt: sentAt(r),
+        proofAt: sentAt(r), ref: r.gcash_ref || "", online: r.ticket === "online",
+        gift: r.gift_email ? { name: r.gift_name, email: r.gift_email } : null,
       });
     }
 
@@ -59,10 +61,18 @@ export default async function handler(req, res) {
     }
 
     const up = topping(r);
-    if (r.status === "paid" && !up) return send(res, 200, { ok: true, status: "paid", name: first(r.name) });
+    if ((r.status === "paid" || r.status === "refunded") && !up) return send(res, 200, { ok: true, status: "paid", name: first(r.name) });
 
+    // the GCash reference number: digits only (GCash shows 13, with spaces)
+    const ref = String(b.ref ?? "").replace(/[\s-]/g, "");
+    if (b.ref !== undefined && !/^\d{6,20}$/.test(ref)) return send(res, 400, { error: "ref" });
     const m = /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/.exec(String(b.image || ""));
     const img = m && Buffer.from(m[1], "base64");
+    if (ref && !b.image) {
+      const ref_at = new Date().toISOString();
+      await db(`registrations?id=eq.${r.id}`, { method: "PATCH", data: { gcash_ref: ref, ref_at } });
+      return send(res, 200, { ok: true, status: r.status, topup: up, name: first(r.name), proofAt: ref_at, ref });
+    }
     if (!img || img.length < 2000 || img[0] !== 0xff || img[1] !== 0xd8) return send(res, 400, { error: "image" });
     if (img.length > MAX) return send(res, 413, { error: "big" });
 
@@ -70,8 +80,8 @@ export default async function handler(req, res) {
     const path = up ? `proofs/${r.id}-topup.enc` : `proofs/${r.id}.enc`;
     await saveFile(path, seal(img), "application/octet-stream"); // locked with our key: only api/signups.js opens it
     const proof_at = new Date().toISOString();
-    await db(`registrations?id=eq.${r.id}`, { method: "PATCH", data: { proof_path: path, proof_at } });
-    return send(res, 200, { ok: true, status: r.status, topup: up, name: first(r.name), proofAt: proof_at });
+    await db(`registrations?id=eq.${r.id}`, { method: "PATCH", data: { proof_path: path, proof_at, ...(ref ? { gcash_ref: ref, ref_at: proof_at } : {}) } });
+    return send(res, 200, { ok: true, status: r.status, topup: up, name: first(r.name), proofAt: proof_at, ref });
   } catch (e) {
     console.error("pay failed", e.message);
     return send(res, 500, { error: "server" });

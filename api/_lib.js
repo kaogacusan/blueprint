@@ -41,7 +41,9 @@ export async function teamName(req) {
 /* ---------- tickets (migrations 010, 011, 012). The site shows the same prices (index.html, main.js PRICE). ----------
    Pilot pricing from Nov 7: Full Pass ₱799, Single Session ₱299 each, Barkada ₱1,999 (three Full Passes, one payer).
    From Nov 10, Session 1 is free: its own ticket, no payment. Singles are for Sessions 2 to 4. */
-export const PRICE = { full: 799, single: 299, barkada: 1999 };
+export const PRICE = { full: 799, single: 299, barkada: 1999, online: 349 };
+/* From Nov 11 night the site sells one thing: Blueprint Online, ₱349 (migration 017). Sales close Sun Nov 15, 10 PM. */
+export const SALES_CLOSE = Date.parse("2026-11-15T22:00:00+08:00");
 const ALL = [1, 2, 3, 4];
 export const FREE = 1;
 const PAID = ALL.filter((n) => n !== FREE);
@@ -50,6 +52,7 @@ const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
    Picking all three paid singles gets them the Full Pass: it's cheaper and comes with the pre-work bundle.
    A Barkada needs two friends with a name and an email each, different from the payer's and each other's. */
 export function ticketFor(ticket, sessions, friends, email = "") {
+  if (ticket === "online") return { ticket: "online", sessions: ALL, amount: PRICE.online, friends: [] };
   if (ticket === "free") return { ticket: "free", sessions: [FREE], amount: 0, friends: [] };
   if (ticket === "full") return { ticket: "full", sessions: ALL, amount: PRICE.full, friends: [] };
   if (ticket === "barkada") {
@@ -78,6 +81,7 @@ const friendNames = (r) => (r.friends || []).map((f) => f.name.trim().split(/\s+
    or "the Barkada ticket (all four sessions for you, Ana and Ben)" */
 export const ticketLine = (r, titles = {}) => r.ticket === "single" || r.ticket === "free"
   ? and((r.sessions || []).map((n) => `Session ${n}${titles[n] ? `: ${titles[n]}` : ""}`)) + (r.ticket === "free" ? " (free)" : "")
+  : r.ticket === "online" ? "Blueprint Online"
   : r.ticket === "barkada" ? `the Barkada ticket (all four sessions for ${and(["you", ...friendNames(r)])})`
   : "the Full Pass (all four sessions)";
 export async function sessionTitles() {
@@ -421,4 +425,4 @@ export async function newQuestionPing() {
 }
 
 /* the email building blocks, for the course emails in api/_learn.js */
-export { mail, shell, p, h, btn, esc, first, peso, askText };
+export { mail, shell, p, h, btn, esc, first, peso, askText, chip, step, payCard, qrAttachment };

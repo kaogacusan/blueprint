@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pay · Blueprint</title>
-  <meta name="description" content="Pay for Blueprint with GCash and upload your receipt to lock your slot." />
+  <meta name="description" content="Pay for Blueprint Online with GCash and type your reference number." />
   <meta name="robots" content="noindex" />
   <meta name="referrer" content="no-referrer" />
   <link rel="icon" href="assets/blueprint-mark.png" />
@@ -36,6 +36,11 @@
     .drop img { max-height: 280px; max-width: 100%; border-radius: 8px; }
     .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
     .sent { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--tint); color: var(--ink-2); font-size: 0.92rem; line-height: 1.45; }
+    .refin { font-family: var(--mono); font-size: 1.15rem; letter-spacing: 0.08em; }
+    .opt { margin-top: 14px; }
+    .opt > summary { cursor: pointer; color: var(--core); font-weight: 600; font-size: 0.95rem; list-style: none; }
+    .opt > summary::-webkit-details-marker { display: none; }
+    .opt[open] > summary { margin-bottom: 10px; }
     .code { font-family: var(--mono); font-weight: 500; letter-spacing: 0.06em; }
     /* Single Session → Full Pass (pay.js): before paying it switches the ticket, after paying it's a top-up */
     .up { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 22px 0 0; padding: 14px 16px; border: 1px solid rgba(6, 70, 200, 0.18); border-radius: var(--radius-sm); background: var(--tint); color: var(--ink-2); font-size: 0.95rem; line-height: 1.45; text-align: left; }
@@ -54,7 +59,7 @@
     <p class="help" id="loading">Loading your payment page…</p>
 
     <form class="reg" id="payForm" novalidate hidden>
-      <h1 class="reg__title" id="payTitle">Lock your <span class="grad">slot.</span></h1>
+      <h1 class="reg__title" id="payTitle">Get <span class="grad">Blueprint.</span></h1>
       <p class="reg__sub" id="hello">Two quick steps.</p>
 
       <div class="step" id="stepPay">
@@ -70,17 +75,25 @@
       </div>
 
       <div class="step">
-        <p class="step__k">2. Upload your receipt</p>
+        <p class="step__k" id="step2k">2. Type your reference number</p>
         <p class="sent" id="sent" hidden></p>
-        <label class="drop" id="drop">
-          <input type="file" id="f-proof" accept="image/*" />
-          <span id="dropText"><b>Choose a screenshot</b><br /><small>of your GCash receipt</small></span>
-          <img id="preview" alt="Your receipt" hidden />
-        </label>
+        <div class="field" id="refField">
+          <label for="f-ref">GCash reference number</label>
+          <input class="refin" id="f-ref" inputmode="numeric" autocomplete="off" maxlength="24" placeholder="1234 567 890123" />
+          <p class="help" style="margin:8px 2px 0">It’s on your GCash receipt, labelled <b>Ref No.</b></p>
+        </div>
+        <details class="opt" id="shotBox">
+          <summary id="shotSum">+ Add a screenshot of the receipt (optional)</summary>
+          <label class="drop" id="drop">
+            <input type="file" id="f-proof" accept="image/*" />
+            <span id="dropText"><b>Choose a screenshot</b><br /><small>of your GCash receipt</small></span>
+            <img id="preview" alt="Your receipt" hidden />
+          </label>
+        </details>
       </div>
 
       <button class="btn btn--primary btn--lg btn--block" type="submit" style="margin-top: 22px">
-        <span class="btn__label">Send receipt</span><span class="spinner" aria-hidden="true"></span>
+        <span class="btn__label">Send</span><span class="spinner" aria-hidden="true"></span>
       </button>
       <p class="reg__error" id="payError" role="alert" hidden></p>
     </form>
@@ -88,8 +101,9 @@
     <div class="done" id="payDone" hidden>
       <div class="done__mark" aria-hidden="true">✓</div>
       <h2 class="reg__title" id="doneTitle">Got it.</h2>
-      <p class="reg__sub" id="doneText">We’ll check your receipt and email your slot confirmation within 24 hours.</p>
-      <a class="btn btn--ghost btn--block" href="./">Back to Blueprint</a>
+      <p class="reg__sub" id="doneText">We’ll check your payment and email the course link within 1 hour (8 AM to 10 PM).</p>
+      <a class="btn btn--primary btn--block" id="toCourse" href="/learn" hidden>Open the course</a>
+      <a class="btn btn--ghost btn--block" href="./" style="margin-top:10px">Back to Blueprint</a>
     </div>
 
     <!-- moved into the form (not paid yet) or under "You're in" (paid) by pay.js -->

@@ -1,12 +1,17 @@
-/* POST /api/register: the site's sign-up form. Saves the sign-up with a sign-up number and a private
+/* POST /api/register: the site's sign-up form. Since the Nov 11 night plan it sells one thing, Blueprint Online
+   (ticket "online", ₱349, migration 017), with an optional gift: gift_name + gift_email get the access instead.
+   Sales close Sun Nov 15, 10 PM (SALES_CLOSE in _lib.js). The older tickets below stay readable for last week's rows.
+   Before that: Saves the sign-up with a sign-up number and a private
    payment link, and emails the GCash QR. Same checks as the database (migrations 001, 003, 005, 006, 007, 010).
    The ticket (Full Pass, Single Session with the sessions they picked, or Barkada with two friends) sets the amount here, never in the browser.
    A new paid sign-up gets its payment link back so the site can send them straight to /pay.
    A free Session 1 sign-up has nothing to pay: its seat is saved right away (or it waits in line if Session 1 is full). */
-import { send, body, db, enc, settings, newCode, paymentEmail, freeEmail, ticketFor, seatsOf, startsAt } from "./_lib.js";
+import { send, body, db, enc, settings, newCode, paymentEmail, freeEmail, ticketFor, seatsOf, startsAt, SALES_CLOSE } from "./_lib.js";
+import { onlinePayEmail } from "./_learn.js";
 
 const YEARS = ["1st year", "2nd year", "3rd year", "4th year", "Fresh grad", "Other"];
-const HEARD = ["", "Student org", "Friend", "Facebook", "Instagram", "Email", "Other"];
+const HEARD = ["", "Booth", "Student org", "Friend", "Facebook", "Instagram", "Email", "Other"];
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const str = (v, max) => String(v ?? "").trim().slice(0, max);
 
 export default async function handler(req, res) {
@@ -20,6 +25,11 @@ export default async function handler(req, res) {
     consent: b.consent === true, privacy_version: str(b.privacy_version, 20),
   };
   const tk = ticketFor(b.ticket, b.sessions, b.friends, row.email);
+  const online = tk?.ticket === "online";
+  // a gift: both or neither, and not their own email
+  const gift = { gift_name: online ? str(b.gift_name, 120) : "", gift_email: online ? str(b.gift_email, 200).toLowerCase() : "" };
+  if ((gift.gift_name || gift.gift_email) && (!gift.gift_name || !EMAIL.test(gift.gift_email) || gift.gift_email === row.email)) return send(res, 400, { error: "invalid" });
+  if (online && Date.now() >= SALES_CLOSE) return send(res, 403, { error: "closed" });
   const digits = row.mobile.replace(/\D/g, "");
   if (!tk || !row.name || !row.course || !YEARS.includes(row.year) || !HEARD.includes(row.heard_from) || !row.consent || !row.privacy_version
     || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row.email) || !/^\+?[\d\s-]+$/.test(row.mobile) || digits.length < 10 || digits.length > 13) {
@@ -37,7 +47,7 @@ export default async function handler(req, res) {
     const old = mine.find((r) => (r.ticket === "free") === free);
     if (old) {
       const quiet = old.emailed_at && Date.now() - Date.parse(old.emailed_at) < 10 * 60e3;
-      const resend = old.ticket === "free" ? freeEmail : old.status === "registered" ? paymentEmail : null;
+      const resend = old.ticket === "free" ? freeEmail : old.status !== "registered" ? null : old.ticket === "online" ? onlinePayEmail : paymentEmail;
       if (resend && old.code && !quiet) {
         await resend(old);
         await db(`registrations?id=eq.${old.id}`, { method: "PATCH", data: { emailed_at: new Date().toISOString() } });
@@ -47,7 +57,7 @@ export default async function handler(req, res) {
 
     // sign-ups for a session stop when it starts (Manila time, from Schedule)
     const sessions = await db("sessions?select=n,date,start_time");
-    if (sessions.some((x) => tk.sessions.includes(x.n) && Date.now() >= startsAt(x))) return send(res, 403, { error: "closed" });
+    if (!online && sessions.some((x) => tk.sessions.includes(x.n) && Date.now() >= startsAt(x))) return send(res, 403, { error: "closed" });
 
     // a flood of sign-ups in an hour is a bot, not a class: stop before Gmail blocks us
     const hourAgo = new Date(Date.now() - 3600e3).toISOString();
@@ -64,7 +74,7 @@ export default async function handler(req, res) {
 
     let saved;
     for (let i = 0; i < 5 && !saved; i++) {
-      try { [saved] = await db("registrations", { method: "POST", data: { ...row, ...tk, ...seat, code: newCode() }, prefer: "return=representation" }); }
+      try { [saved] = await db("registrations", { method: "POST", data: { ...row, ...tk, ...gift, ...seat, code: newCode() }, prefer: "return=representation" }); }
       catch (e) {
         if (free && e.code === "23514") return send(res, 503, { error: "free_not_ready" }); // migration 012 not run yet
         if (e.code === "23505" && /email/.test(e.message)) return send(res, 200, { ok: true, again: true, free }); // sent twice at once
@@ -74,7 +84,7 @@ export default async function handler(req, res) {
     if (!saved) throw new Error("no code");
 
     try {
-      await (free ? freeEmail : paymentEmail)(saved);
+      await (free ? freeEmail : online ? onlinePayEmail : paymentEmail)(saved);
       await db(`registrations?id=eq.${saved.id}`, { method: "PATCH", data: { emailed_at: new Date().toISOString() } });
     } catch (e) {
       console.error("payment email failed", saved.id, e.message); // the team sees "email not sent" and can resend

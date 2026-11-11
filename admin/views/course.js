@@ -1,40 +1,33 @@
-/* Course: Blueprint Online, the self-paced course at /learn (migration 014, api/learn.js).
-   Session 1 is free. Sessions 2 to 4 are paid by GCash: the learner uploads a receipt and, while "instant" is on,
-   those sessions open right away. Anyone on the core team then opens the receipt here, checks GCash and clicks Paid
-   or Not paid (api/course.js). Not paid locks those sessions again and emails them.
-   Prices, the instant switch and the video links stay with the owner. Guests never see this page. */
+/* Course: Blueprint Online at /learn (migrations 014, 017; api/learn.js).
+   Since the Nov 11 night plan buyers pay on the site (Sign-ups page); Paid emails them a link that signs them in.
+   Four modules, in order: each is a video (or the deck until the video is up), Thomas's page text and a Google Form.
+   They tick "I've sent my form" to open the next one. Module 4 done → the 1:1 booking link, and they count for the certificate.
+   The owner pastes the video, slides, form and booking links here. Guests never see this page.
+   Old per-session receipts (course_orders, before the night plan) still show if there are any. */
 import { S, update, setting, saveSetting, reloadCourse, courseReceipt, checkCourseOrder } from "/admin/store.js";
 import { esc, icon, copy, toast, confirmBox, countUps, peso, openDrawer, closeDrawer } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
-/* what they said they're working toward on /learn ("Tailor Blueprint to you", migration 016) */
-const GOAL = { internship: "Internship", job: "First job", org: "Org position", scholarship: "Scholarship / exchange", explore: "Not sure yet" };
-const FIELD = { business: "Business", creative: "Comms & creative", scitech: "Sci, tech & health", policy: "Policy, law & soc sci", humanities: "Humanities & education", other: "Other field" };
-const STAGE = { none: "No résumé yet", rough: "Has a résumé", applying: "Applying now" };
 
 const SESSIONS = [1, 2, 3, 4];
 const STATUS = { pending: "Pending", paid: "Paid", rejected: "Not paid" };
+const VIA = { online: "Bought", gift: "Gift", refunded: "Refunded, free", workshop: "Workshop ticket", demo: "Demo" };
 const f = { q: "" };
 const folds = { rules: false, setup: false }; // stay open or shut when the page redraws
 const fmt = (iso) => new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const day = (iso) => new Date(iso).toLocaleDateString("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric" });
 const first = (name = "") => name.trim().split(/\s+/)[0] || "They";
 const sorted = (ns = []) => [...ns].sort((a, b) => a - b).map((n) => `S${n}`);
-const sess = (ns) => sorted(ns).join(", ");                                                          // "S2, S3, S4"
-const words = (ns) => { const s = sorted(ns); return s.length > 1 ? `${s.slice(0, -1).join(", ")} and ${s.at(-1)}` : s[0] || ""; }; // "S2, S3 and S4"
+const sess = (ns) => sorted(ns).join(", ");
+const words = (ns) => { const s = sorted(ns); return s.length > 1 ? `${s.slice(0, -1).join(", ")} and ${s.at(-1)}` : s[0] || ""; };
 const many = (ns) => ns.length > 1;
-/* same defaults as api/_learn.js prices() */
-const prices = () => { const c = setting("course"); return { single: Number(c.single) || 149, bundle: Number(c.bundle) || 349, instant: c.instant !== false }; };
 const learnerOf = (o) => (S.data.learners || []).find((l) => l.id === o.learner_id);
 
-const RULES = () => {
-  const p = prices();
-  return [
-    "Only use these details to run Blueprint Online. Emailing more than one learner? Put the emails in <b>BCC</b>.",
-    `Before clicking Paid, open their receipt and find the same payment in GCash (Transactions): same amount, same reference number. Amounts you’ll see: <b>${peso(p.single)}</b> one session · <b>${peso(Math.min(p.bundle, 2 * p.single))}</b> two · <b>${peso(Math.min(p.bundle, 3 * p.single))}</b> all three.`,
-    "Receipts stay here. Don’t download or screenshot them, and don’t send them to group chats. They’re stored encrypted, and each time someone opens one it’s logged.",
-    "Something leaked or got sent to the wrong person? Tell Keira right away. We have 72 hours to report it.",
-  ];
-};
+const RULES = [
+  "Only use these details to run Blueprint Online. Emailing more than one learner? Put the emails in <b>BCC</b>.",
+  "Payments are checked on the <a href=\"#inquiries\">Sign-ups</a> page: find their GCash reference number (₱349), click Paid, and the course link goes out by itself.",
+  "Thomas reads each learner’s form answers in the Blueprint Online Tracker before their 1:1. The certificate goes out when all four forms are in the tracker.",
+  "Something leaked or got sent to the wrong person? Tell Keira right away. We have 72 hours to report it.",
+];
 
 /* the course tables aren't on realtime: ask again when the page opens, and every minute while it's open */
 let pulled = 0, ticker = 0;
@@ -52,23 +45,17 @@ export default {
     const orders = S.data.course_orders || [], learners = S.data.learners || [];
     const pending = orders.filter((o) => o.status === "pending");
     const rows = [...pending, ...orders.filter((o) => o.status !== "pending")];
-    const total = (st) => orders.filter((o) => o.status === st).reduce((t, o) => t + o.amount, 0);
-    const paying = new Set(orders.filter((o) => o.status !== "rejected").map((o) => o.learner_id)).size;
-    const workshop = learners.filter((l) => l.via === "workshop").length;
     const list = learners.filter((l) => !f.q || `${l.name} ${l.email}`.toLowerCase().includes(f.q.toLowerCase()));
-    const p = prices();
-    // sessions opened on a receipt nobody has checked yet
-    const waiting = new Set(pending.flatMap((o) => o.sessions.map((n) => `${o.learner_id}:${n}`)));
-    const work = new Map();
-    for (const w of S.data.course_work || []) work.set(`${w.learner_id}:${w.session}`, w);
+    const done = new Map(); // learner id → modules finished
+    for (const w of S.data.course_work || []) if (w.completed_at) done.set(w.learner_id, [...(done.get(w.learner_id) || []), w.session]);
+    const finished = (n) => learners.filter((l) => (done.get(l.id) || []).includes(n)).length;
+    const started = learners.filter((l) => l.last_seen).length;
 
     root.innerHTML = `
       <header class="ph">
         <div>
           <h1 class="ph__title">Course</h1>
-          <p class="ph__sub">${pending.length
-            ? `<b>${pending.length} receipt${pending.length > 1 ? "s" : ""} to check.</b> ${p.instant ? "The sessions are already open for them, so check GCash for the amount and reference number, then click Paid or Not paid. Not paid locks those sessions again and emails them." : "They’re waiting for their sessions, so check GCash for the amount and reference number, then click Paid (that opens them) or Not paid (that emails them)."}`
-            : `Blueprint Online, the self-paced course at <a href="/learn" target="_blank" rel="noopener">/learn</a>. Session 1 is free. When someone pays for Session 2, 3 or 4, their GCash receipt shows up here with a Check receipt button.`}</p>
+          <p class="ph__sub">Blueprint Online at <a href="/learn" target="_blank" rel="noopener">/learn</a>. Buyers get in through the link in their “You’re in” email. They do the four modules in order, and finishing Module 4 shows them the 1:1 booking link.</p>
         </div>
         <div class="ph__actions">
           <a class="btn btn--ghost" href="/learn" target="_blank" rel="noopener" title="The course page learners see">${icon("external")} Open /learn</a>
@@ -77,43 +64,39 @@ export default {
       </header>
 
       <details class="more" id="rulesFold" ${folds.rules ? "open" : ""}>
-        <summary>${icon("lock")} Private: how to handle learners and receipts${icon("down", "fold__chev")}</summary>
-        <ul class="rules">${RULES().map((r) => `<li>${r}</li>`).join("")}</ul>
+        <summary>${icon("lock")} Private: how to handle learners${icon("down", "fold__chev")}</summary>
+        <ul class="rules">${RULES.map((r) => `<li>${r}</li>`).join("")}</ul>
       </details>
 
       ${S.owner ? setup() : ""}
 
       <section class="stats">
-        <div class="stat"><span class="stat__k">Learners</span><span class="stat__n"><b data-count="${learners.length}">0</b></span><span class="stat__sub">Signed up at /learn</span></div>
-        <div class="stat"><span class="stat__k">Paying</span><span class="stat__n"><b data-count="${paying}">0</b>${learners.length ? `<small>of ${learners.length}</small>` : ""}</span><span class="stat__sub">${workshop ? `Plus ${workshop} through a workshop ticket` : "Bought Session 2, 3 or 4"}</span></div>
-        <div class="stat"><span class="stat__k">Revenue</span><span class="stat__n"><b data-count="${total("paid")}" data-fmt="peso">₱0</b><small>checked</small></span><span class="stat__sub">${peso(total("pending"))} waiting to be checked</span></div>
-        <div class="stat ${pending.length ? "stat--warn" : ""}"><span class="stat__k">To check</span><span class="stat__n"><b data-count="${pending.length}">0</b><small>receipt${pending.length === 1 ? "" : "s"}</small></span><span class="stat__sub">${pending.length ? "Click Check receipt below" : "All caught up"}</span></div>
+        <div class="stat"><span class="stat__k">Learners</span><span class="stat__n"><b data-count="${learners.length}">0</b></span><span class="stat__sub">${started} opened the course</span></div>
+        <div class="stat"><span class="stat__k">Module 1 done</span><span class="stat__n"><b data-count="${finished(1)}">0</b>${learners.length ? `<small>of ${learners.length}</small>` : ""}</span><span class="stat__sub">Sent the Sino Ka? form</span></div>
+        <div class="stat"><span class="stat__k">Module 2 done</span><span class="stat__n"><b data-count="${finished(2)}">0</b></span><span class="stat__sub">Résumé and LinkedIn</span></div>
+        <div class="stat"><span class="stat__k">Ready for the 1:1</span><span class="stat__n"><b data-count="${finished(4)}">0</b></span><span class="stat__sub">Finished all four: booking link and certificate</span></div>
       </section>
 
-      <section class="card">
-        <div class="ch"><h3>${icon("wallet")} Orders</h3><span class="muted">${orders.length ? `${pending.length} to check · ${orders.length} in all` : "GCash receipts for Sessions 2 to 4"}</span></div>
-        ${rows.length ? `<div class="tablewrap"><table class="table table--regs table--course">
+      ${rows.length ? `<section class="card">
+        <div class="ch"><h3>${icon("wallet")} Old course orders</h3><span class="muted">${pending.length} to check · from before the ₱349 plan</span></div>
+        <div class="tablewrap"><table class="table table--regs table--course">
           <thead><tr><th>Order</th><th>Learner</th><th>What</th><th class="r">Amount</th><th>Status</th><th>When</th></tr></thead>
-          <tbody id="orders">${rows.map((o, i) => orderRow(o, i)).join("")}</tbody></table></div>`
-        : empty("No orders yet. When someone pays for Session 2, 3 or 4 and uploads their GCash receipt, it shows up here to check.", "wallet")}
-      </section>
+          <tbody id="orders">${rows.map((o, i) => orderRow(o, i)).join("")}</tbody></table></div>
+      </section>` : ""}
 
       <section class="card">
         <div class="ch ch--tools"><h3>${icon("users")} Learners</h3>
-          ${learners.length ? `<label class="search">${icon("search")}<input id="q" placeholder="Search name or email" value="${esc(f.q)}" /></label><span class="muted">${list.length} of ${learners.length}</span>` : `<span class="muted">Everyone who started at /learn</span>`}</div>
+          ${learners.length ? `<label class="search">${icon("search")}<input id="q" placeholder="Search name or email" value="${esc(f.q)}" /></label><span class="muted">${list.length} of ${learners.length}</span>` : `<span class="muted">Everyone who opened the course</span>`}</div>
         ${list.length ? `<div class="tablewrap"><table class="table table--regs table--course">
-          <thead><tr><th>Name</th><th>Year</th><th>Going for</th><th>Heard from</th><th>Sessions</th><th>Via</th><th>Progress</th><th>Last seen</th></tr></thead>
+          <thead><tr><th>Name</th><th>Year</th><th>How they got it</th><th>Modules done</th><th>Last seen</th></tr></thead>
           <tbody>${list.map((l, i) => `<tr class="in" style="--i:${Math.min(i, 16)}">
             <td><b>${esc(l.name)}</b><small><a href="mailto:${esc(l.email)}">${esc(l.email)}</a></small></td>
             <td class="nowrap">${esc(l.year)}</td>
-            <td>${l.goal ? `<b>${esc(GOAL[l.goal] || l.goal)}</b>` : `<span class="muted">—</span>`}${l.field ? `<small>${esc(FIELD[l.field] || l.field)}</small>` : ""}${l.stage ? `<small>${esc(STAGE[l.stage] || l.stage)}</small>` : ""}</td>
-            <td>${l.heard_from ? esc(l.heard_from) : `<span class="muted">—</span>`}</td>
-            <td>${chips(l, waiting)}</td>
-            <td>${l.via === "workshop" ? `<span class="tag" title="A paid workshop ticket came with it, so every session is open">Workshop</span>` : l.via ? esc(l.via) : `<span class="muted">—</span>`}</td>
-            <td><span class="prog">${progress(l, work)}</span></td>
-            <td class="muted nowrap">${l.last_seen ? esc(fmt(l.last_seen)) : "—"}<small>Joined ${esc(day(l.created_at))}</small></td>
+            <td>${l.via ? `<span class="tag">${esc(VIA[l.via] || l.via)}</span>` : `<span class="muted">—</span>`}</td>
+            <td>${chips(l, done.get(l.id) || [])}</td>
+            <td class="muted nowrap">${l.last_seen ? esc(fmt(l.last_seen)) : "Not yet"}<small>Added ${esc(day(l.created_at))}</small></td>
           </tr>`).join("")}</tbody></table></div>`
-        : empty(learners.length ? "Nobody matches that search." : "Nobody has signed up yet. Learners show up here as soon as they start at /learn.", "users")}
+        : empty(learners.length ? "Nobody matches that search." : "Nobody yet. Learners show up here the first time they open the course from their email.", "users")}
       </section>`;
 
     countUps(root);
@@ -131,6 +114,14 @@ export default {
   },
 };
 
+/* M1 to M4: done ones filled in their module colour, the rest grey */
+function chips(l, doneNs) {
+  return `<span class="sess">${SESSIONS.map((n) => {
+    const on = doneNs.includes(n);
+    return `<span class="tag ${on ? `tag--s${n}` : "is-off"}" title="Module ${n}: ${on ? "form sent" : "not yet"}">M${n}${on ? " ✓" : ""}</span>`;
+  }).join("")}</span>`;
+}
+
 function orderRow(o, i) {
   const l = learnerOf(o);
   const checked = o.status !== "pending" && o.checked_at ? `<small>${esc(o.checked_by || "Checked")} · ${esc(day(o.checked_at))}</small>` : "";
@@ -144,27 +135,6 @@ function orderRow(o, i) {
     <td class="st"><span class="spill spill--${o.status}">${STATUS[o.status] || esc(o.status)}</span>${checked}${o.status === "rejected" && o.note ? `<small title="Sent to them">“${esc(o.note)}”</small>` : ""}</td>
     <td class="muted nowrap">${esc(fmt(o.created_at))}</td>
   </tr>`;
-}
-
-/* S1 to S4: open ones in their session colour, locked ones grey, opened on an unchecked receipt outlined */
-function chips(l, waiting) {
-  return `<span class="sess">${SESSIONS.map((n) => {
-    const on = l.unlocked.includes(n), wait = on && waiting.has(`${l.id}:${n}`);
-    const why = !on ? "locked" : n === 1 ? "free" : l.via === "workshop" ? "came with their workshop ticket" : wait ? "open, receipt not checked yet" : "open, paid";
-    return `<span class="tag ${on ? `tag--s${n}` : "is-off"} ${wait ? "is-wait" : ""}" title="Session ${n}: ${why}">S${n}</span>`;
-  }).join("")}</span>`;
-}
-
-/* steps done out of the session's steps ("S1 4/5"), ✓ once they finished it */
-function progress(l, work) {
-  const shown = SESSIONS.filter((n) => l.unlocked.includes(n) || work.has(`${l.id}:${n}`));
-  return shown.map((n) => {
-    const w = work.get(`${l.id}:${n}`);
-    const ids = ((S.data.course_sessions || []).find((s) => s.n === n)?.steps || []).map((st) => st.id);
-    const done = (w?.done || []).filter((id) => !ids.length || ids.includes(id)).length;
-    const title = w?.completed_at ? `Finished ${fmt(w.completed_at)}` : w ? `Last saved ${fmt(w.updated_at)}` : "Not started";
-    return `<span class="${w?.completed_at ? "done" : w ? "" : "muted"}" title="${esc(title)}">S${n} ${ids.length ? `${done}/${ids.length}` : `${done} done`}${w?.completed_at ? " ✓" : ""}</span>`;
-  }).join(`<i aria-hidden="true">·</i>`);
 }
 
 /* the receipt next to the Paid / Not paid buttons, so checking and deciding is one place */
@@ -224,25 +194,24 @@ function showOrder(o) {
   });
 }
 
-/* ---------- owner: prices, when sessions open, and the videos ---------- */
+/* ---------- owner: each module's links, and the 1:1 booking link ---------- */
+const LINKS = [["video_url", "Video", "https://youtu.be/…", "Unlisted YouTube (or Google Drive / Vimeo). Shows at the top of the module."],
+  ["slides_url", "Slides", "https://…", "The deck, shown until the video is up (Canva, Google Slides or a PDF link)."],
+  ["form_url", "Google Form", "https://forms.gle/…", "The worksheet. The module page’s main button opens it."]];
 function setup() {
-  const p = prices(), rows = S.data.course_sessions || [];
-  const vids = rows.filter((s) => s.video_url).length;
+  const c = setting("course"), rows = S.data.course_sessions || [];
+  const count = (k) => rows.filter((s) => s[k]).length;
   return `<details class="card fold cset" id="setupFold" ${folds.setup ? "open" : ""}>
-    <summary class="ch ch--pad"><h3>${icon("globe")} Course setup</h3><span class="muted">${peso(p.single)} a session · ${peso(p.bundle)} all three · ${vids} of 4 videos</span>${icon("down", "fold__chev")}</summary>
+    <summary class="ch ch--pad"><h3>${icon("globe")} Course setup</h3><span class="muted">${count("form_url")} of 4 forms · ${count("video_url")} of 4 videos · ${c.booking ? "booking link set" : "no booking link yet"}</span>${icon("down", "fold__chev")}</summary>
     <div class="fold__body payset">
-      <label class="payset__f"><span>Price per session <small>Session 2, 3 or 4 on its own, in pesos</small></span>
-        <input class="cell-in" id="cSingle" type="number" min="1" max="10000" step="1" inputmode="numeric" value="${p.single}" /></label>
-      <label class="payset__f"><span>All three sessions <small>Sessions 2 to 4 together. Someone who already has one pays whichever is less: this or the singles.</small></span>
-        <input class="cell-in" id="cBundle" type="number" min="1" max="10000" step="1" inputmode="numeric" value="${p.bundle}" /></label>
-      <div class="payset__f cset__wide"><label class="switch"><input type="checkbox" id="cInstant" ${p.instant ? "checked" : ""} /><span></span>Open sessions as soon as they upload a receipt</label>
-        <small>Off: they wait until someone here clicks Paid. New prices and this switch apply to new orders.</small></div>
-      <div class="payset__f cset__wide"><span>Videos</span>
-        <div class="cset__vids">${SESSIONS.map((n) => {
-          const s = rows.find((x) => x.n === n);
-          return `<label><small>Session ${n}${s?.title ? `: ${esc(s.title)}` : ""}</small><input class="cell-in" data-vid="${n}" type="url" maxlength="300" value="${esc(s?.video_url || "")}" placeholder="${s ? "https://youtu.be/…" : "Lesson isn’t in the database yet"}" ${s ? "" : "disabled"} /></label>`;
-        }).join("")}</div>
-        <small>Paste an unlisted YouTube link (or Google Drive / Vimeo). It shows at the top of that session’s briefing.</small></div>
+      ${SESSIONS.map((n) => {
+        const s = rows.find((x) => x.n === n);
+        return `<div class="payset__f cset__wide"><span>Module ${n}${s?.title ? `: ${esc(s.title)}` : ""}${s?.minutes ? ` <small>${s.minutes} min</small>` : ""}</span>
+          <div class="cset__vids">${LINKS.map(([k, label, ph]) => `<label><small>${label}</small><input class="cell-in" data-link="${k}" data-n="${n}" type="url" maxlength="300" value="${esc(s?.[k] || "")}" placeholder="${ph}" ${s ? "" : "disabled"} /></label>`).join("")}</div></div>`;
+      }).join("")}
+      <small class="cset__wide">${LINKS.map(([, l, , help]) => `<b>${l}:</b> ${help}`).join(" ")} Only buyers whose module is open get these links.</small>
+      <label class="payset__f cset__wide"><span>1:1 booking link <small>Shown once a learner finishes Module 4 (Google Calendar booking page, Calendly…). Calls run until Dec 5.</small></span>
+        <input class="cell-in" id="cBooking" type="url" maxlength="300" value="${esc(c.booking || "")}" placeholder="https://calendar.app.google/…" /></label>
     </div>
   </details>`;
 }
@@ -250,21 +219,17 @@ function setup() {
 function wireSetup(root) {
   if (!S.owner) return;
   root.querySelector("#setupFold")?.addEventListener("toggle", (e) => (folds.setup = e.target.open));
-  const save = async (patch, msg) => {
-    try { await saveSetting("course", { ...setting("course"), ...patch }); toast(msg); } catch { toast("Couldn’t save.", "bad"); }
-  };
-  const price = (key) => (e) => {
-    const n = Math.round(Number(e.target.value));
-    if (!(n >= 1 && n <= 10000)) { e.target.value = prices()[key]; return toast("Use an amount from ₱1 to ₱10,000.", "bad"); }
-    save({ [key]: n }, "Saved. New orders use it.");
-  };
-  root.querySelector("#cSingle")?.addEventListener("change", price("single"));
-  root.querySelector("#cBundle")?.addEventListener("change", price("bundle"));
-  root.querySelector("#cInstant")?.addEventListener("change", (e) => save({ instant: e.target.checked }, e.target.checked ? "Saved. Sessions open as soon as a receipt comes in." : "Saved. Sessions open when someone here clicks Paid."));
-  root.querySelectorAll("[data-vid]").forEach((inp) => inp.addEventListener("change", async () => {
-    const n = Number(inp.dataset.vid), url = inp.value.trim();
-    if (url && !/^https:\/\/\S+$/i.test(url)) return toast("Paste a link that starts with https://", "bad");
-    try { await update("course_sessions", n, { video_url: url }); toast(url ? `Saved. Session ${n} shows it now.` : `Video removed from Session ${n}.`); }
+  const okUrl = (url) => !url || /^https:\/\/\S+$/i.test(url);
+  root.querySelector("#cBooking")?.addEventListener("change", async (e) => {
+    const url = e.target.value.trim();
+    if (!okUrl(url)) return toast("Paste a link that starts with https://", "bad");
+    try { await saveSetting("course", { ...setting("course"), booking: url }); toast(url ? "Saved. Learners who finish Module 4 see it now." : "Booking link removed."); }
+    catch { toast("Couldn’t save.", "bad"); }
+  });
+  root.querySelectorAll("[data-link]").forEach((inp) => inp.addEventListener("change", async () => {
+    const n = Number(inp.dataset.n), k = inp.dataset.link, url = inp.value.trim(), what = LINKS.find(([x]) => x === k)[1];
+    if (!okUrl(url)) return toast("Paste a link that starts with https://", "bad");
+    try { await update("course_sessions", n, { [k]: url }); toast(url ? `Saved. Module ${n} shows the ${what.toLowerCase()} now.` : `${what} removed from Module ${n}.`); }
     catch { toast("Couldn’t save.", "bad"); }
   }));
 }

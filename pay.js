@@ -1,5 +1,6 @@
 /* /pay?t=...: their private payment page (the link is in the sign-up email).
-   Shows our GCash QR, then they upload a screenshot of the receipt (api/pay.js saves it).
+   Blueprint Online (₱349, from the Nov 11 night plan): our GCash QR, then they type the GCash reference number
+   (a screenshot is optional). Older workshop tickets: the screenshot, as before (api/pay.js saves it).
    Single Session people can move up to the Full Pass here: before paying it just switches the ticket;
    after paying they pay the difference (₱500 after one session, ₱201 after two) with the same QR. */
 (() => {
@@ -9,7 +10,9 @@
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const peso = (n) => `₱${Number(n).toLocaleString("en-PH")}`;
   const when = (iso) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-  let image = "", topup = false;
+  let image = "", topup = false, online = false;
+  const refIn = $("f-ref");
+  const refOk = (v) => /^\d{6,20}$/.test(v.replace(/[\s-]/g, ""));
 
   const done = (title, text) => {
     $("loading").hidden = form.hidden = true;
@@ -17,11 +20,16 @@
     if (text) $("doneText").textContent = text;
     $("payDone").hidden = false;
   };
+  const youreIn = (name) => {
+    done(`You’re in, ${name}.`, online ? "We emailed you the course link. Check your inbox (and Spam). It signs you straight in." : "Your slot is confirmed. Check your email for the schedule and pre-work.");
+    if (online) $("toCourse").hidden = false;
+  };
   const MSG = {
     nomatch: "This payment link doesn’t work. Open the button in your Blueprint sign-up email (check spam too). Lost it? Register again with the same email and we’ll resend it.",
     cancelled: "This sign-up was cancelled. Ask us on the site (ateneoblueprint.vercel.app/#ask) and we’ll sort it out.",
     image: "That file didn’t work. Try a screenshot (PNG or JPG) of your GCash receipt.",
     big: "That image is too big. Try a plain screenshot instead.",
+    ref: "That reference number doesn’t look right. It’s the long number on your GCash receipt (Ref No.).",
     checking: "We’re still checking your receipt. Once it’s confirmed, you can upgrade here.",
     noupgrade: "This ticket can’t be upgraded here. Ask us on the site and we’ll sort it out.",
   };
@@ -60,16 +68,25 @@
       const res = await fetch(`/api/pay?t=${encodeURIComponent(t)}`);
       const p = await res.json().catch(() => ({}));
       if (!res.ok) return done("Use the link in your email.", MSG[p.error] || "Something went wrong. Please refresh the page.");
-      if (p.status === "paid" && !p.topup) {
-        done(`You’re in, ${p.name}.`, "Your slot is confirmed. Check your email for the schedule and pre-work.");
-        return offer(p, (b) => $("payDone").querySelector(".btn").before(b));
+      online = !!p.online;
+      if ((p.status === "paid" || p.status === "refunded") && !p.topup) {
+        youreIn(p.name);
+        return online ? null : offer(p, (b) => $("payDone").querySelector(".btn").before(b));
       }
       if (p.status === "waitlist") return done(`You’re on the waitlist, ${p.name}.`, "All slots were taken before your payment came in. We’ll email you if one opens up, or refund you.");
       if (p.status === "cancelled") return done("This sign-up was cancelled.", MSG.cancelled);
 
       $("hello").innerHTML = p.topup
         ? `Hi ${esc(p.name)}! Pay ${esc(peso(p.price))} more and you’re in for all four sessions. Your sign-up number is <span class="code">${esc(p.code)}</span>.`
-        : `Hi ${esc(p.name)}! Your sign-up number is <span class="code">${esc(p.code)}</span>.`;
+        : `Hi ${esc(p.name)}! Your sign-up number is <span class="code">${esc(p.code)}</span>.${p.gift ? ` We’ll send the course to <b>${esc(p.gift.name)}</b> (${esc(p.gift.email)}) once your payment is in.` : ""}`;
+      if (!online) {
+        // last week's tickets: the screenshot is the proof, as before
+        $("payTitle").innerHTML = `Lock your <span class="grad">slot.</span>`;
+        $("step2k").textContent = "2. Upload your receipt";
+        $("refField").hidden = $("shotSum").hidden = true;
+        $("shotBox").open = true;
+      }
+      if (p.ref) refIn.value = p.ref;
       if (p.topup) $("payTitle").innerHTML = `Move up to the <span class="grad">Full Pass.</span>`;
       $("amount").textContent = peso(p.price);
       $("payFor").textContent = p.for ? `for ${p.for}` : "";
@@ -87,7 +104,9 @@
   })();
 
   function sentNote(at) {
-    $("sent").innerHTML = `We got your receipt (${when(at)}). We’ll email ${topup ? "you when you’re on the Full Pass" : "your slot confirmation"} within 24 hours. Wrong screenshot? Upload a new one below.`;
+    $("sent").innerHTML = online
+      ? `We got your reference number (${when(at)}). We’ll email the course link within 1 hour (8 AM to 10 PM). Typed it wrong? Fix it below and send again.`
+      : `We got your receipt (${when(at)}). We’ll email ${topup ? "you when you’re on the Full Pass" : "your slot confirmation"} within 24 hours. Wrong screenshot? Upload a new one below.`;
     $("sent").hidden = false;
   }
 
@@ -129,17 +148,20 @@
   /* ---------- send it ---------- */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!image) { err.textContent = "Choose a screenshot of your GCash receipt first."; err.hidden = false; return; }
+    const ref = refIn.value.trim();
+    if (online && !refOk(ref)) { err.textContent = ref ? MSG.ref : "Type the reference number from your GCash receipt first."; err.hidden = false; refIn.focus(); return; }
+    if (!online && !image) { err.textContent = "Choose a screenshot of your GCash receipt first."; err.hidden = false; return; }
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");
     btn.disabled = true;
     err.hidden = true;
     try {
-      const res = await fetch("/api/pay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t, image }) });
+      const res = await fetch("/api/pay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(online ? { t, ref, ...(image ? { image } : {}) } : { t, image }) });
       const out = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(MSG[out.error] || "Something went wrong. Please check your connection and try again.");
-      if (out.status === "paid" && !out.topup) return done(`You’re already in, ${out.name}.`, "Your slot is confirmed. Check your email for the schedule and pre-work.");
-      done(`Got it, ${out.name}.`, out.topup ? "We’ll check your receipt and email you within 24 hours, once you’re on the Full Pass." : "");
+      if (out.status === "paid" && !out.topup) return youreIn(out.name);
+      done(`Got it, ${out.name}.`, online ? "We’ll check your payment and email the course link within 1 hour (8 AM to 10 PM)."
+        : out.topup ? "We’ll check your receipt and email you within 24 hours, once you’re on the Full Pass." : "We’ll check your receipt and email your slot confirmation within 24 hours.");
     } catch (x) {
       err.textContent = x.message;
       err.hidden = false;

@@ -183,64 +183,13 @@
   const qas = document.querySelectorAll(".qa");
   qas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) qas.forEach((o) => o !== d && (o.open = false)); }));
 
-  /* ---------- Tickets ----------
-     Session 1 free (from Nov 10), Single Session for Sessions 2 to 4 with a session picker, Full Pass, or Barkada
-     (three Full Passes, one payer). Every Register button scrolls to the tickets; a ticket button opens the sign-up form.
-     The server works out the amount again (api/_lib.js PRICE). Pilot prices from Nov 7.
-     Each session has a data-start time: once it starts, it can't be picked anymore (the server checks too). */
-  const PRICE = { full: 799, single: 299, barkada: 1999 };
-  const ALL = [1, 2, 3, 4];
-  const peso = (n) => `₱${n.toLocaleString("en-PH")}`;
-  const tickets = document.getElementById("tickets");
-  const picker = document.getElementById("pickSessions");
-  const boxes = [...picker.querySelectorAll("input")];
-  const singleBtn = document.getElementById("singleBtn");
-  const upsell = document.getElementById("upsell");
-  const freeCard = document.getElementById("freeCard");
-  const picked = () => boxes.filter((b) => b.checked).map((b) => Number(b.value));
-  const box = (n) => boxes.find((b) => Number(b.value) === n);
-  const titleOf = (n) => (n === 1 ? "Sino Ka?" : box(n).closest(".slot").querySelector(".slot__t").firstChild.textContent.trim());
-  const dateOf = (n) => (n === 1 ? "Tue, Nov 10" : box(n).closest(".slot").querySelector("small").textContent.split(" · ")[0]);
-  const started = (el) => Date.now() >= Date.parse(el.dataset.start);
-  let ticket = { ticket: "free", sessions: [1] };
-
-  /* sessions that already started: greyed out, can't be picked */
-  boxes.forEach((b) => {
-    const slot = b.closest(".slot");
-    if (!started(slot)) return;
-    b.disabled = true; b.checked = false;
-    slot.classList.add("is-past");
-    slot.querySelector("small").textContent += " · Started";
-  });
-
-  /* Session 1 is free until it starts: the pop-up on every visit, the bar at the bottom, the free card, the hero button */
-  const freeOpen = !started(freeCard);
-  document.documentElement.classList.toggle("free-open", freeOpen);
-  freeCard.hidden = !freeOpen;
-
-  const syncSingle = () => {
-    const s = picked(), n = s.length, cost = n * PRICE.single, diff = PRICE.full - cost;
-    picker.classList.remove("is-invalid");
-    singleBtn.textContent = n === 0 ? "Pick your sessions"
-      : n === boxes.length ? `Get the Full Pass · ${peso(PRICE.full)}`
-      : n === 1 ? `Get Session ${s[0]} · ${peso(cost)}`
-      : `Get ${n} sessions · ${peso(cost)}`;
-    singleBtn.classList.toggle("btn--primary", n > 0);
-    singleBtn.classList.toggle("btn--ghost", n === 0);
-    /* any singles: show how close the Full Pass is (₱500 more after one, ₱201 after two, cheaper with all three) */
-    upsell.hidden = n < 1;
-    upsell.innerHTML = n === boxes.length ? `That’s all three, so it’s the Full Pass: <b>${peso(-diff)} less</b>, and every session.`
-      : n >= 1 ? `Every session for <b>${peso(Math.abs(diff))} ${diff > 0 ? "more" : "less"}</b>. <button class="tix__switch" type="button" data-ticket="full">Get the Full Pass</button>`
-      : "";
-  };
-  picker.addEventListener("change", syncSingle);
-  syncSingle();
-
-  const scrollToTickets = () => tickets.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-  document.querySelectorAll("[data-register]").forEach((b) => b.addEventListener("click", scrollToTickets));
-
-  /* ---------- Registration modal ----------
-     Sends the sign-up to /api/register, which emails the link to their payment page (it has the GCash QR). The team sees it in /admin. */
+  /* ---------- Get Blueprint ----------
+     One product since Nov 11: Blueprint Online, ₱349 (four modules plus a 15-minute 1:1 with Thomas).
+     Every "Get Blueprint" button opens the sign-up form. /api/register saves it (ticket "online"), sets the amount
+     itself, and emails the link to their payment page (GCash QR + reference number). The team sees it in /admin.
+     Deep links: /?get opens the form · ?from=booth picks "Booth" for "How did you hear about Blueprint?" */
+  const qs = new URLSearchParams(location.search);
+  const fromBooth = qs.get("from") === "booth";
   const modal = document.getElementById("modal");
   const form = document.getElementById("regForm");
   const done = document.getElementById("done");
@@ -260,96 +209,48 @@
   };
   mobile.addEventListener("input", checkMobile);
 
-  /* "Session 2: Proof on Paper" / "Sessions 2 and 3" */
-  const sessionsLabel = (s) => (s.length === 1 ? `Session ${s[0]}: ${titleOf(s[0])}` : `Sessions ${s.slice(0, -1).join(", ")} and ${s.at(-1)}`);
-  const amountOf = (t) => (t.ticket === "free" ? 0 : t.ticket === "single" ? t.sessions.length * PRICE.single : PRICE[t.ticket]);
-  const crew = document.getElementById("crewFields");
-  const paintTicket = () => {
-    const full = ticket.ticket === "full", s = ticket.sessions, barkada = ticket.ticket === "barkada", free = ticket.ticket === "free";
-    document.getElementById("mineName").textContent = free ? "Session 1 · Free" : barkada ? "Barkada" : full ? "Full Pass" : s.length === 1 ? "Single Session" : `${s.length} single sessions`;
-    document.getElementById("mineMeta").textContent = barkada ? "Three Full Passes: you and two friends, Nov 10 to 13"
-      : full ? "All four sessions, Nov 10 to 13"
-      : s.map((n) => `Session ${n}: ${titleOf(n)}, ${dateOf(n)}`).join("\n");
-    crew.hidden = !barkada;
-    document.getElementById("minePrice").textContent = free ? "Free" : peso(amountOf(ticket));
-    document.getElementById("regSub").textContent = free
-      ? "It takes a minute. No payment: your seat is saved right away."
-      : "It takes a minute. Then pay by GCash and upload your receipt to lock your slot.";
-    document.getElementById("regFine").textContent = free
-      ? "Free. No GCash, no receipt."
-      : `No payment yet. Right after this form, you pay ${peso(amountOf(ticket))} by GCash.`;
+  /* Buying it for someone else: their name and email, both or neither (the tick box shows the two boxes) */
+  const gift = document.getElementById("f-gift");
+  const giftFields = document.getElementById("giftFields");
+  const giftName = document.getElementById("f-gift-name");
+  const giftEmail = document.getElementById("f-gift-email");
+  const syncGift = () => {
+    giftFields.hidden = !gift.checked;
+    [giftName, giftEmail].forEach((el) => { el.required = gift.checked; });
+    if (gift.checked) setTimeout(() => giftName.focus(), 30);
   };
-  document.getElementById("mineChange").addEventListener("click", () => { modal.close(); scrollToTickets(); });
-  document.getElementById("getRest").addEventListener("click", () => { modal.close(); scrollToTickets(); });
+  gift.addEventListener("change", syncGift);
+  const checkGift = () => {
+    const mine = document.getElementById("f-email").value.trim().toLowerCase();
+    giftEmail.setCustomValidity(gift.checked && giftEmail.value.trim().toLowerCase() === mine ? "Use their own email." : "");
+  };
 
   const openModal = () => {
-    paintTicket();
     form.hidden = false;
     done.hidden = true;
     form.reset();
     form.querySelectorAll(".is-invalid").forEach((f) => f.classList.remove("is-invalid"));
     regError.hidden = true;
+    if (fromBooth) heard.value = "Booth";
     syncOrg();
+    syncGift();
     modal.showModal();
     setTimeout(() => form.querySelector("input")?.focus(), 60);
   };
-  /* ticket buttons anywhere on the page: the cards, the hero, the pop-up, the bar */
-  const freePop = document.getElementById("freePop");
-  const freeBar = document.getElementById("freeBar");
-  document.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-ticket]");
-    if (!b) return;
-    if (b.dataset.ticket === "free") {
-      if (!freeOpen) { scrollToTickets(); return; }
-      if (freePop.open) freePop.close();
-      ticket = { ticket: "free", sessions: [1] };
-      openModal();
-      return;
-    }
-    const s = picked();
-    if (b.dataset.ticket === "single" && !s.length) {
-      picker.classList.add("is-invalid");
-      boxes.find((x) => !x.disabled)?.focus();
-      return;
-    }
-    ticket = b.dataset.ticket === "barkada" ? { ticket: "barkada", sessions: ALL }
-      : b.dataset.ticket === "full" || s.length === boxes.length ? { ticket: "full", sessions: ALL } : { ticket: "single", sessions: s };
-    openModal();
+  document.querySelectorAll("[data-register]").forEach((b) => b.addEventListener("click", openModal));
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal || e.target.closest("[data-close]")) modal.close();
   });
-  [modal, freePop].forEach((m) => m.addEventListener("click", (e) => {
-    if (e.target === m || e.target.closest("[data-close]")) m.close();
-  }));
-  /* after the pop-up closes, the bar at the bottom keeps saying it */
-  freePop.addEventListener("close", () => { freeBar.hidden = !freeOpen; });
+  if (qs.has("get")) openModal();
 
-  if (freeOpen) {
-    const manila = (d) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
-    const today = manila(new Date(freeCard.dataset.start)) === manila(new Date());
-    document.getElementById("freeWhen").textContent = today ? "Today · Tue, Nov 10" : "Tue, Nov 10";
-    document.getElementById("freeBarWhen").textContent = today ? "Today, 5:30 PM" : "Tue, Nov 10, 5:30 PM";
-    /* ?free=1 (the link in our emails) opens the free sign-up form; everyone else gets the pop-up */
-    if (new URLSearchParams(location.search).has("free")) { ticket = { ticket: "free", sessions: [1] }; openModal(); freeBar.hidden = false; }
-    else setTimeout(() => { if (!modal.open) freePop.showModal(); else freeBar.hidden = false; }, reduce ? 0 : 900);
-  }
-
-  /* Barkada: both friends need a name and their own email (not the payer's, not each other's) */
-  const friendEmails = ["f-f1-email", "f-f2-email"].map((id) => document.getElementById(id));
-  const checkFriends = () => {
-    const mine = document.getElementById("f-email").value.trim().toLowerCase();
-    friendEmails.forEach((el, i) => {
-      const v = el.value.trim().toLowerCase(), taken = [mine, ...(i ? [friendEmails[0].value.trim().toLowerCase()] : [])];
-      el.setCustomValidity(v && taken.includes(v) ? "Use their own email." : "");
-    });
-  };
   const validate = () => {
     checkMobile();
-    checkFriends();
-    crew.querySelectorAll("input").forEach((el) => { el.required = !crew.hidden; });
+    checkGift();
     let ok = true;
     form.querySelectorAll(".field:not(.field--optional)").forEach((f) => {
-      if (f.closest("[hidden]")) return; // the Barkada's friends, when it isn't a Barkada
+      if (f.closest("[hidden]")) return; // the gift boxes, when it isn't a gift
       const input = f.querySelector("input, select");
-      const valid = input.checkValidity() && input.value.trim() !== "";
+      const valid = input.checkValidity() && (input.type === "checkbox" || input.value.trim() !== "");
       f.classList.toggle("is-invalid", !valid);
       if (!valid) ok = false;
     });
@@ -375,6 +276,7 @@
     e.preventDefault();
     if (!validate()) { form.querySelector(".is-invalid input, .is-invalid select")?.focus(); return; }
     const data = Object.fromEntries(new FormData(form));
+    const isGift = gift.checked;
     const row = {
       name: data.name.trim(),
       email: data.email.trim().toLowerCase(),
@@ -386,9 +288,9 @@
       consent: true,
       privacy_version: PRIVACY_VERSION,
       website: data.website || "",
-      ticket: ticket.ticket,
-      sessions: ticket.sessions,
-      ...(ticket.ticket === "barkada" ? { friends: [1, 2].map((n) => ({ name: data[`f${n}_name`].trim(), email: data[`f${n}_email`].trim().toLowerCase() })) } : {}),
+      ticket: "online",
+      gift_name: isGift ? data.gift_name.trim() : "",
+      gift_email: isGift ? data.gift_email.trim().toLowerCase() : "",
     };
     const btn = form.querySelector("[type=submit]");
     btn.classList.add("is-loading");
@@ -401,9 +303,11 @@
     } catch (err) {
       console.error(err);
       regError.textContent = err.code === "closed"
-        ? "That session has started, so sign-ups for it are closed. Pick another one."
-        : err.code === "free_not_ready"
-        ? "Online sign-up for the free session isn’t ready yet. Just come: FA Annex 104, 5:30 PM."
+        ? "Sales closed on Sunday, Nov 15 at 10 PM. Questions? Ask us with the form under the FAQ."
+        : err.code === "busy"
+        ? "Lots of people are signing up right now. Try again in a minute."
+        : err.code === "invalid"
+        ? "Something’s missing. Check each box and try again."
         : "Something went wrong. Please check your connection and try again.";
       regError.hidden = false;
       return;
@@ -411,39 +315,23 @@
       btn.classList.remove("is-loading");
       btn.disabled = false;
     }
-    document.getElementById("regName").textContent = row.name;
-    document.getElementById("regMeta").textContent = `${row.course} · ${row.year}`;
-    /* free Session 1: nothing to pay, so no steps. The next thing to sell is Sessions 2 to 4. */
-    const free = ticket.ticket === "free", wait = out.status === "waitlist";
-    document.getElementById("nextSteps").hidden = free;
-    document.getElementById("getRest").hidden = !free;
-    document.getElementById("regStatus").textContent = !free ? "Status · Registered, awaiting payment"
-      : out.again ? "Status · Signed up before" : wait ? "Status · Next in line" : "Status · Seat saved · Free";
+    document.getElementById("regName").textContent = isGift ? `For ${row.gift_name}` : row.name;
+    document.getElementById("regMeta").textContent = isGift ? `From ${row.name}` : `${row.course} · ${row.year}`;
+    document.getElementById("regStatus").textContent = out.pay ? "Status · Registered, awaiting payment" : "Status · Signed up before";
     /* signed up before with this email: the server only re-sends the email, so point them there */
     const payNow = document.getElementById("payNow");
     payNow.hidden = !out.pay;
     if (out.pay) payNow.href = out.pay;
-    /* a new sign-up: the amount the server saved. Signed up before: their first ticket stands (it's on their payment page) */
-    document.getElementById("regTicket").textContent = `Blueprint · ${free ? "Session 1 · Free" : out.pay ? (ticket.ticket === "barkada" ? "Barkada of 3" : ticket.ticket === "full" ? "Full Pass" : sessionsLabel(ticket.sessions).replace(/:.*/, "")) : "Sign-up"}`;
-    document.getElementById("stepPay").innerHTML = out.pay
-      ? `<b>Pay ${peso(out.amount || amountOf(ticket))} by GCash</b> using the QR on your payment page.`
-      : "<b>Pay by GCash</b> using the QR on your payment page. It shows your ticket and amount.";
-    document.getElementById("doneTitle").textContent = free
-      ? out.has1 ? "You already have Session 1." : out.again ? "You’ve signed up before." : wait ? "Session 1 is full." : "You’re in. It’s free."
-      : out.pay ? "You’re on the list." : "You’ve signed up before.";
-    document.getElementById("doneText").textContent = free
-      ? out.has1 ? "It’s part of the ticket you signed up for. See you there!"
-        : out.again ? `We emailed your Session 1 details again to ${row.email}.`
-        : wait ? "Come anyway: if someone doesn’t show up, their seat is yours. We emailed you the details."
-        : `Your seat in Session 1 is saved. We emailed you the details. Liked it? Sessions 2 to 4 are ${peso(PRICE.single)} each.`
-      : out.pay
-      ? "Your slot isn’t locked until you pay. Three steps:"
+    document.getElementById("stepAccess").innerHTML = isGift
+      ? `<b>We email the access link to ${row.gift_name.replace(/[&<>"']/g, "")}</b> within 1 hour (8 AM to 10 PM).`
+      : "<b>Get your access link by email</b> within 1 hour (8 AM to 10 PM).";
+    document.getElementById("doneTitle").textContent = out.pay ? "Almost there." : "You’ve signed up before.";
+    document.getElementById("doneText").textContent = out.pay
+      ? "Three steps:"
       : `We emailed your payment link again to ${row.email}. Open it, then:`;
-    document.getElementById("doneFine").textContent = free
-      ? "Can’t find the email? Check spam. Questions? Ask us with the form under the FAQ."
-      : out.pay
-      ? "We also emailed you this link, so you can pay later. Can’t find the email? Check spam, or register again with the same email and we’ll resend it."
-      : "Not in your inbox? Check spam. We resend it at most every 10 minutes, so wait a bit before trying again. Still nothing, or want to switch tickets? Ask us with the form under the FAQ.";
+    document.getElementById("doneFine").textContent = out.pay
+      ? "We also emailed you this link, so you can pay later. Can’t find the email? Check spam, or fill in the form again with the same email and we’ll resend it."
+      : "Not in your inbox? Check spam. We resend it at most every 10 minutes, so wait a bit before trying again. Already paid? Your access link comes by email within 1 hour (8 AM to 10 PM).";
     form.hidden = true;
     done.hidden = false;
   });

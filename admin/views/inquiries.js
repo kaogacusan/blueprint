@@ -1,34 +1,39 @@
-/* Sign-ups: everyone who registered on the site.
+/* Sign-ups: everyone who registered on the site. Since the Nov 11 night plan that's Blueprint Online (₱349, no seat limit):
+   they type their GCash reference number on /pay, the team finds it in GCash and clicks Paid, which emails the course link
+   (to the gift's recipient if it's a gift). "Refunded, free access" is for last week's workshop buyers: it emails them the course free.
+   Before that:
    They pay by GCash and upload a screenshot of the receipt on their own /pay link; anyone on the team opens it,
    checks GCash and clicks Paid, which emails the slot confirmation (api/signups.js). Notes, downloading, deleting and the payment setup stay with the owner.
    The rules box matches what privacy.html promises sign-ups. */
-import { S, update, remove, setting, saveSetting, setRegStatus, signupAction, freeNews, eraseRegistrations, receipt, accessLog } from "/admin/store.js";
+import { S, update, remove, setting, saveSetting, setRegStatus, signupAction, eraseRegistrations, receipt, accessLog } from "/admin/store.js";
 import { supa } from "/admin/supa.js";
 import { esc, icon, copy, toast, download, confirmBox, countUps, todayISO, peso, openDrawer, closeDrawer } from "/admin/lib.js";
 import { empty } from "/admin/ui.js";
 
-const STATUSES = [["registered", "Registered"], ["paid", "Paid"], ["waitlist", "Waitlist"], ["cancelled", "Cancelled"]];
-const HELP = { registered: "Signed up, waiting to pay", paid: "Seat confirmed", waitlist: "After the first paid seats", cancelled: "Not coming" };
+const STATUSES = [["registered", "Registered"], ["paid", "Paid"], ["refunded", "Refunded, free access"], ["cancelled", "Cancelled"], ["waitlist", "Waitlist"]];
+const HELP = { registered: "Signed up, waiting to pay", paid: "Has the course", refunded: "Last week’s buyers, free", waitlist: "Old workshop seats", cancelled: "Not buying" };
+const BREAK_EVEN = 14; // Thomas's doc 00: 14 × ₱349 covers the ₱4,650 spent on materials
 const f = { q: "", status: "" };
 const fmt = (iso) => new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const label = (k) => (STATUSES.find(([s]) => s === k) || [, k])[1];
 /* their ticket (migrations 010, 011): "Full Pass", "Single · S2, S3", or "Barkada · 3 Full Passes" */
 const ALL = [1, 2, 3, 4];
 const sessionsOf = (r) => (r.ticket === "single" || r.ticket === "free" ? r.sessions || [] : ALL);
-const ticketOf = (r) => (r.ticket === "single" || r.ticket === "free" ? `${r.ticket === "free" ? "Free" : "Single"} · ${sessionsOf(r).map((n) => `S${n}`).join(", ")}` : r.ticket === "barkada" ? "Barkada · 3 Full Passes" : "Full Pass");
+const ticketOf = (r) => (r.ticket === "online" ? "Blueprint Online" : r.ticket === "single" || r.ticket === "free" ? `${r.ticket === "free" ? "Free" : "Single"} · ${sessionsOf(r).map((n) => `S${n}`).join(", ")}` : r.ticket === "barkada" ? "Barkada · 3 Full Passes" : "Full Pass");
 const friendsOf = (r) => (r.friends || []).map((x) => x.name).filter(Boolean);
 /* seats are per session: a Full Pass takes one in all four, a Barkada three (same count as api/signups.js) */
 const seatsOf = (r) => (r.ticket === "barkada" ? 3 : 1);
-const seatsTaken = (regs) => ALL.map((n) => regs.filter((r) => r.status === "paid" && sessionsOf(r).includes(n)).reduce((t, r) => t + seatsOf(r), 0));
+
 /* pilot prices (Nov 7, api/_lib.js PRICE): every amount that can show up in GCash */
-const AMOUNTS = [["₱299", "1 session"], ["₱598", "2 sessions"], ["₱799", "Full Pass"], ["₱1,999", "Barkada of 3"], ["₱500", "upgrade after 1 session"], ["₱201", "upgrade after 2 sessions"]];
+const AMOUNTS = [["₱349", "Blueprint Online"], ["₱299", "old: 1 session"], ["₱598", "2 sessions"], ["₱799", "Full Pass"], ["₱1,999", "Barkada of 3"], ["₱500", "upgrade after 1 session"], ["₱201", "upgrade after 2 sessions"]];
 const amountsLine = AMOUNTS.map(([a, w]) => `<b>${a}</b> ${w}`).join(" · ");
 const RULES = [
   "Only use these details to run Blueprint.",
   "Emailing more than one person? Put the emails in <b>BCC</b>.",
   "No screenshots or copies in group chats. Send people here instead.",
-  "Before clicking Paid, open their receipt and find the same payment in GCash (Transactions): same amount, same reference number. Paid emails them right away.",
-  `Amounts you’ll see in GCash: ${amountsLine}. Anything else, check their ticket before clicking Paid.`,
+  "Before clicking Paid, find their reference number in GCash (Transactions). The amount must be ₱349. Paid emails them the course link right away.",
+  "Then add a row to the Buyers tab of the Blueprint Online Tracker. At the booth, also post their name and a screenshot of the payment in the GC.",
+  `Amounts you might see in GCash: ${amountsLine}. Anything else, check before clicking Paid.`,
   "Receipts stay here. Don’t download them or send them to chats. They’re stored encrypted, and each time someone opens one it’s logged.",
   "Questions from participants: answer them on the Questions page, not from your own email, DMs or group chats.",
   "Something leaked or got sent to the wrong person? Tell Keira right away. We have 72 hours to report it.",
@@ -41,18 +46,17 @@ export default {
     const regs = S.data.registrations || [];
     const list = regs.filter((r) => (!f.status || r.status === f.status) && (!f.q || [r.name, r.email, r.mobile, r.course, r.year, r.heard_from, r.heard_org, r.notes, ticketOf(r), ...friendsOf(r)].join(" ").toLowerCase().includes(f.q.toLowerCase())));
     const count = (s) => regs.filter((r) => r.status === s).length;
-    const seats = setting("costing").max || 20;
-    const taken = seatsTaken(regs), fullest = Math.max(...taken);
     const checking = regs.filter(toCheck);
+    const paidOnline = regs.filter((r) => r.ticket === "online" && r.status === "paid").length;
+    const shown = STATUSES.filter(([k]) => k !== "waitlist" || count(k));
 
     root.innerHTML = `
       <header class="ph">
         <div>
           <h1 class="ph__title">Sign-ups</h1>
-          <p class="ph__sub">${checking.length ? `<b>${checking.length} sent a receipt.</b> Click Check receipt, find the payment in GCash, then click Paid. That emails their slot confirmation and pre-work.` : `Everyone who registered on the site. When someone uploads their GCash receipt, it shows here with a Check receipt button.`} Each session has ${seats} seats, and they go to whoever pays first. A Full Pass takes a seat in all four, a Barkada three in all four. Session 1 is free: a free sign-up gets its seat right away.</p>
+          <p class="ph__sub">${checking.length ? `<b>${checking.length} to check.</b> Find their reference number in GCash (₱349), then click Paid. That emails them the course link.` : `Everyone who registered for Blueprint Online. When someone types their GCash reference number, it shows here with a Paid button.`} Send access within 1 hour, 8 AM to 10 PM. No limit on buyers; sales close Sun Nov 15, 10 PM.</p>
         </div>
         <div class="ph__actions">
-          <button class="btn btn--primary" id="freeNews" title="Email everyone who signed up that Session 1 is free. Each person gets it once.">${icon("send")} Email: Session 1 is free</button>
           <button class="btn btn--ghost" id="copyEmails" title="Copy the emails shown below, to paste in BCC">${icon("copy")} Copy emails</button>
           ${S.owner ? `<button class="btn btn--ghost" id="csv" title="Download the list below as a spreadsheet">${icon("download")} Download</button>` : ""}
         </div>
@@ -70,13 +74,12 @@ export default {
       ${S.owner ? paySetup() : ""}
 
       <section class="stats">
-        ${STATUSES.map(([k, l]) => `<button class="stat ${f.status === k ? "is-on" : ""}" data-k="${k}">
+        ${shown.map(([k, l]) => `<button class="stat ${f.status === k ? "is-on" : ""}" data-k="${k}">
           <span class="stat__k"><i class="sdot sdot--${k}"></i>${l}</span>
-          <span class="stat__n"><b data-count="${count(k)}">0</b>${k === "paid" ? `<small>fullest session ${fullest} of ${seats}</small>` : ""}</span>
-          ${k === "paid" ? `<i class="meter" title="Seats taken: ${taken.map((t, i) => `S${i + 1} ${t}/${seats}`).join(", ")}"><i style="--w:${Math.min(100, (fullest / seats) * 100)}%"></i></i>` : `<span class="stat__sub">${HELP[k]}</span>`}
+          <span class="stat__n"><b data-count="${count(k)}">0</b>${k === "paid" ? `<small>${paidOnline} online of ${BREAK_EVEN} to break even</small>` : ""}</span>
+          ${k === "paid" ? `<i class="meter" title="Blueprint Online paid: ${paidOnline} of ${BREAK_EVEN}"><i style="--w:${Math.min(100, (paidOnline / BREAK_EVEN) * 100)}%"></i></i>` : `<span class="stat__sub">${HELP[k]}</span>`}
         </button>`).join("")}
       </section>
-      <p class="seatline">Seats taken (paid): ${taken.map((t, i) => `<span class="${t >= seats ? "bad" : ""}">S${i + 1} <b>${t}</b>/${seats}</span>`).join("")}</p>
 
       <div class="card filters">
         <label class="search">${icon("search")}<input id="q" placeholder="Search name, email, course, org" value="${esc(f.q)}" /></label>
@@ -88,7 +91,7 @@ export default {
       ${list.length ? `<div class="card tablewrap"><table class="table table--regs">
         <thead><tr><th>Name</th><th>GCash</th><th>Mobile</th><th>Course</th><th>Heard from</th><th>Status</th><th>Notes</th><th>Signed up</th>${S.owner ? "<th></th>" : ""}</tr></thead>
         <tbody>${list.map((r, i) => `<tr data-id="${r.id}" class="in st-${r.status}" style="--i:${Math.min(i, 16)}">
-          <td><b>${esc(r.name)}</b><small><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></small>${friendsOf(r).length ? `<small>+ ${esc(friendsOf(r).join(", "))}</small>` : ""}</td>
+          <td><b>${esc(r.name)}</b><small><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></small>${friendsOf(r).length ? `<small>+ ${esc(friendsOf(r).join(", "))}</small>` : ""}${r.gift_email ? `<small>${icon("send")} Gift for <b>${esc(r.gift_name)}</b> · ${esc(r.gift_email)}</small>` : ""}</td>
           <td class="nowrap">${payCell(r)}</td>
           <td class="nowrap">${r.mobile ? `<a href="tel:${esc(r.mobile.replace(/[^\d+]/g, ""))}">${esc(r.mobile)}</a>` : `<span class="muted">—</span>`}</td>
           <td>${esc(r.course)}<small>${esc(r.year)}</small></td>
@@ -104,18 +107,6 @@ export default {
     const emails = list.map((r) => r.email);
     root.querySelector("#copyEmails").addEventListener("click", () => (emails.length ? copy(emails.join(", "), `Copied ${emails.length} email${emails.length > 1 ? "s" : ""}. Paste them in BCC, not To.`) : toast("No emails to copy.")));
     wirePaySetup(root);
-    root.querySelector("#freeNews").addEventListener("click", async (e) => {
-      const b = e.currentTarget;
-      const people = regs.filter((r) => r.code && r.status !== "cancelled" && r.ticket !== "free").length;
-      if (!(await confirmBox(`Email ${people} sign-up${people === 1 ? "" : "s"} that Session 1 is free? Unpaid Session 1 singles stop paying for it. Anyone who already got this email is skipped.`, { ok: "Send", tone: "" }))) return;
-      b.disabled = true;
-      let sent = 0;
-      try {
-        for (let out; !out || (out.sent && out.left); ) { out = await freeNews(); sent += out.sent; if (!out.sent && out.left) throw new Error("stuck"); }
-        toast(sent ? `Sent to ${sent} ${sent === 1 ? "person" : "people"}.` : "Everyone already got it.");
-      } catch { toast(`Sent to ${sent}, then it stopped. Click again to send the rest.`, "bad"); }
-      finally { b.disabled = false; }
-    });
     root.querySelector("#showLog")?.addEventListener("click", async (e) => {
       const ul = root.querySelector("#alog");
       try {
@@ -130,7 +121,7 @@ export default {
       try { await removeProofs(regs); const n = await eraseRegistrations(); toast(`Erased ${n} sign-up${n === 1 ? "" : "s"}`); } catch { toast("Couldn’t erase.", "bad"); }
     });
     root.querySelector("#csv")?.addEventListener("click", () => {
-      const cols = ["created_at", "name", "email", "code", "ticket", "sessions", "amount", "friends", "topup", "proof_at", "paid_at", "paid_by", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes", "consented_at", "privacy_version"];
+      const cols = ["created_at", "name", "email", "code", "ticket", "gift_name", "gift_email", "gcash_ref", "sessions", "amount", "friends", "topup", "proof_at", "paid_at", "paid_by", "mobile", "course", "year", "heard_from", "heard_org", "status", "notes", "consented_at", "privacy_version"];
       const flat = (v) => (!Array.isArray(v) ? v ?? "" : v.some((x) => x && typeof x === "object") ? v.map((x) => `${x.name} <${x.email}>`).join("; ") : v.join(" "));
       const cell = (v) => `"${String(flat(v)).replace(/"/g, '""')}"`;
       download(`blueprint-signups-${todayISO()}.csv`, [cols.join(","), ...list.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\n"), "text/csv");
@@ -146,6 +137,7 @@ export default {
       if (e.target.matches("[data-status]")) {
         const prev = r.status, next = e.target.value;
         if (next === "paid") { e.target.value = prev; return markPaid(r); }
+        if (next === "refunded") { e.target.value = prev; return markRefunded(r); }
         try { await setRegStatus(id, next); toast(`${r.name}: ${label(next)}`, "", { label: "Undo", run: () => setRegStatus(id, prev).catch(() => toast("Couldn’t undo.", "bad")) }); }
         catch { e.target.value = prev; toast("Couldn’t save.", "bad"); }
         return;
@@ -184,12 +176,12 @@ function payCell(r) {
     <small class="tk"><b>${esc(peso(r.amount))}</b> · ${esc(ticketOf(r))}</small>
     ${upgrading(r) ? `<small class="${topupSent(r) ? "" : "muted"}">Upgrading to Full Pass: <b>${esc(peso(r.topup))}</b> ${topupSent(r) ? `receipt sent ${esc(fmt(r.proof_at))}` : "not paid yet"}</small>` : ""}
     ${r.proof_path && !upgrading(r) ? `<small>Receipt sent ${r.proof_at ? esc(fmt(r.proof_at)) : ""}</small>` : r.gcash_ref ? `<small>Ref <span class="mono">${esc(r.gcash_ref)}</span></small>` : r.status === "registered" ? `<small class="muted">Not paid yet</small>` : ""}
-    ${r.ticket === "free" ? `<small>${r.status === "waitlist" ? "Free · next in line" : "Free · no payment"}</small>` : r.paid_at ? `<small>Paid ${esc(fmt(r.paid_at))}${r.paid_by ? ` · ${esc(r.paid_by)}` : ""}</small>` : ""}
+    ${r.status === "refunded" ? `<small>Refunded · course free</small>` : r.ticket === "free" ? `<small>${r.status === "waitlist" ? "Free · next in line" : "Free · no payment"}</small>` : r.paid_at ? `<small>Paid ${esc(fmt(r.paid_at))}${r.paid_by ? ` · ${esc(r.paid_by)}` : ""}</small>` : ""}
     ${(r.proof_path && r.status === "registered") || topupSent(r) ? `<button class="btn btn--primary btn--xs" data-proof>${icon("eye")} Check receipt</button>`
       : r.proof_path ? `<button class="btn btn--ghost btn--xs" data-proof>${icon("eye")} Receipt</button>`
       : toCheck(r) ? `<button class="btn btn--primary btn--xs" data-paid>${icon("check")} Paid</button>` : ""}
     ${unsent ? `<small class="bad">Email not sent</small>` : ""}
-    ${r.code && ["registered", "paid", "waitlist"].includes(r.status) ? `<button class="btn btn--ghost btn--xs" data-resend title="Send their last email again">${icon("send")} ${unsent ? "Send email" : "Resend"}</button>` : ""}`;
+    ${r.code && ["registered", "paid", "waitlist", "refunded"].includes(r.status) ? `<button class="btn btn--ghost btn--xs" data-resend title="Send their last email again">${icon("send")} ${unsent ? "Send email" : "Resend"}</button>` : ""}`;
 }
 
 /* their receipt next to the Paid button, so checking and confirming is one place */
@@ -220,7 +212,26 @@ async function removeProofs(rows) {
   if (error) throw error;
 }
 
+/* last week's workshop buyers: they keep their refund and get Blueprint Online free (Thomas's doc 03) */
+async function markRefunded(r) {
+  if (!(await confirmBox(`Mark ${r.name} as refunded, free access? This emails them Blueprint Online for free (the course link and the 1:1). Only for last week’s workshop buyers.`, { ok: "Send free access", tone: "" }))) return false;
+  try {
+    const out = await signupAction("refunded", r.id);
+    toast(out.emailed ? `Free access sent to ${out.to}.` : `${r.name} is marked, but the email didn’t send. Click Resend.`, out.emailed ? "" : "bad");
+    return true;
+  } catch { toast("Couldn’t save. Try again.", "bad"); return false; }
+}
+
 async function markPaid(r) {
+  if (r.ticket === "online") {
+    const to = r.gift_email || r.email;
+    if (!(await confirmBox(`Mark ${r.name} as paid?${r.gcash_ref ? ` Find GCash ref ${r.gcash_ref} for ₱349 first.` : r.proof_path ? " Only if you found their ₱349 in GCash." : " They haven’t typed a reference number yet."} This emails the course link to ${to}${r.gift_email ? ` (a gift for ${r.gift_name})` : ""}.`, { ok: "Paid", tone: "" }))) return false;
+    try {
+      const out = await signupAction("paid", r.id);
+      toast(out.emailed ? `${r.name} is in. Course link sent to ${out.to || to}. Add them to the Buyers tab.` : `${r.name} is marked paid, but the email didn’t send. Click Send email.`, out.emailed ? "" : "bad");
+      return true;
+    } catch { toast("Couldn’t mark paid. Try again.", "bad"); return false; }
+  }
   const up = upgrading(r);
   const ask = up ? `Confirm ${r.name}’s ${peso(r.topup)} top-up? Only if you found it in GCash. They move to the Full Pass and get the full schedule and pre-work by email.`
     : `Mark ${r.name} as paid?${r.proof_path ? " Only if you found their payment in GCash." : r.gcash_ref ? ` Check GCash ref ${r.gcash_ref} first.` : " They haven’t sent a receipt."} This emails their slot confirmation and pre-work${r.ticket === "barkada" ? " to all three" : ""}.`;
@@ -241,7 +252,7 @@ async function markPaid(r) {
 /* ---------- owner: what the payment emails say ---------- */
 function paySetup() {
   const p = setting("payment");
-  const missing = [!p.qrPath && "GCash QR", !p.gcashName && "account name", !(p.prework || []).length && "pre-work links"].filter(Boolean);
+  const missing = [!p.qrPath && "GCash QR", !p.gcashName && "account name"].filter(Boolean);
   return `<details class="card fold" ${!p.qrPath || !p.gcashName ? "open" : ""}>
     <summary class="ch ch--pad"><h3>${icon("wallet")} Payment setup</h3><span class="muted">${missing.length ? `Missing: ${missing.join(", ")}` : "Ready"}</span>${icon("down", "fold__chev")}</summary>
     <div class="fold__body payset">
